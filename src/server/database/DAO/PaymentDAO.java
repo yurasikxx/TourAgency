@@ -1,4 +1,4 @@
-package server.database.dao;
+package server.database.DAO;
 
 public class PaymentDAO {
 }

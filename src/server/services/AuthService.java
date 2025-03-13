@@ -1,4 +1,8 @@
 package server.services;
 
-public class AuthService {
+import server.models.User;
+
+public interface AuthService {
+    User authenticate(String username, String password);
+    void register(User user);
 }

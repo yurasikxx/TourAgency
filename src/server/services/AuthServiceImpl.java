@@ -1,0 +1,26 @@
+package server.services;
+
+import server.models.User;
+import server.database.DAO.UserDAO;
+
+public class AuthServiceImpl implements AuthService {
+    private UserDAO userDAO;
+
+    public AuthServiceImpl(UserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
+
+    @Override
+    public User authenticate(String username, String password) {
+        User user = userDAO.getUserByUsername(username);
+        if (user != null && user.getPassword().equals(password)) {
+            return user;
+        }
+        return null;
+    }
+
+    @Override
+    public void register(User user) {
+        userDAO.addUser(user);
+    }
+}

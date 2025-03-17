@@ -33,6 +33,8 @@ public class TourController {
 
     public void setTourService(TourService tourService) {
         this.tourService = tourService;
+        System.out.println("TourService установлен в TourController.");
+        loadTours(); // Загружаем туры после установки tourService
     }
 
     public void setPrimaryStage(Stage primaryStage) {
@@ -43,28 +45,12 @@ public class TourController {
     private void initialize() {
         System.out.println("Инициализация TourController...");
 
-        if (nameColumn == null) {
-            System.out.println("nameColumn не инициализирован!");
-        }
-        if (descriptionColumn == null) {
-            System.out.println("descriptionColumn не инициализирован!");
-        }
-        if (priceColumn == null) {
-            System.out.println("priceColumn не инициализирован!");
-        }
-        if (tourTable == null) {
-            System.out.println("tourTable не инициализирован!");
-        }
-        if (tourService == null) {
-            System.out.println("tourService не инициализирован!");
-        }
-
         // Настройка колонок таблицы
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
 
-        // Загрузка данных
+        // Загрузка данных (если tourService уже инициализирован)
         if (tourService != null) {
             loadTours();
         } else {
@@ -73,16 +59,17 @@ public class TourController {
     }
 
     private void loadTours() {
-        // Получаем данные от сервера
-        List<Tour> serverTours = tourService.getAllTours();
+        if (tourService != null) {
+            List<Tour> serverTours = tourService.getAllTours();
+            List<TourModel> tours = serverTours.stream()
+                    .map(TourModel::fromServerModel)
+                    .collect(Collectors.toList());
 
-        // Преобразуем серверные модели в клиентские
-        List<TourModel> tours = serverTours.stream()
-                .map(TourModel::fromServerModel)
-                .collect(Collectors.toList());
-
-        // Загружаем данные в таблицу
-        tourTable.getItems().setAll(tours);
+            tourTable.getItems().setAll(tours);
+            System.out.println("Туры загружены в таблицу.");
+        } else {
+            System.out.println("Ошибка: TourService не инициализирован!");
+        }
     }
 
     @FXML

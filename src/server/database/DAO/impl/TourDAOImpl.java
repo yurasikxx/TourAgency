@@ -1,5 +1,6 @@
-package server.database.DAO;
+package server.database.DAO.impl;
 
+import server.database.DAO.TourDAO;
 import server.models.Tour;
 import server.database.DatabaseConnection;
 

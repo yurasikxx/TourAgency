@@ -1,7 +1,8 @@
-package server.services;
+package server.services.impl;
 
 import server.models.Payment;
 import server.database.DAO.PaymentDAO;
+import server.services.PaymentService;
 
 import java.util.List;
 

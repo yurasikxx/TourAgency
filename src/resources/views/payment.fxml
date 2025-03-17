@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<VBox fx:controller="client.controllers.PaymentController"
+      xmlns:fx="http://javafx.com/fxml/1"
+      spacing="10" alignment="CENTER">
+
+    <!-- Заголовок -->
+    <Text text="Мои платежи" styleClass="title"/>
+
+    <!-- Таблица платежей -->
+    <TableView fx:id="paymentTable" prefWidth="600">
+        <columns>
+            <TableColumn text="Сумма" prefWidth="100">
+                <cellValueFactory><PropertyValueFactory property="amount"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn text="Дата платежа" prefWidth="150">
+                <cellValueFactory><PropertyValueFactory property="paymentDate"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn text="Статус" prefWidth="100">
+                <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
+            </TableColumn>
+        </columns>
+    </TableView>
+
+</VBox>

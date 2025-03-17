@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane fx:controller="client.controllers.LoginController"
+          xmlns:fx="http://javafx.com/fxml/1"
+          alignment="center" hgap="10" vgap="10"
+          styleClass="root">
+
+    <!-- Заголовок -->
+    <Text text="Авторизация" GridPane.columnSpan="2" GridPane.rowIndex="0" GridPane.columnIndex="0"
+          styleClass="title"/>
+
+    <!-- Поле для логина -->
+    <Label text="Логин:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <TextField fx:id="usernameField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+    <!-- Поле для пароля -->
+    <Label text="Пароль:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+    <PasswordField fx:id="passwordField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+    <!-- Кнопка входа -->
+    <Button text="Войти" onAction="#handleLogin" GridPane.rowIndex="3" GridPane.columnIndex="1"
+            styleClass="button"/>
+
+    <!-- Сообщение об ошибке -->
+    <Label fx:id="errorLabel" textFill="RED" GridPane.columnSpan="2" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+
+</GridPane>

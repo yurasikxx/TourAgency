@@ -1,6 +1,7 @@
-package server.database.DAO;
+package server.database.DAO.impl;
 
-import server.models.Payment;
+import server.database.DAO.BookingDAO;
+import server.models.Booking;
 import server.database.DatabaseConnection;
 
 import java.sql.Connection;
@@ -10,25 +11,25 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PaymentDAOImpl implements PaymentDAO {
+public class BookingDAOImpl implements BookingDAO {
     private Connection connection;
 
-    public PaymentDAOImpl() {
+    public BookingDAOImpl() {
         this.connection = DatabaseConnection.getInstance().getConnection();
     }
 
     @Override
-    public Payment getPaymentById(int id) {
-        String query = "SELECT * FROM Payments WHERE id = ?";
+    public Booking getBookingById(int id) {
+        String query = "SELECT * FROM Bookings WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return new Payment(
+                return new Booking(
                         resultSet.getInt("id"),
-                        resultSet.getInt("booking_id"),
-                        resultSet.getDouble("amount"),
-                        resultSet.getString("payment_date"),
+                        resultSet.getInt("user_id"),
+                        resultSet.getInt("tour_id"),
+                        resultSet.getString("booking_date"),
                         resultSet.getString("status")
                 );
             }
@@ -39,35 +40,35 @@ public class PaymentDAOImpl implements PaymentDAO {
     }
 
     @Override
-    public List<Payment> getPaymentsByBookingId(int bookingId) {
-        List<Payment> payments = new ArrayList<>();
-        String query = "SELECT * FROM Payments WHERE booking_id = ?";
+    public List<Booking> getBookingsByUserId(int userId) {
+        List<Booking> bookings = new ArrayList<>();
+        String query = "SELECT * FROM Bookings WHERE user_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, bookingId);
+            statement.setInt(1, userId);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                payments.add(new Payment(
+                bookings.add(new Booking(
                         resultSet.getInt("id"),
-                        resultSet.getInt("booking_id"),
-                        resultSet.getDouble("amount"),
-                        resultSet.getString("payment_date"),
+                        resultSet.getInt("user_id"),
+                        resultSet.getInt("tour_id"),
+                        resultSet.getString("booking_date"),
                         resultSet.getString("status")
                 ));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return payments;
+        return bookings;
     }
 
     @Override
-    public void addPayment(Payment payment) {
-        String query = "INSERT INTO Payments (booking_id, amount, payment_date, status) VALUES (?, ?, ?, ?)";
+    public void addBooking(Booking booking) {
+        String query = "INSERT INTO Bookings (user_id, tour_id, booking_date, status) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, payment.getBookingId());
-            statement.setDouble(2, payment.getAmount());
-            statement.setString(3, payment.getPaymentDate());
-            statement.setString(4, payment.getStatus());
+            statement.setInt(1, booking.getUserId());
+            statement.setInt(2, booking.getTourId());
+            statement.setString(3, booking.getBookingDate());
+            statement.setString(4, booking.getStatus());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -75,14 +76,14 @@ public class PaymentDAOImpl implements PaymentDAO {
     }
 
     @Override
-    public void updatePayment(Payment payment) {
-        String query = "UPDATE Payments SET booking_id = ?, amount = ?, payment_date = ?, status = ? WHERE id = ?";
+    public void updateBooking(Booking booking) {
+        String query = "UPDATE Bookings SET user_id = ?, tour_id = ?, booking_date = ?, status = ? WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, payment.getBookingId());
-            statement.setDouble(2, payment.getAmount());
-            statement.setString(3, payment.getPaymentDate());
-            statement.setString(4, payment.getStatus());
-            statement.setInt(5, payment.getId());
+            statement.setInt(1, booking.getUserId());
+            statement.setInt(2, booking.getTourId());
+            statement.setString(3, booking.getBookingDate());
+            statement.setString(4, booking.getStatus());
+            statement.setInt(5, booking.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -90,8 +91,8 @@ public class PaymentDAOImpl implements PaymentDAO {
     }
 
     @Override
-    public void deletePayment(int id) {
-        String query = "DELETE FROM Payments WHERE id = ?";
+    public void deleteBooking(int id) {
+        String query = "DELETE FROM Bookings WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             statement.executeUpdate();

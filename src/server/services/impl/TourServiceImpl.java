@@ -1,7 +1,8 @@
-package server.services;
+package server.services.impl;
 
 import server.models.Tour;
 import server.database.DAO.TourDAO;
+import server.services.TourService;
 
 import java.util.List;
 

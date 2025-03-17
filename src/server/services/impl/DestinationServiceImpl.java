@@ -1,7 +1,8 @@
-package server.services;
+package server.services.impl;
 
 import server.models.Destination;
 import server.database.DAO.DestinationDAO;
+import server.services.DestinationService;
 
 import java.util.List;
 

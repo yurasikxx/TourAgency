@@ -19,6 +19,16 @@ public class DestinationModel {
         this.description = description;
     }
 
+    // Метод преобразования серверной модели в клиентскую
+    public static DestinationModel fromServerModel(server.models.Destination serverDestination) {
+        return new DestinationModel(
+                serverDestination.getId(),
+                serverDestination.getName(),
+                serverDestination.getCountry(),
+                serverDestination.getDescription()
+        );
+    }
+
     // Геттеры и сеттеры
     public int getId() {
         return id;

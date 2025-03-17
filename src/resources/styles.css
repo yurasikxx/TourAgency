@@ -1,0 +1,253 @@
+/* Общие стили для корневого элемента */
+.root {
+    -fx-font-family: "Arial";
+    -fx-base: #4CAF50; /* Основной цвет */
+    -fx-background-color: #f4f4f4; /* Фоновый цвет */
+}
+
+/* Стили для заголовков */
+.title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+/* Стили для кнопок */
+.button {
+    -fx-background-color: #4CAF50; /* Зеленый цвет */
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.button:hover {
+    -fx-background-color: #45a049; /* Темно-зеленый цвет при наведении */
+}
+
+.button:pressed {
+    -fx-background-color: #3d8b40; /* Еще более темный зеленый при нажатии */
+}
+
+/* Стили для текстовых полей */
+.text-field {
+    -fx-font-size: 14px;
+    -fx-padding: 5px;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.text-field:focused {
+    -fx-border-color: #4CAF50; /* Зеленый цвет при фокусе */
+}
+
+/* Стили для меток (Label) */
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.error-label {
+    -fx-text-fill: #ff0000; /* Красный цвет для ошибок */
+    -fx-font-size: 12px;
+}
+
+/* Стили для таблиц */
+.table-view {
+    -fx-base: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-background-color: #f4f4f4;
+    -fx-table-cell-border-color: transparent;
+    -fx-table-header-border-color: transparent;
+    -fx-padding: 5px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #4CAF50;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.table-view .table-cell {
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+    -fx-border-color: transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f9f9f9; /* Чередование цветов строк */
+}
+
+.table-row-cell:even {
+    -fx-background-color: #ffffff;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #4CAF50; /* Зеленый цвет для выбранной строки */
+    -fx-text-fill: white;
+}
+
+/* Стили для списков (ListView) */
+.list-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.list-cell {
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+}
+
+.list-cell:odd {
+    -fx-background-color: #f9f9f9; /* Чередование цветов ячеек */
+}
+
+.list-cell:even {
+    -fx-background-color: #ffffff;
+}
+
+.list-cell:selected {
+    -fx-background-color: #4CAF50; /* Зеленый цвет для выбранной ячейки */
+    -fx-text-fill: white;
+}
+
+/* Стили для деталей (например, в DestinationController) */
+.detail-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+    -fx-padding: 5px;
+}/* Общие стили для корневого элемента */
+ .root {
+     -fx-font-family: "Arial";
+     -fx-base: #4CAF50; /* Основной цвет */
+     -fx-background-color: #f4f4f4; /* Фоновый цвет */
+ }
+
+ /* Стили для заголовков */
+ .title {
+     -fx-font-size: 24px;
+     -fx-font-weight: bold;
+     -fx-text-fill: #333333;
+ }
+
+ /* Стили для кнопок */
+ .button {
+     -fx-background-color: #4CAF50; /* Зеленый цвет */
+     -fx-text-fill: white;
+     -fx-font-size: 14px;
+     -fx-padding: 10px 20px;
+     -fx-border-radius: 5px;
+     -fx-background-radius: 5px;
+ }
+
+ .button:hover {
+     -fx-background-color: #45a049; /* Темно-зеленый цвет при наведении */
+ }
+
+ .button:pressed {
+     -fx-background-color: #3d8b40; /* Еще более темный зеленый при нажатии */
+ }
+
+ /* Стили для текстовых полей */
+ .text-field {
+     -fx-font-size: 14px;
+     -fx-padding: 5px;
+     -fx-border-color: #cccccc;
+     -fx-border-radius: 5px;
+     -fx-background-radius: 5px;
+ }
+
+ .text-field:focused {
+     -fx-border-color: #4CAF50; /* Зеленый цвет при фокусе */
+ }
+
+ /* Стили для меток (Label) */
+ .label {
+     -fx-font-size: 14px;
+     -fx-text-fill: #333333;
+ }
+
+ .error-label {
+     -fx-text-fill: #ff0000; /* Красный цвет для ошибок */
+     -fx-font-size: 12px;
+ }
+
+ /* Стили для таблиц */
+ .table-view {
+     -fx-base: #ffffff;
+     -fx-control-inner-background: #ffffff;
+     -fx-background-color: #f4f4f4;
+     -fx-table-cell-border-color: transparent;
+     -fx-table-header-border-color: transparent;
+     -fx-padding: 5px;
+ }
+
+ .table-view .column-header-background {
+     -fx-background-color: #4CAF50;
+ }
+
+ .table-view .column-header, .table-view .filler {
+     -fx-background-color: #4CAF50;
+     -fx-text-fill: white;
+     -fx-font-size: 14px;
+ }
+
+ .table-view .table-cell {
+     -fx-padding: 5px;
+     -fx-font-size: 14px;
+     -fx-border-color: transparent;
+ }
+
+ .table-row-cell:odd {
+     -fx-background-color: #f9f9f9; /* Чередование цветов строк */
+ }
+
+ .table-row-cell:even {
+     -fx-background-color: #ffffff;
+ }
+
+ .table-row-cell:selected {
+     -fx-background-color: #4CAF50; /* Зеленый цвет для выбранной строки */
+     -fx-text-fill: white;
+ }
+
+ /* Стили для списков (ListView) */
+ .list-view {
+     -fx-background-color: #ffffff;
+     -fx-border-color: #cccccc;
+     -fx-border-radius: 5px;
+     -fx-background-radius: 5px;
+ }
+
+ .list-cell {
+     -fx-padding: 5px;
+     -fx-font-size: 14px;
+ }
+
+ .list-cell:odd {
+     -fx-background-color: #f9f9f9; /* Чередование цветов ячеек */
+ }
+
+ .list-cell:even {
+     -fx-background-color: #ffffff;
+ }
+
+ .list-cell:selected {
+     -fx-background-color: #4CAF50; /* Зеленый цвет для выбранной ячейки */
+     -fx-text-fill: white;
+ }
+
+ /* Стили для деталей (например, в DestinationController) */
+ .detail-label {
+     -fx-font-size: 14px;
+     -fx-text-fill: #333333;
+     -fx-padding: 5px;
+ }

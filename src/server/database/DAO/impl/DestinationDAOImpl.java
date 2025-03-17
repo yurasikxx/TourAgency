@@ -1,5 +1,6 @@
-package server.database.DAO;
+package server.database.DAO.impl;
 
+import server.database.DAO.DestinationDAO;
 import server.models.Destination;
 import server.database.DatabaseConnection;
 

@@ -1,7 +1,8 @@
-package server.services;
+package server.services.impl;
 
 import server.models.User;
 import server.database.DAO.UserDAO;
+import server.services.AuthService;
 
 public class AuthServiceImpl implements AuthService {
     private UserDAO userDAO;

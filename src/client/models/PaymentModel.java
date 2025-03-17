@@ -19,6 +19,16 @@ public class PaymentModel {
         this.status = status;
     }
 
+    // Метод преобразования серверной модели в клиентскую
+    public static PaymentModel fromServerModel(server.models.Payment serverPayment) {
+        return new PaymentModel(
+                serverPayment.getId(),
+                serverPayment.getAmount(),
+                serverPayment.getPaymentDate(),
+                serverPayment.getStatus()
+        );
+    }
+
     // Геттеры и сеттеры
     public int getId() {
         return id;

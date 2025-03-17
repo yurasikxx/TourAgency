@@ -19,6 +19,16 @@ public class BookingModel {
         this.status = status;
     }
 
+    // Метод преобразования серверной модели в клиентскую
+    public static BookingModel fromServerModel(server.models.Booking serverBooking) {
+        return new BookingModel(
+                serverBooking.getId(),
+                "Тур " + serverBooking.getTourId(), // Пример: можно загрузить название тура из базы данных
+                serverBooking.getBookingDate(),
+                serverBooking.getStatus()
+        );
+    }
+
     // Геттеры и сеттеры
     public int getId() {
         return id;

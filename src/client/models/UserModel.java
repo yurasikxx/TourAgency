@@ -17,6 +17,15 @@ public class UserModel {
         this.role = role;
     }
 
+    // Метод преобразования серверной модели в клиентскую
+    public static UserModel fromServerModel(server.models.User serverUser) {
+        return new UserModel(
+                serverUser.getId(),
+                serverUser.getUsername(),
+                serverUser.getRole()
+        );
+    }
+
     // Геттеры и сеттеры
     public int getId() {
         return id;

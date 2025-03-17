@@ -25,6 +25,19 @@ public class TourModel {
         this.destination = destination;
     }
 
+    // Метод преобразования серверной модели в клиентскую
+    public static TourModel fromServerModel(server.models.Tour serverTour) {
+        return new TourModel(
+                serverTour.getId(),
+                serverTour.getName(),
+                serverTour.getDescription(),
+                serverTour.getPrice(),
+                serverTour.getStartDate(),
+                serverTour.getEndDate(),
+                "Направление " + serverTour.getDestinationId() // Пример: можно загрузить название направления из базы данных
+        );
+    }
+
     // Геттеры и сеттеры
     public int getId() {
         return id;

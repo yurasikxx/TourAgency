@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<VBox fx:controller="client.controllers.BookingController"
+      xmlns:fx="http://javafx.com/fxml/1"
+      spacing="10" alignment="CENTER">
+
+    <!-- Заголовок -->
+    <Text text="Мои бронирования" styleClass="title"/>
+
+    <!-- Таблица бронирований -->
+    <TableView fx:id="bookingTable" prefWidth="600">
+        <columns>
+            <TableColumn text="Тур" prefWidth="200">
+                <cellValueFactory><PropertyValueFactory property="tourName"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn text="Дата бронирования" prefWidth="150">
+                <cellValueFactory><PropertyValueFactory property="bookingDate"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn text="Статус" prefWidth="100">
+                <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
+            </TableColumn>
+        </columns>
+    </TableView>
+
+    <!-- Кнопки -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Отменить бронь" onAction="#handleCancelBooking" styleClass="button"/>
+        <Button text="Обновить" onAction="#handleRefresh" styleClass="button"/>
+        <Button text="Платежи" onAction="#handleViewPayments" styleClass="button"/>
+    </HBox>
+
+</VBox>

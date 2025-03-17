@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox fx:controller="client.controllers.DestinationController"
+      xmlns:fx="http://javafx.com/fxml/1"
+      spacing="10" alignment="CENTER">
+
+    <!-- Заголовок -->
+    <Text text="Список направлений" styleClass="title"/>
+
+    <!-- Список направлений -->
+    <ListView fx:id="destinationList" prefWidth="400" prefHeight="200"/>
+
+    <!-- Детали направления -->
+    <VBox spacing="5">
+        <Label text="Название:"/>
+        <Label fx:id="nameLabel" styleClass="detail-label"/>
+        <Label text="Страна:"/>
+        <Label fx:id="countryLabel" styleClass="detail-label"/>
+        <Label text="Описание:"/>
+        <Label fx:id="descriptionLabel" styleClass="detail-label"/>
+    </VBox>
+
+    <!-- Кнопка для перехода к турам -->
+    <Button text="Туры" onAction="#handleViewTours" styleClass="button"/>
+
+</VBox>

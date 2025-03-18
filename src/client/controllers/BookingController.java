@@ -1,5 +1,6 @@
 package client.controllers;
 
+import client.models.BookingModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,12 +9,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import client.models.BookingModel;
-import server.services.BookingService;
-import server.models.Booking;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 public class BookingController {
     @FXML
@@ -28,15 +29,16 @@ public class BookingController {
     @FXML
     private TableColumn<BookingModel, String> statusColumn;
 
-    private BookingService bookingService;
     private Stage primaryStage;
 
-    public void setBookingService(BookingService bookingService) {
-        this.bookingService = bookingService;
-    }
-
+    /**
+     * Устанавливает primaryStage для контроллера.
+     *
+     * @param primaryStage Основное окно приложения.
+     */
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        loadBookings(); // Загружаем бронирования при инициализации
     }
 
     @FXML
@@ -45,46 +47,83 @@ public class BookingController {
         tourNameColumn.setCellValueFactory(new PropertyValueFactory<>("tourName"));
         bookingDateColumn.setCellValueFactory(new PropertyValueFactory<>("bookingDate"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-        // Загрузка данных
-        loadBookings();
     }
 
+    /**
+     * Загружает список бронирований с сервера.
+     */
     private void loadBookings() {
-        // Получаем данные от сервера
-        List<Booking> serverBookings = bookingService.getBookingsByUserId(1); // Пример: ID пользователя = 1
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-        // Преобразуем серверные модели в клиентские
-        List<BookingModel> bookings = serverBookings.stream()
-                .map(BookingModel::fromServerModel)
-                .collect(Collectors.toList());
+            // Отправка запроса на сервер
+            out.println("GET_BOOKINGS 1"); // Пример: userId = 1
 
-        // Загружаем данные в таблицу
-        bookingTable.getItems().setAll(bookings);
+            // Получение ответа от сервера
+            String response = in.readLine();
+            if (response.startsWith("BOOKINGS")) {
+                String[] bookingsData = response.substring(9).split("\\|");
+                for (String bookingData : bookingsData) {
+                    String[] fields = bookingData.split(",");
+                    BookingModel booking = new BookingModel(
+                            Integer.parseInt(fields[0]),
+                            fields[1],
+                            fields[2],
+                            fields[3]
+                    );
+                    bookingTable.getItems().add(booking);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Обрабатывает нажатие кнопки "Отменить бронь".
+     */
     @FXML
     private void handleCancelBooking() {
         BookingModel selectedBooking = bookingTable.getSelectionModel().getSelectedItem();
         if (selectedBooking != null) {
-            System.out.println("Отменено бронирование: " + selectedBooking.getTourName());
+            try (Socket socket = new Socket("localhost", 12345);
+                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+                // Отправка запроса на сервер
+                out.println("CANCEL_BOOKING " + selectedBooking.getId());
+
+                // Получение ответа от сервера
+                String response = in.readLine();
+                if (response.equals("CANCEL_SUCCESS")) {
+                    System.out.println("Бронирование успешно отменено!");
+                    loadBookings(); // Обновляем список бронирований
+                } else {
+                    System.out.println("Ошибка при отмене бронирования.");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
             System.out.println("Бронирование не выбрано!");
         }
     }
 
-    @FXML
-    private void handleViewPayments() {
-        loadPaymentView();
-    }
-
+    /**
+     * Обрабатывает нажатие кнопки "Обновить".
+     */
     @FXML
     private void handleRefresh() {
-        loadBookings(); // Обновляем данные в таблице
-        System.out.println("Данные обновлены.");
+        bookingTable.getItems().clear(); // Очищаем таблицу
+        loadBookings(); // Загружаем бронирования заново
     }
 
-    private void loadPaymentView() {
+    /**
+     * Обрабатывает нажатие кнопки "Платежи".
+     */
+    @FXML
+    private void handleViewPayments() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/payment.fxml"));
             Parent root = loader.load();
@@ -96,7 +135,7 @@ public class BookingController {
             primaryStage.setScene(scene);
             primaryStage.setTitle("Платежи");
             primaryStage.show();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

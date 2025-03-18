@@ -1,18 +1,19 @@
 package client.controllers;
 
+import client.models.DestinationModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.stage.Stage;
-import client.models.DestinationModel;
-import server.services.DestinationService;
-import server.models.Destination;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 public class DestinationController {
     @FXML
@@ -27,40 +28,61 @@ public class DestinationController {
     @FXML
     private Label descriptionLabel;
 
-    private DestinationService destinationService;
-    private Stage primaryStage; // Добавляем ссылку на Stage
+    private Stage primaryStage;
 
-    public void setDestinationService(DestinationService destinationService) {
-        this.destinationService = destinationService;
-    }
-
+    /**
+     * Устанавливает primaryStage для контроллера.
+     *
+     * @param primaryStage Основное окно приложения.
+     */
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        loadDestinations(); // Загружаем направления при инициализации
     }
 
     @FXML
     private void initialize() {
-        // Загрузка данных
-        loadDestinations();
-
         // Обработка выбора направления
         destinationList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showDestinationDetails(newValue));
     }
 
+    /**
+     * Загружает список направлений с сервера.
+     */
     private void loadDestinations() {
-        // Получаем данные от сервера
-        List<Destination> serverDestinations = destinationService.getAllDestinations();
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-        // Преобразуем серверные модели в клиентские
-        List<DestinationModel> destinations = serverDestinations.stream()
-                .map(DestinationModel::fromServerModel)
-                .collect(Collectors.toList());
+            // Отправка запроса на сервер
+            out.println("GET_DESTINATIONS");
 
-        // Загружаем данные в список
-        destinationList.getItems().setAll(destinations);
+            // Получение ответа от сервера
+            String response = in.readLine();
+            if (response.startsWith("DESTINATIONS")) {
+                String[] destinationsData = response.substring(12).split("\\|");
+                for (String destinationData : destinationsData) {
+                    String[] fields = destinationData.split(",");
+                    DestinationModel destination = new DestinationModel(
+                            Integer.parseInt(fields[0]),
+                            fields[1],
+                            fields[2],
+                            fields[3]
+                    );
+                    destinationList.getItems().add(destination);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Отображает детали выбранного направления.
+     *
+     * @param destination Выбранное направление.
+     */
     private void showDestinationDetails(DestinationModel destination) {
         if (destination != null) {
             nameLabel.setText(destination.getName());
@@ -73,12 +95,11 @@ public class DestinationController {
         }
     }
 
+    /**
+     * Обрабатывает нажатие кнопки "Туры".
+     */
     @FXML
     private void handleViewTours() {
-        loadTourView(); // Переход к окну туров
-    }
-
-    private void loadTourView() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour.fxml"));
             Parent root = loader.load();
@@ -90,7 +111,7 @@ public class DestinationController {
             primaryStage.setScene(scene);
             primaryStage.setTitle("Туры");
             primaryStage.show();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

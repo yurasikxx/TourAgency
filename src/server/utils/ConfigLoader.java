@@ -34,9 +34,14 @@ public class ConfigLoader {
      *
      * @param key Ключ параметра.
      * @return Значение параметра.
+     * @throws RuntimeException Если параметр не найден.
      */
     public String getProperty(String key) {
-        return properties.getProperty(key);
+        String value = properties.getProperty(key);
+        if (value == null) {
+            throw new RuntimeException("Параметр " + key + " не найден в конфигурационном файле!");
+        }
+        return value;
     }
 
     /**
@@ -55,14 +60,15 @@ public class ConfigLoader {
      *
      * @param key Ключ параметра.
      * @return Значение параметра как целое число.
-     * @throws NumberFormatException Если значение параметра не является числом.
+     * @throws RuntimeException Если параметр не найден или не является числом.
      */
     public int getIntProperty(String key) {
-        String value = properties.getProperty(key);
-        if (value == null) {
-            throw new RuntimeException("Параметр " + key + " не найден в конфигурационном файле!");
+        String value = getProperty(key);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Параметр " + key + " должен быть целым числом!", e);
         }
-        return Integer.parseInt(value);
     }
 
     /**
@@ -71,14 +77,18 @@ public class ConfigLoader {
      * @param key          Ключ параметра.
      * @param defaultValue Значение по умолчанию, если параметр не найден.
      * @return Значение параметра как целое число или значение по умолчанию.
-     * @throws NumberFormatException Если значение параметра не является числом.
+     * @throws RuntimeException Если параметр не является числом.
      */
     public int getIntProperty(String key, int defaultValue) {
         String value = properties.getProperty(key);
         if (value == null) {
             return defaultValue;
         }
-        return Integer.parseInt(value);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Параметр " + key + " должен быть целым числом!", e);
+        }
     }
 
     /**
@@ -86,12 +96,10 @@ public class ConfigLoader {
      *
      * @param key Ключ параметра.
      * @return Значение параметра как логическое значение.
+     * @throws RuntimeException Если параметр не найден.
      */
     public boolean getBooleanProperty(String key) {
-        String value = properties.getProperty(key);
-        if (value == null) {
-            throw new RuntimeException("Параметр " + key + " не найден в конфигурационном файле!");
-        }
+        String value = getProperty(key);
         return Boolean.parseBoolean(value);
     }
 

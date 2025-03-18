@@ -2,8 +2,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+
 <VBox fx:controller="client.controllers.PaymentController"
       xmlns:fx="http://javafx.com/fxml/1"
       spacing="10" alignment="CENTER">
@@ -25,5 +25,11 @@
             </TableColumn>
         </columns>
     </TableView>
+
+    <!-- Кнопки -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Обновить" onAction="#handleRefresh" styleClass="button"/>
+        <Button text="Назад" onAction="#handleViewBookings" styleClass="button"/>
+    </HBox>
 
 </VBox>

@@ -1,5 +1,6 @@
 package client.controllers;
 
+import client.models.PaymentModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,12 +9,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import client.models.PaymentModel;
-import server.services.PaymentService;
-import server.models.Payment;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 public class PaymentController {
     @FXML
@@ -28,15 +29,16 @@ public class PaymentController {
     @FXML
     private TableColumn<PaymentModel, String> statusColumn;
 
-    private PaymentService paymentService;
     private Stage primaryStage;
 
-    public void setPaymentService(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
-
+    /**
+     * Устанавливает primaryStage для контроллера.
+     *
+     * @param primaryStage Основное окно приложения.
+     */
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        loadPayments(); // Загружаем платежи при инициализации
     }
 
     @FXML
@@ -45,36 +47,53 @@ public class PaymentController {
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         paymentDateColumn.setCellValueFactory(new PropertyValueFactory<>("paymentDate"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-        // Загрузка данных
-        loadPayments();
     }
 
+    /**
+     * Загружает список платежей с сервера.
+     */
     private void loadPayments() {
-        // Получаем данные от сервера
-        List<Payment> serverPayments = paymentService.getPaymentsByBookingId(1); // Пример: ID бронирования = 1
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-        // Преобразуем серверные модели в клиентские
-        List<PaymentModel> payments = serverPayments.stream()
-                .map(PaymentModel::fromServerModel)
-                .collect(Collectors.toList());
+            // Отправка запроса на сервер
+            out.println("GET_PAYMENTS 1"); // Пример: bookingId = 1
 
-        // Загружаем данные в таблицу
-        paymentTable.getItems().setAll(payments);
+            // Получение ответа от сервера
+            String response = in.readLine();
+            if (response.startsWith("PAYMENTS")) {
+                String[] paymentsData = response.substring(9).split("\\|");
+                for (String paymentData : paymentsData) {
+                    String[] fields = paymentData.split(",");
+                    PaymentModel payment = new PaymentModel(
+                            Integer.parseInt(fields[0]),
+                            Double.parseDouble(fields[1]),
+                            fields[2],
+                            fields[3]
+                    );
+                    paymentTable.getItems().add(payment);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    @FXML
-    private void handleViewBookings() {
-        loadBookingView();
-    }
-
+    /**
+     * Обрабатывает нажатие кнопки "Обновить".
+     */
     @FXML
     private void handleRefresh() {
-        loadPayments(); // Обновляем данные в таблице
-        System.out.println("Данные обновлены.");
+        paymentTable.getItems().clear(); // Очищаем таблицу
+        loadPayments(); // Загружаем платежи заново
     }
 
-    private void loadBookingView() {
+    /**
+     * Обрабатывает нажатие кнопки "Назад".
+     */
+    @FXML
+    private void handleViewBookings() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/booking.fxml"));
             Parent root = loader.load();
@@ -86,7 +105,7 @@ public class PaymentController {
             primaryStage.setScene(scene);
             primaryStage.setTitle("Бронирования");
             primaryStage.show();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

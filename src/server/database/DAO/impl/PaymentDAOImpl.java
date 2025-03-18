@@ -15,7 +15,11 @@ public class PaymentDAOImpl implements PaymentDAO {
     private Connection connection;
 
     public PaymentDAOImpl() {
-        this.connection = DatabaseConnection.getInstance().getConnection();
+        try {
+            this.connection = DatabaseConnection.getInstance().getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -15,7 +15,11 @@ public class BookingDAOImpl implements BookingDAO {
     private Connection connection;
 
     public BookingDAOImpl() {
-        this.connection = DatabaseConnection.getInstance().getConnection();
+        try {
+            this.connection = DatabaseConnection.getInstance().getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

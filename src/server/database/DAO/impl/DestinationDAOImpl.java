@@ -15,7 +15,11 @@ public class DestinationDAOImpl implements DestinationDAO {
     private Connection connection;
 
     public DestinationDAOImpl() {
-        this.connection = DatabaseConnection.getInstance().getConnection();
+        try {
+            this.connection = DatabaseConnection.getInstance().getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -1,5 +1,17 @@
 package server;
 
+import server.services.AuthService;
+import server.services.TourService;
+import server.services.BookingService;
+import server.services.PaymentService;
+import server.services.impl.AuthServiceImpl;
+import server.services.impl.TourServiceImpl;
+import server.services.impl.BookingServiceImpl;
+import server.services.impl.PaymentServiceImpl;
+import server.database.DAO.impl.UserDAOImpl;
+import server.database.DAO.impl.TourDAOImpl;
+import server.database.DAO.impl.BookingDAOImpl;
+import server.database.DAO.impl.PaymentDAOImpl;
 import server.utils.ConfigLoader;
 
 import java.io.IOException;
@@ -8,19 +20,24 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Основной класс сервера, который запускает сервер и обрабатывает подключения клиентов.
- */
 public class MainServer {
     private ServerSocket serverSocket;
     private ExecutorService threadPool;
     private boolean isRunning;
 
-    /**
-     * Запускает сервер на указанном порту.
-     *
-     * @param port Порт, на котором будет запущен сервер.
-     */
+    private AuthService authService;
+    private TourService tourService;
+    private BookingService bookingService;
+    private PaymentService paymentService;
+
+    public MainServer() {
+        // Инициализация сервисов
+        this.authService = new AuthServiceImpl(new UserDAOImpl());
+        this.tourService = new TourServiceImpl(new TourDAOImpl());
+        this.bookingService = new BookingServiceImpl(new BookingDAOImpl());
+        this.paymentService = new PaymentServiceImpl(new PaymentDAOImpl());
+    }
+
     public void start(int port) {
         try {
             serverSocket = new ServerSocket(port);
@@ -31,7 +48,12 @@ public class MainServer {
             while (isRunning) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Новое подключение: " + clientSocket.getInetAddress());
-                threadPool.execute(new ClientHandler(clientSocket));
+
+                // Создаем ClientHandler с передачей сервисов
+                ClientHandler clientHandler = new ClientHandler(
+                        clientSocket, authService, tourService, bookingService, paymentService
+                );
+                threadPool.execute(clientHandler);
             }
         } catch (IOException e) {
             System.err.println("Ошибка при запуске сервера: " + e.getMessage());
@@ -40,9 +62,6 @@ public class MainServer {
         }
     }
 
-    /**
-     * Останавливает сервер.
-     */
     public void stop() {
         isRunning = false;
         try {

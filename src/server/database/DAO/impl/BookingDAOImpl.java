@@ -74,6 +74,7 @@ public class BookingDAOImpl implements BookingDAO {
             statement.setString(3, booking.getBookingDate());
             statement.setString(4, booking.getStatus());
             statement.executeUpdate();
+            System.out.println("Бронирование успешно добавлено.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -89,6 +90,7 @@ public class BookingDAOImpl implements BookingDAO {
             statement.setString(4, booking.getStatus());
             statement.setInt(5, booking.getId());
             statement.executeUpdate();
+            System.out.println("Бронирование успешно обновлено.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -100,6 +102,7 @@ public class BookingDAOImpl implements BookingDAO {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             statement.executeUpdate();
+            System.out.println("Бронирование успешно удалено.");
         } catch (SQLException e) {
             e.printStackTrace();
         }

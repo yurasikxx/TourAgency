@@ -1,61 +1,59 @@
 package client.models;
 
-/**
- * Модель бронирования для клиентской части.
- */
 public class BookingModel {
     private int id;
     private String tourName;
     private String bookingDate;
+    private double price;
     private String status;
 
     // Конструкторы
     public BookingModel() {}
 
-    public BookingModel(int id, String tourName, String bookingDate, String status) {
+    public BookingModel(int id, String tourName, String bookingDate, double price, String status) {
         this.id = id;
         this.tourName = tourName;
         this.bookingDate = bookingDate;
+        this.price = price;
         this.status = status;
     }
 
-    // Метод преобразования серверной модели в клиентскую
-    public static BookingModel fromServerModel(server.models.Booking serverBooking) {
-        return new BookingModel(
-                serverBooking.getId(),
-                "Тур " + serverBooking.getTourId(), // Пример: можно загрузить название тура из базы данных
-                serverBooking.getBookingDate(),
-                serverBooking.getStatus()
-        );
-    }
-
-    // Геттеры и сеттеры
+    // Геттеры
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getTourName() {
         return tourName;
     }
 
-    public void setTourName(String tourName) {
-        this.tourName = tourName;
-    }
-
     public String getBookingDate() {
         return bookingDate;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    // Сеттеры (если нужны)
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setTourName(String tourName) {
+        this.tourName = tourName;
     }
 
     public void setBookingDate(String bookingDate) {
         this.bookingDate = bookingDate;
     }
 
-    public String getStatus() {
-        return status;
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public void setStatus(String status) {
@@ -68,6 +66,7 @@ public class BookingModel {
                 "id=" + id +
                 ", tourName='" + tourName + '\'' +
                 ", bookingDate='" + bookingDate + '\'' +
+                ", price=" + price +
                 ", status='" + status + '\'' +
                 '}';
     }

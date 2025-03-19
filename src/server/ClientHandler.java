@@ -88,8 +88,14 @@ public class ClientHandler implements Runnable {
                 return handleBookTour(parts);
             case "GET_BOOKINGS":
                 return handleGetBookings(parts);
+            case "GET_TOUR_PRICE":
+                return handleGetTourPrice(parts);
             case "GET_PAYMENTS":
                 return handleGetPayments(parts);
+            case "CANCEL_BOOKING":
+                return handleCancelBooking(parts);
+            case "MAKE_PAYMENT":
+                return handleMakePayment(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -187,15 +193,42 @@ public class ClientHandler implements Runnable {
                 List<Booking> bookings = bookingService.getBookingsByUserId(userId);
                 StringBuilder response = new StringBuilder("BOOKINGS ");
                 for (Booking booking : bookings) {
-                    response.append(booking.getId()).append(",")
-                            .append(booking.getUserId()).append(",")
-                            .append(booking.getTourId()).append(",")
-                            .append(booking.getBookingDate()).append(",")
-                            .append(booking.getStatus()).append("|");
+                    // Получаем тур по ID
+                    Tour tour = tourService.getTourById(booking.getTourId());
+                    if (tour != null) {
+                        // Добавляем данные о бронировании и туре в ответ
+                        response.append(booking.getId()).append(",")
+                                .append(tour.getName()).append(",") // Название тура
+                                .append(booking.getBookingDate()).append(",")
+                                .append(tour.getPrice()).append(",") // Стоимость тура
+                                .append(booking.getStatus()).append("|");
+                    } else {
+                        // Если тур не найден, добавляем данные без названия и стоимости
+                        response.append(booking.getId()).append(",")
+                                .append("Тур " + booking.getTourId()).append(",") // Заглушка для названия
+                                .append(booking.getBookingDate()).append(",")
+                                .append(0.0).append(",") // Заглушка для стоимости
+                                .append(booking.getStatus()).append("|");
+                    }
                 }
                 return response.toString();
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid user ID";
+            }
+        }
+        return "ERROR: Invalid request";
+    }
+
+    private String handleGetTourPrice(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int tourId = Integer.parseInt(parts[1]);
+                Tour tour = tourService.getTourById(tourId);
+                if (tour != null) {
+                    return "TOUR_PRICE " + tour.getPrice();
+                }
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid tour ID";
             }
         }
         return "ERROR: Invalid request";
@@ -226,5 +259,35 @@ public class ClientHandler implements Runnable {
             }
         }
         return "ERROR: Invalid request";
+    }
+
+    private String handleCancelBooking(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int bookingId = Integer.parseInt(parts[1]);
+                bookingService.deleteBooking(bookingId);
+                return "CANCEL_SUCCESS";
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid booking ID";
+            }
+        }
+        return "ERROR: Invalid cancel booking request";
+    }
+
+    private String handleMakePayment(String[] parts) {
+        if (parts.length == 4) {
+            try {
+                int bookingId = Integer.parseInt(parts[1]);
+                double amount = Double.parseDouble(parts[2]);
+                String paymentDate = parts[3];
+
+                Payment payment = new Payment(0, bookingId, amount, paymentDate, "PENDING");
+                paymentService.addPayment(payment);
+                return "PAYMENT_SUCCESS";
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid payment data";
+            }
+        }
+        return "ERROR: Invalid payment request";
     }
 }

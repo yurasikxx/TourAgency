@@ -33,6 +33,7 @@
     <bottom>
         <HBox spacing="10" alignment="CENTER_RIGHT">
             <Button text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
+            <Button text="Мои бронирования" onAction="#handleViewBookings" styleClass="button"/>
             <Button text="Обновить" onAction="#handleRefresh" styleClass="button"/>
             <Button text="Направления" onAction="#handleViewDestinations" styleClass="button"/>
             <Button text="Выйти" onAction="#handleLogout" styleClass="button"/>

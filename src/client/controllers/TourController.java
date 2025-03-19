@@ -160,4 +160,22 @@ public class TourController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void handleViewBookings() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/booking.fxml"));
+            Parent root = loader.load();
+
+            BookingController bookingController = loader.getController();
+            bookingController.setPrimaryStage(primaryStage);
+
+            Scene scene = new Scene(root, 800, 600);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Мои бронирования");
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

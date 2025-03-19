@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -27,6 +28,9 @@ public class BookingController {
     private TableColumn<BookingModel, String> bookingDateColumn;
 
     @FXML
+    private TableColumn<BookingModel, String> priceColumn;
+
+    @FXML
     private TableColumn<BookingModel, String> statusColumn;
 
     private Stage primaryStage;
@@ -46,6 +50,7 @@ public class BookingController {
         // Настройка колонок таблицы
         tourNameColumn.setCellValueFactory(new PropertyValueFactory<>("tourName"));
         bookingDateColumn.setCellValueFactory(new PropertyValueFactory<>("bookingDate"));
+        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
     }
 
@@ -62,22 +67,61 @@ public class BookingController {
 
             // Получение ответа от сервера
             String response = in.readLine();
+            System.out.println("Ответ сервера: " + response); // Вывод ответа сервера
+
             if (response.startsWith("BOOKINGS")) {
+                // Убираем префикс "BOOKINGS " и разбиваем данные по символу "|"
                 String[] bookingsData = response.substring(9).split("\\|");
                 for (String bookingData : bookingsData) {
+                    if (bookingData.isEmpty()) {
+                        continue; // Пропускаем пустые строки
+                    }
+
+                    // Разбиваем данные бронирования по запятым
                     String[] fields = bookingData.split(",");
-                    BookingModel booking = new BookingModel(
-                            Integer.parseInt(fields[0]),
-                            fields[1],
-                            fields[2],
-                            fields[3]
-                    );
-                    bookingTable.getItems().add(booking);
+                    if (fields.length == 5) { // Проверяем, что все поля присутствуют
+                        int id = Integer.parseInt(fields[0]); // ID бронирования
+                        String tourName = fields[1]; // Название тура
+                        String bookingDate = fields[2]; // Дата бронирования
+                        double price = Double.parseDouble(fields[3]); // Стоимость тура
+                        String status = fields[4]; // Статус
+
+                        // Создаем объект BookingModel
+                        BookingModel booking = new BookingModel(id, tourName, bookingDate, price, status);
+                        bookingTable.getItems().add(booking);
+                    } else {
+                        System.err.println("Ошибка: некорректные данные бронирования: " + bookingData);
+                    }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Получает стоимость тура по его ID.
+     *
+     * @param tourId ID тура.
+     * @return Стоимость тура.
+     */
+    private double getTourPrice(int tourId) {
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            // Отправка запроса на сервер
+            out.println("GET_TOUR_PRICE " + tourId);
+
+            // Получение ответа от сервера
+            String response = in.readLine();
+            if (response.startsWith("TOUR_PRICE")) {
+                return Double.parseDouble(response.substring(11)); // Пример ответа: TOUR_PRICE 500.0
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0.0; // Возвращаем 0, если не удалось получить стоимость
     }
 
     /**
@@ -98,15 +142,45 @@ public class BookingController {
                 String response = in.readLine();
                 if (response.equals("CANCEL_SUCCESS")) {
                     System.out.println("Бронирование успешно отменено!");
-                    loadBookings(); // Обновляем список бронирований
+
+                    // Показываем уведомление об успешной отмене
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Успешно");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Бронирование успешно отменено!");
+                    alert.showAndWait();
+
+                    // Обновляем данные в таблице
+                    loadBookings();
                 } else {
                     System.out.println("Ошибка при отмене бронирования.");
+
+                    // Показываем уведомление об ошибке
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Ошибка");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Не удалось отменить бронирование.");
+                    alert.showAndWait();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+
+                // Показываем уведомление об ошибке подключения
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка");
+                alert.setHeaderText(null);
+                alert.setContentText("Ошибка подключения к серверу.");
+                alert.showAndWait();
             }
         } else {
             System.out.println("Бронирование не выбрано!");
+
+            // Показываем уведомление, если бронирование не выбрано
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Предупреждение");
+            alert.setHeaderText(null);
+            alert.setContentText("Пожалуйста, выберите бронирование для отмены.");
+            alert.showAndWait();
         }
     }
 
@@ -120,20 +194,20 @@ public class BookingController {
     }
 
     /**
-     * Обрабатывает нажатие кнопки "Платежи".
+     * Обрабатывает нажатие кнопки "Назад".
      */
     @FXML
-    private void handleViewPayments() {
+    private void handleBack() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/payment.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour.fxml"));
             Parent root = loader.load();
 
-            PaymentController paymentController = loader.getController();
-            paymentController.setPrimaryStage(primaryStage);
+            TourController tourController = loader.getController();
+            tourController.setPrimaryStage(primaryStage);
 
             Scene scene = new Scene(root, 800, 600);
             primaryStage.setScene(scene);
-            primaryStage.setTitle("Платежи");
+            primaryStage.setTitle("Туры");
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();

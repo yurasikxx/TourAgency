@@ -1,7 +1,7 @@
 package server.services.impl;
 
-import server.models.Booking;
 import server.database.DAO.BookingDAO;
+import server.models.Booking;
 import server.services.BookingService;
 
 import java.util.List;

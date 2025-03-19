@@ -72,6 +72,25 @@ public class LoginController {
         }
     }
 
+    @FXML
+    private void handleRegister() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/register.fxml"));
+            Parent root = loader.load();
+
+            RegisterController registerController = loader.getController();
+            registerController.setPrimaryStage(primaryStage);
+
+            Scene scene = new Scene(root, 400, 300);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Регистрация");
+            primaryStage.show();
+        } catch (IOException e) {
+            errorLabel.setText("Ошибка при загрузке интерфейса регистрации!");
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Загружает основной интерфейс приложения.
      */

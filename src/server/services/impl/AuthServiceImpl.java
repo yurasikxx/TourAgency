@@ -12,6 +12,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public User getUserByUsername(String username) {
+        return userDAO.getUserByUsername(username);
+    }
+
+    @Override
     public User authenticate(String username, String password) {
         User user = userDAO.getUserByUsername(username);
         if (user != null && user.getPassword().equals(password)) {

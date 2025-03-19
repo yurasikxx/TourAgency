@@ -90,7 +90,9 @@ public class UserDAOImpl implements UserDAO {
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getRole());
             statement.executeUpdate();
+            System.out.println("Пользователь успешно добавлен в базу данных: " + user.getUsername());
         } catch (SQLException e) {
+            System.err.println("Ошибка при добавлении пользователя: " + e.getMessage());
             e.printStackTrace();
         }
     }

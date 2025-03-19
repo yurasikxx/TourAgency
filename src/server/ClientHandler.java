@@ -80,6 +80,8 @@ public class ClientHandler implements Runnable {
         switch (command) {
             case "LOGIN":
                 return handleLogin(parts);
+            case "REGISTER":
+                return handleRegister(parts);
             case "GET_TOURS":
                 return handleGetTours();
             case "BOOK_TOUR":
@@ -109,6 +111,24 @@ public class ClientHandler implements Runnable {
             }
         }
         return "LOGIN_FAILURE";
+    }
+
+    private String handleRegister(String[] parts) {
+        if (parts.length == 3) {
+            String username = parts[1];
+            String password = parts[2];
+
+            // Проверка, существует ли пользователь с таким логином
+            if (authService.getUserByUsername(username) != null) {
+                return "REGISTER_FAILURE: Пользователь с таким логином уже существует.";
+            }
+
+            // Создание нового пользователя
+            User newUser = new User(username, password, "USER"); // Роль по умолчанию
+            authService.register(newUser);
+            return "REGISTER_SUCCESS";
+        }
+        return "REGISTER_FAILURE: Неверный запрос.";
     }
 
     /**

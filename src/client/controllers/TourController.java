@@ -141,4 +141,23 @@ public class TourController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void handleLogout() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
+            Parent root = loader.load();
+
+            LoginController loginController = loader.getController();
+            loginController.setPrimaryStage(primaryStage);
+
+            Scene scene = new Scene(root, 400, 300);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Авторизация");
+            primaryStage.show();
+        } catch (IOException e) {
+            System.err.println("Ошибка при переходе к авторизации: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

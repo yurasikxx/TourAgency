@@ -24,6 +24,10 @@
     <Button text="Войти" onAction="#handleLogin" GridPane.rowIndex="3" GridPane.columnIndex="1"
             styleClass="button"/>
 
+    <!-- Кнопка регистрации -->
+    <Button text="Регистрация" onAction="#handleRegister" GridPane.rowIndex="5" GridPane.columnIndex="1"
+            styleClass="button"/>
+
     <!-- Сообщение об ошибке -->
     <Label fx:id="errorLabel" textFill="RED" GridPane.columnSpan="2" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
 

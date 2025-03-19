@@ -35,6 +35,7 @@
             <Button text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
             <Button text="Обновить" onAction="#handleRefresh" styleClass="button"/>
             <Button text="Направления" onAction="#handleViewDestinations" styleClass="button"/>
+            <Button text="Выйти" onAction="#handleLogout" styleClass="button"/>
         </HBox>
     </bottom>
 

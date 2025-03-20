@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDate;
 
 public class BookingController {
     @FXML
@@ -233,6 +234,36 @@ public class BookingController {
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handlePay() {
+        BookingModel selectedBooking = bookingTable.getSelectionModel().getSelectedItem();
+        if (selectedBooking != null) {
+            try (Socket socket = new Socket("localhost", 12345);
+                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+                // Получаем текущую дату
+                String currentDate = LocalDate.now().toString(); // Формат: "2023-10-25"
+
+                // Отправка запроса на сервер
+                out.println("MAKE_PAYMENT " + selectedBooking.getId() + " " + selectedBooking.getPrice() + " " + currentDate);
+
+                // Получение ответа от сервера
+                String response = in.readLine();
+                if (response.equals("PAYMENT_SUCCESS")) {
+                    System.out.println("Оплата прошла успешно!");
+                    loadBookings(); // Обновляем список бронирований
+                } else {
+                    System.out.println("Ошибка при оплате.");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Бронирование не выбрано!");
         }
     }
 }

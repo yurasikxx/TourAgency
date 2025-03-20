@@ -168,9 +168,10 @@ public class ClientHandler implements Runnable {
             try {
                 int userId = Integer.parseInt(parts[1]);
                 int tourId = Integer.parseInt(parts[2]);
-                String bookingDate = parts[3];
+                String bookingDate = parts[3]; // Текущая дата, переданная с клиента
 
-                Booking booking = new Booking(0, userId, tourId, bookingDate, "PENDING");
+                // Создаем объект Booking с текущей датой
+                Booking booking = new Booking(0, userId, tourId, bookingDate, "pending"); // Статус по умолчанию: "pending"
                 bookingService.addBooking(booking);
                 return "BOOKING_SUCCESS";
             } catch (NumberFormatException e) {
@@ -196,19 +197,22 @@ public class ClientHandler implements Runnable {
                     // Получаем тур по ID
                     Tour tour = tourService.getTourById(booking.getTourId());
                     if (tour != null) {
+                        // Преобразуем статус на русский язык
+                        String status = booking.getStatus().equals("confirmed") ? "Подтверждено" : "В ожидании";
+
                         // Добавляем данные о бронировании и туре в ответ
                         response.append(booking.getId()).append(",")
                                 .append(tour.getName()).append(",") // Название тура
                                 .append(booking.getBookingDate()).append(",")
                                 .append(tour.getPrice()).append(",") // Стоимость тура
-                                .append(booking.getStatus()).append("|");
+                                .append(status).append("|"); // Статус на русском
                     } else {
                         // Если тур не найден, добавляем данные без названия и стоимости
                         response.append(booking.getId()).append(",")
                                 .append("Тур " + booking.getTourId()).append(",") // Заглушка для названия
                                 .append(booking.getBookingDate()).append(",")
                                 .append(0.0).append(",") // Заглушка для стоимости
-                                .append(booking.getStatus()).append("|");
+                                .append("В ожидании").append("|"); // Статус по умолчанию
                     }
                 }
                 return response.toString();
@@ -247,11 +251,15 @@ public class ClientHandler implements Runnable {
                 List<Payment> payments = paymentService.getPaymentsByBookingId(bookingId);
                 StringBuilder response = new StringBuilder("PAYMENTS ");
                 for (Payment payment : payments) {
+                    // Преобразуем статус на русский язык
+                    String status = payment.getStatus().equals("paid") ? "Оплачено" : "В ожидании";
+
+                    // Добавляем данные о платеже в ответ
                     response.append(payment.getId()).append(",")
                             .append(payment.getBookingId()).append(",")
                             .append(payment.getAmount()).append(",")
                             .append(payment.getPaymentDate()).append(",")
-                            .append(payment.getStatus()).append("|");
+                            .append(status).append("|"); // Статус на русском
                 }
                 return response.toString();
             } catch (NumberFormatException e) {

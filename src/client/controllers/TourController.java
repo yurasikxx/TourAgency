@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDate;
 
 public class TourController {
     @FXML
@@ -94,8 +95,11 @@ public class TourController {
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
+                // Получаем текущую дату
+                String currentDate = LocalDate.now().toString(); // Формат: "2023-10-25"
+
                 // Отправка запроса на сервер
-                out.println("BOOK_TOUR 1 " + selectedTour.getId() + " 2023-10-01"); // Пример: userId = 1, bookingDate = 2023-10-01
+                out.println("BOOK_TOUR 1 " + selectedTour.getId() + " " + currentDate); // Пример: userId = 1, bookingDate = текущая дата
 
                 // Получение ответа от сервера
                 String response = in.readLine();

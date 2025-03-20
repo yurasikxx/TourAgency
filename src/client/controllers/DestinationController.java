@@ -44,7 +44,8 @@ public class DestinationController {
     private void initialize() {
         // Обработка выбора направления
         destinationList.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> showDestinationDetails(newValue));
+                (observable, oldValue, newValue) -> showDestinationDetails(newValue)
+        );
     }
 
     /**
@@ -64,13 +65,16 @@ public class DestinationController {
                 String[] destinationsData = response.substring(12).split("\\|");
                 for (String destinationData : destinationsData) {
                     String[] fields = destinationData.split(",");
-                    DestinationModel destination = new DestinationModel(
-                            Integer.parseInt(fields[0]),
-                            fields[1],
-                            fields[2],
-                            fields[3]
-                    );
-                    destinationList.getItems().add(destination);
+                    if (fields.length == 4) {
+                        int id = Integer.parseInt(fields[0].trim());
+                        String name = fields[1];
+                        String country = fields[2];
+                        String description = fields[3];
+
+                        // Создаем объект DestinationModel
+                        DestinationModel destination = new DestinationModel(id, name, country, description);
+                        destinationList.getItems().add(destination);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -100,19 +104,38 @@ public class DestinationController {
      */
     @FXML
     private void handleViewTours() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour.fxml"));
-            Parent root = loader.load();
+        DestinationModel selectedDestination = destinationList.getSelectionModel().getSelectedItem();
+        if (selectedDestination != null) {
+            try (Socket socket = new Socket("localhost", 12345);
+                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            TourController tourController = loader.getController();
-            tourController.setPrimaryStage(primaryStage);
+                // Отправка запроса на сервер
+                out.println("GET_TOURS_BY_DESTINATION " + selectedDestination.getId());
 
-            Scene scene = new Scene(root, 800, 600);
-            primaryStage.setScene(scene);
-            primaryStage.setTitle("Туры");
-            primaryStage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
+                // Получение ответа от сервера
+                String response = in.readLine();
+                if (response.startsWith("TOURS")) {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour.fxml"));
+                        Parent root = loader.load();
+
+                        TourController tourController = loader.getController();
+                        tourController.setPrimaryStage(primaryStage);
+
+                        Scene scene = new Scene(root, 800, 600);
+                        primaryStage.setScene(scene);
+                        primaryStage.setTitle("Туры");
+                        primaryStage.show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Направление не выбрано!");
         }
     }
 }

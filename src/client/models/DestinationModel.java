@@ -64,11 +64,6 @@ public class DestinationModel {
 
     @Override
     public String toString() {
-        return "DestinationModel{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", country='" + country + '\'' +
-                ", description='" + description + '\'' +
-                '}';
+        return "Путешествие в " + '"' + description + '"' + " – " + name + ", " + country;
     }
 }

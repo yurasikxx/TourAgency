@@ -1,17 +1,8 @@
 package server;
 
-import server.services.AuthService;
-import server.services.TourService;
-import server.services.BookingService;
-import server.services.PaymentService;
-import server.services.impl.AuthServiceImpl;
-import server.services.impl.TourServiceImpl;
-import server.services.impl.BookingServiceImpl;
-import server.services.impl.PaymentServiceImpl;
-import server.database.DAO.impl.UserDAOImpl;
-import server.database.DAO.impl.TourDAOImpl;
-import server.database.DAO.impl.BookingDAOImpl;
-import server.database.DAO.impl.PaymentDAOImpl;
+import server.database.DAO.impl.*;
+import server.services.*;
+import server.services.impl.*;
 import server.utils.ConfigLoader;
 
 import java.io.IOException;
@@ -29,6 +20,7 @@ public class MainServer {
     private TourService tourService;
     private BookingService bookingService;
     private PaymentService paymentService;
+    private DestinationService destinationService;
 
     public MainServer() {
         // Инициализация сервисов
@@ -36,6 +28,7 @@ public class MainServer {
         this.tourService = new TourServiceImpl(new TourDAOImpl());
         this.bookingService = new BookingServiceImpl(new BookingDAOImpl());
         this.paymentService = new PaymentServiceImpl(new PaymentDAOImpl());
+        this.destinationService = new DestinationServiceImpl(new DestinationDAOImpl());
     }
 
     public void start(int port) {
@@ -51,7 +44,7 @@ public class MainServer {
 
                 // Создаем ClientHandler с передачей сервисов
                 ClientHandler clientHandler = new ClientHandler(
-                        clientSocket, authService, tourService, bookingService, paymentService
+                        clientSocket, authService, tourService, bookingService, paymentService, destinationService
                 );
                 threadPool.execute(clientHandler);
             }

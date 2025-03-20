@@ -1,13 +1,7 @@
 package server;
 
-import server.services.AuthService;
-import server.services.BookingService;
-import server.services.TourService;
-import server.services.PaymentService;
-import server.models.User;
-import server.models.Tour;
-import server.models.Booking;
-import server.models.Payment;
+import server.models.*;
+import server.services.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,14 +19,17 @@ public class ClientHandler implements Runnable {
     private TourService tourService;
     private BookingService bookingService;
     private PaymentService paymentService;
+    private DestinationService destinationService;
 
     public ClientHandler(Socket socket, AuthService authService, TourService tourService,
-                         BookingService bookingService, PaymentService paymentService) {
+                         BookingService bookingService, PaymentService paymentService,
+                         DestinationService destinationService) {
         this.clientSocket = socket;
         this.authService = authService;
         this.tourService = tourService;
         this.bookingService = bookingService;
         this.paymentService = paymentService;
+        this.destinationService = destinationService;
     }
 
     @Override
@@ -96,6 +93,10 @@ public class ClientHandler implements Runnable {
                 return handleCancelBooking(parts);
             case "MAKE_PAYMENT":
                 return handleMakePayment(parts);
+            case "GET_DESTINATIONS":
+                return handleGetDestinations();
+            case "GET_TOURS_BY_DESTINATION":
+                return handleGetToursByDestination(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -297,5 +298,40 @@ public class ClientHandler implements Runnable {
             }
         }
         return "ERROR: Invalid payment request";
+    }
+
+    private String handleGetDestinations() {
+        List<Destination> destinations = destinationService.getAllDestinations();
+        StringBuilder response = new StringBuilder("DESTINATIONS ");
+        for (Destination destination : destinations) {
+            response.append(destination.getId()).append(",")
+                    .append(destination.getName()).append(",")
+                    .append(destination.getCountry()).append(",")
+                    .append(destination.getDescription()).append("|");
+        }
+        return response.toString();
+    }
+
+    private String handleGetToursByDestination(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int destinationId = Integer.parseInt(parts[1]);
+                List<Tour> tours = tourService.getToursByDestinationId(destinationId);
+                StringBuilder response = new StringBuilder("TOURS ");
+                for (Tour tour : tours) {
+                    response.append(tour.getId()).append(",")
+                            .append(tour.getName()).append(",")
+                            .append(tour.getDescription()).append(",")
+                            .append(tour.getPrice()).append(",")
+                            .append(tour.getStartDate()).append(",")
+                            .append(tour.getEndDate()).append(",")
+                            .append(tour.getDestinationId()).append("|");
+                }
+                return response.toString();
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid destination ID";
+            }
+        }
+        return "ERROR: Invalid request";
     }
 }

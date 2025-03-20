@@ -4,6 +4,7 @@ import server.models.Tour;
 import server.database.DAO.TourDAO;
 import server.services.TourService;
 
+import java.util.Collections;
 import java.util.List;
 
 public class TourServiceImpl implements TourService {
@@ -21,6 +22,11 @@ public class TourServiceImpl implements TourService {
     @Override
     public List<Tour> getAllTours() {
         return tourDAO.getAllTours();
+    }
+
+    @Override
+    public List<Tour> getToursByDestinationId(int id) {
+        return Collections.emptyList();
     }
 
     @Override

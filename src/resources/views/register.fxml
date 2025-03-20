@@ -6,6 +6,7 @@
 <GridPane fx:controller="client.controllers.RegisterController"
           xmlns:fx="http://javafx.com/fxml/1"
           alignment="center" hgap="10" vgap="10"
+          prefWidth="1280" prefHeight="720"
           styleClass="root">
 
     <!-- Заголовок -->

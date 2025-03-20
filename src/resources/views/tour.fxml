@@ -5,7 +5,9 @@
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <BorderPane fx:controller="client.controllers.TourController"
-            xmlns:fx="http://javafx.com/fxml/1">
+            xmlns:fx="http://javafx.com/fxml/1"
+            prefWidth="1280" prefHeight="720"
+            styleClass="root">
 
     <!-- Верхняя панель -->
     <top>

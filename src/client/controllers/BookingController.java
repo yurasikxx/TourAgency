@@ -151,7 +151,7 @@ public class BookingController {
                     alert.showAndWait();
 
                     // Обновляем данные в таблице
-                    loadBookings();
+                    handleRefresh();
                 } else {
                     System.out.println("Ошибка при отмене бронирования.");
 
@@ -208,6 +208,28 @@ public class BookingController {
             Scene scene = new Scene(root, 800, 600);
             primaryStage.setScene(scene);
             primaryStage.setTitle("Туры");
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleViewPayments() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/payment.fxml"));
+            Parent root = loader.load();
+
+            PaymentController paymentController = loader.getController();
+            paymentController.setPrimaryStage(primaryStage);
+
+            Scene scene = new Scene(root);
+
+            // Устанавливаем размер сцены
+            primaryStage.setScene(scene);
+            primaryStage.setWidth(1280); // Ширина окна
+            primaryStage.setHeight(720); // Высота окна
+            primaryStage.setTitle("Платежи");
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();

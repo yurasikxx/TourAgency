@@ -133,8 +133,12 @@ public class TourController {
             DestinationController destinationController = loader.getController();
             destinationController.setPrimaryStage(primaryStage);
 
-            Scene scene = new Scene(root, 800, 600);
+            Scene scene = new Scene(root);
+
+            // Устанавливаем размер сцены
             primaryStage.setScene(scene);
+            primaryStage.setWidth(1280); // Ширина окна
+            primaryStage.setHeight(720); // Высота окна
             primaryStage.setTitle("Направления");
             primaryStage.show();
         } catch (IOException e) {
@@ -170,8 +174,12 @@ public class TourController {
             BookingController bookingController = loader.getController();
             bookingController.setPrimaryStage(primaryStage);
 
-            Scene scene = new Scene(root, 800, 600);
+            Scene scene = new Scene(root);
+
+            // Устанавливаем размер сцены
             primaryStage.setScene(scene);
+            primaryStage.setWidth(1280); // Ширина окна
+            primaryStage.setHeight(720); // Высота окна
             primaryStage.setTitle("Мои бронирования");
             primaryStage.show();
         } catch (IOException e) {

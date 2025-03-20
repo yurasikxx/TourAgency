@@ -7,6 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 import java.io.BufferedReader;
@@ -104,13 +106,24 @@ public class LoginController {
             tourController.setPrimaryStage(primaryStage);
 
             // Устанавливаем новую сцену
-            Scene scene = new Scene(root, 800, 600);
+            Scene scene = new Scene(root);
+
+            // Устанавливаем размер сцены
             primaryStage.setScene(scene);
+            primaryStage.setWidth(1280); // Ширина окна
+            primaryStage.setHeight(720); // Высота окна
             primaryStage.setTitle("Туры");
             primaryStage.show();
         } catch (IOException e) {
-            errorLabel.setText("Ошибка при загрузке основного интерфейса!");
+            System.err.println("Ошибка при загрузке основного интерфейса: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) { // Проверяем, что нажата клавиша Enter
+            handleLogin(); // Вызываем метод для входа
         }
     }
 }

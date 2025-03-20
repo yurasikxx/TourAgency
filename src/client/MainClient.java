@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
 /**
@@ -24,9 +25,17 @@ public class MainClient extends Application {
         loginController.setPrimaryStage(primaryStage);
 
         // Настройка сцены и отображение окна
-        Scene scene = new Scene(root, 400, 300);
-        primaryStage.setTitle("Туристическое агентство - Авторизация");
+        Scene scene = new Scene(root);
         primaryStage.setScene(scene);
+
+        // Установка размера окна
+        primaryStage.setWidth(1280); // Ширина окна
+        primaryStage.setHeight(720); // Высота окна
+
+        // Установка заголовка окна
+        primaryStage.setTitle("Туристическое агентство - Авторизация");
+
+        // Отображение окна
         primaryStage.show();
     }
 

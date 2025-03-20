@@ -6,7 +6,9 @@
 
 <VBox fx:controller="client.controllers.BookingController"
       xmlns:fx="http://javafx.com/fxml/1"
-      spacing="10" alignment="CENTER">
+      spacing="10" alignment="CENTER"
+      prefWidth="1280" prefHeight="720"
+      styleClass="root">
 
     <!-- Заголовок -->
     <Text text="Мои бронирования" styleClass="title"/>

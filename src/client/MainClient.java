@@ -1,18 +1,20 @@
 package client;
 
 import client.controllers.LoginController;
+import client.models.UserModel;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
 /**
  * Основной класс клиентского приложения.
- * Запускает JavaFX-приложение и загружает начальный интерфейс (форму авторизации).
  */
 public class MainClient extends Application {
+
+    // Текущий авторизированный пользователь
+    private static UserModel currentUser;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -27,16 +29,28 @@ public class MainClient extends Application {
         // Настройка сцены и отображение окна
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
-
-        // Установка размера окна
         primaryStage.setWidth(1280); // Ширина окна
         primaryStage.setHeight(720); // Высота окна
-
-        // Установка заголовка окна
         primaryStage.setTitle("Туристическое агентство - Авторизация");
-
-        // Отображение окна
         primaryStage.show();
+    }
+
+    /**
+     * Устанавливает текущего пользователя.
+     *
+     * @param user Текущий пользователь.
+     */
+    public static void setCurrentUser(UserModel user) {
+        currentUser = user;
+    }
+
+    /**
+     * Возвращает текущего пользователя.
+     *
+     * @return Текущий пользователь.
+     */
+    public static UserModel getCurrentUser() {
+        return currentUser;
     }
 
     /**

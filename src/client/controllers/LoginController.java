@@ -1,5 +1,7 @@
 package client.controllers;
 
+import client.MainClient;
+import client.models.UserModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -61,15 +63,32 @@ public class LoginController {
 
             // Получение ответа от сервера
             String response = in.readLine();
+            System.out.println("Ответ сервера: " + response); // Вывод для отладки
+
             if (response.startsWith("LOGIN_SUCCESS")) {
                 // Успешная авторизация
-                loadMainView();
+                String[] responseParts = response.split(" ");
+                if (responseParts.length >= 3) { // Проверяем, что ответ содержит роль и ID
+                    String role = responseParts[1]; // Роль пользователя
+                    int userId = Integer.parseInt(responseParts[2]); // ID пользователя
+
+                    // Создаем объект UserModel для текущего пользователя
+                    UserModel user = new UserModel(userId, username, role);
+                    MainClient.setCurrentUser(user); // Сохраняем текущего пользователя
+
+                    loadMainView(); // Загружаем основной интерфейс
+                } else {
+                    errorLabel.setText("Ошибка: сервер вернул некорректный ответ.");
+                }
             } else {
                 // Ошибка авторизации
                 errorLabel.setText("Неверный логин или пароль!");
             }
         } catch (IOException e) {
             errorLabel.setText("Ошибка подключения к серверу!");
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            errorLabel.setText("Ошибка: некорректный ID пользователя.");
             e.printStackTrace();
         }
     }

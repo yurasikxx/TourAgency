@@ -1,11 +1,14 @@
 package client.controllers;
 
+import client.MainClient;
 import client.models.BookingModel;
+import client.models.UserModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -33,6 +36,9 @@ public class BookingController {
 
     @FXML
     private TableColumn<BookingModel, String> statusColumn;
+
+    @FXML
+    private Label balanceLabel;
 
     private Stage primaryStage;
 
@@ -71,7 +77,7 @@ public class BookingController {
             System.out.println("Ответ сервера: " + response); // Вывод ответа сервера
 
             if (response.startsWith("BOOKINGS")) {
-                // Убираем префикс "BOOKINGS " и разбиваем данные по символу "|"
+                // Убираем префикс "BOOKINGS" и разбиваем данные по символу "|"
                 String[] bookingsData = response.substring(9).split("\\|");
                 for (String bookingData : bookingsData) {
                     if (bookingData.isEmpty()) {
@@ -95,6 +101,12 @@ public class BookingController {
                     }
                 }
             }
+
+            // Обновляем баланс пользователя
+            double balance = getUserBalance();
+            System.out.println("Баланс пользователя: " + balance); // Вывод баланса для отладки
+            balanceLabel.setText(String.format("%.2f", balance));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -143,6 +155,10 @@ public class BookingController {
                 String response = in.readLine();
                 if (response.equals("CANCEL_SUCCESS")) {
                     System.out.println("Бронирование успешно отменено!");
+
+                    // Обновляем баланс пользователя
+                    double balance = getUserBalance();
+                    balanceLabel.setText(String.format("%.2f", balance));
 
                     // Показываем уведомление об успешной отмене
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -255,6 +271,11 @@ public class BookingController {
                 String response = in.readLine();
                 if (response.equals("PAYMENT_SUCCESS")) {
                     System.out.println("Оплата прошла успешно!");
+
+                    // Обновляем баланс пользователя
+                    double balance = getUserBalance();
+                    balanceLabel.setText(String.format("%.2f", balance));
+
                     loadBookings(); // Обновляем список бронирований
                 } else {
                     System.out.println("Ошибка при оплате.");
@@ -265,5 +286,33 @@ public class BookingController {
         } else {
             System.out.println("Бронирование не выбрано!");
         }
+    }
+
+    private double getUserBalance() {
+        UserModel currentUser = MainClient.getCurrentUser(); // Получаем текущего пользователя
+        if (currentUser == null) {
+            System.out.println("Пользователь не авторизован!");
+            return 0.0;
+        }
+
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            // Отправка запроса на сервер с ID текущего пользователя
+            out.println("GET_BALANCE " + currentUser.getId());
+            System.out.println("Отправлен запрос на получение баланса для пользователя " + currentUser.getId()); // Вывод для отладки
+
+            // Получение ответа от сервера
+            String response = in.readLine();
+            System.out.println("Ответ сервера: " + response); // Вывод ответа сервера
+
+            if (response.startsWith("BALANCE")) {
+                return Double.parseDouble(response.substring(8)); // Пример ответа: BALANCE 2000.0
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0.0; // Возвращаем 0, если не удалось получить баланс
     }
 }

@@ -97,6 +97,8 @@ public class ClientHandler implements Runnable {
                 return handleGetDestinations();
             case "GET_TOURS_BY_DESTINATION":
                 return handleGetToursByDestination(parts);
+            case "GET_BALANCE":
+                return handleGetBalance(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -114,7 +116,7 @@ public class ClientHandler implements Runnable {
             String password = parts[2];
             User user = userService.authenticate(username, password);
             if (user != null) {
-                return "LOGIN_SUCCESS " + user.getRole();
+                return "LOGIN_SUCCESS " + user.getRole() + " " + user.getId(); // Возвращаем роль и ID
             }
         }
         return "LOGIN_FAILURE";
@@ -330,6 +332,20 @@ public class ClientHandler implements Runnable {
                 return response.toString();
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid destination ID";
+            }
+        }
+        return "ERROR: Invalid request";
+    }
+
+    private String handleGetBalance(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int userId = Integer.parseInt(parts[1]);
+                double balance = userService.getBalance(userId);
+                System.out.println("Запрошен баланс для пользователя " + userId + ": " + balance); // Вывод для отладки
+                return "BALANCE " + balance;
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid user ID";
             }
         }
         return "ERROR: Invalid request";

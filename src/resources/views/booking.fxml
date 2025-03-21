@@ -13,6 +13,12 @@
     <!-- Заголовок -->
     <Text text="Мои бронирования" styleClass="title"/>
 
+    <!-- Баланс пользователя -->
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="Ваш баланс:" styleClass="detail-label"/>
+        <Label fx:id="balanceLabel" styleClass="detail-label"/>
+    </HBox>
+
     <!-- Таблица бронирований -->
     <TableView fx:id="bookingTable" prefWidth="600">
         <columns>

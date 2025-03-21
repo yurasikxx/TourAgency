@@ -193,15 +193,21 @@ public class ClientHandler implements Runnable {
     private String handleGetBookings(String[] parts) {
         if (parts.length == 2) {
             try {
-                int userId = Integer.parseInt(parts[1]);
+                int userId = Integer.parseInt(parts[1]); // ID текущего пользователя
                 List<Booking> bookings = bookingService.getBookingsByUserId(userId);
                 StringBuilder response = new StringBuilder("BOOKINGS ");
                 for (Booking booking : bookings) {
                     // Получаем тур по ID
                     Tour tour = tourService.getTourById(booking.getTourId());
                     if (tour != null) {
-                        // Преобразуем статус на русский язык
-                        String status = booking.getStatus().equals("confirmed") ? "Подтверждено" : "В ожидании";
+                        String status = "";
+                        if (booking.getStatus().equals("confirmed")) {
+                            status = "Подтверждено";
+                        } else if (booking.getStatus().equals("cancelled")) {
+                            status = "Отменено";
+                        } else {
+                            status = "В ожидании";
+                        }
 
                         // Добавляем данные о бронировании и туре в ответ
                         response.append(booking.getId()).append(",")
@@ -273,33 +279,106 @@ public class ClientHandler implements Runnable {
     }
 
     private String handleCancelBooking(String[] parts) {
-        if (parts.length == 2) {
+        if (parts.length == 3) { // Добавлен ID пользователя
             try {
                 int bookingId = Integer.parseInt(parts[1]);
-                bookingService.deleteBooking(bookingId);
+                int userId = Integer.parseInt(parts[2]); // ID текущего пользователя
+
+                // Получаем информацию о бронировании
+                Booking booking = bookingService.getBookingById(bookingId);
+                if (booking == null) {
+                    return "ERROR: Бронирование не найдено.";
+                }
+
+                // Проверяем, что бронирование принадлежит текущему пользователю
+                if (booking.getUserId() != userId) {
+                    return "ERROR: Бронирование не принадлежит текущему пользователю.";
+                }
+
+                // Получаем информацию о пользователе
+                User user = userService.getUserById(userId);
+                if (user == null) {
+                    return "ERROR: Пользователь не найден.";
+                }
+
+                // Получаем стоимость тура
+                Tour tour = tourService.getTourById(booking.getTourId());
+                if (tour == null) {
+                    return "ERROR: Тур не найден.";
+                }
+
+                // Вычисляем штраф (5% от стоимости тура)
+                double penalty = tour.getPrice() * 0.05;
+
+                // Проверяем, достаточно ли средств на балансе для штрафа
+                if (user.getBalance() < penalty) {
+                    return "ERROR: Недостаточно средств для оплаты штрафа.";
+                }
+
+                // Списываем штраф с баланса пользователя
+                double newBalance = user.getBalance() - penalty;
+                userService.updateBalance(userId, newBalance);
+
+                // Обновляем статус бронирования на "Отменено"
+                booking.setStatus("cancelled");
+                bookingService.updateBooking(booking); // Обновляем бронирование в базе данных
+
                 return "CANCEL_SUCCESS";
             } catch (NumberFormatException e) {
-                return "ERROR: Invalid booking ID";
+                return "ERROR: Некорректный ID бронирования.";
             }
         }
-        return "ERROR: Invalid cancel booking request";
+        return "ERROR: Неверный запрос.";
     }
 
     private String handleMakePayment(String[] parts) {
-        if (parts.length == 4) {
+        if (parts.length == 5) { // Добавлен ID пользователя
             try {
                 int bookingId = Integer.parseInt(parts[1]);
                 double amount = Double.parseDouble(parts[2]);
                 String paymentDate = parts[3];
+                int userId = Integer.parseInt(parts[4]); // ID текущего пользователя
 
-                Payment payment = new Payment(0, bookingId, amount, paymentDate, "PENDING");
+                // Получаем информацию о бронировании
+                Booking booking = bookingService.getBookingById(bookingId);
+                if (booking == null) {
+                    return "ERROR: Бронирование не найдено.";
+                }
+
+                // Проверяем, что бронирование принадлежит текущему пользователю
+                if (booking.getUserId() != userId) {
+                    return "ERROR: Бронирование не принадлежит текущему пользователю.";
+                }
+
+                // Получаем информацию о пользователе
+                User user = userService.getUserById(userId);
+                if (user == null) {
+                    return "ERROR: Пользователь не найден.";
+                }
+
+                // Проверяем, достаточно ли средств на балансе
+                if (user.getBalance() < amount) {
+                    return "ERROR: Недостаточно средств на балансе.";
+                }
+
+                // Списываем средства с баланса пользователя
+                double newBalance = user.getBalance() - amount;
+                userService.updateBalance(userId, newBalance);
+
+                // Обновляем статус бронирования на "confirmed"
+                booking.setStatus("confirmed");
+                bookingService.updateBooking(booking); // Обновляем бронирование в базе данных
+
+                // Добавляем запись о платеже
+                Payment payment = new Payment(0, bookingId, amount, paymentDate, "paid");
                 paymentService.addPayment(payment);
+
                 return "PAYMENT_SUCCESS";
             } catch (NumberFormatException e) {
-                return "ERROR: Invalid payment data";
+                return "ERROR: Некорректные данные.";
             }
         }
-        return "ERROR: Invalid payment request";
+        return "ERROR: Неверный запрос.";
     }
 
     private String handleGetDestinations() {

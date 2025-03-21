@@ -39,6 +39,7 @@
 
     <!-- Кнопки -->
     <HBox spacing="10" alignment="CENTER">
+        <Button text="Оплатить" onAction="#handlePay" styleClass="button"/>
         <Button text="Отменить бронь" onAction="#handleCancelBooking" styleClass="button"/>
         <Button text="Обновить" onAction="#handleRefresh" styleClass="button"/>
         <Button text="Назад" onAction="#handleBack" styleClass="button"/>

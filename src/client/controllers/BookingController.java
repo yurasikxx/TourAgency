@@ -69,8 +69,15 @@ public class BookingController {
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            // Отправка запроса на сервер
-            out.println("GET_BOOKINGS 1"); // Пример: userId = 1
+            // Получаем ID текущего пользователя
+            UserModel currentUser = MainClient.getCurrentUser();
+            if (currentUser == null) {
+                System.out.println("Пользователь не авторизован!");
+                return;
+            }
+
+            // Отправка запроса на сервер с ID текущего пользователя
+            out.println("GET_BOOKINGS " + currentUser.getId());
 
             // Получение ответа от сервера
             String response = in.readLine();
@@ -148,8 +155,15 @@ public class BookingController {
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                // Отправка запроса на сервер
-                out.println("CANCEL_BOOKING " + selectedBooking.getId());
+                // Получаем ID текущего пользователя
+                UserModel currentUser = MainClient.getCurrentUser();
+                if (currentUser == null) {
+                    System.out.println("Пользователь не авторизован!");
+                    return;
+                }
+
+                // Отправка запроса на сервер с ID текущего пользователя
+                out.println("CANCEL_BOOKING " + selectedBooking.getId() + " " + currentUser.getId());
 
                 // Получение ответа от сервера
                 String response = in.readLine();
@@ -160,23 +174,23 @@ public class BookingController {
                     double balance = getUserBalance();
                     balanceLabel.setText(String.format("%.2f", balance));
 
+                    // Обновляем список бронирований
+                    handleRefresh(); // Добавлено обновление данных
+
                     // Показываем уведомление об успешной отмене
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Успешно");
                     alert.setHeaderText(null);
-                    alert.setContentText("Бронирование успешно отменено!");
+                    alert.setContentText("Бронирование успешно отменено.");
                     alert.showAndWait();
-
-                    // Обновляем данные в таблице
-                    handleRefresh();
                 } else {
-                    System.out.println("Ошибка при отмене бронирования.");
+                    System.out.println("Ошибка при отмене бронирования: " + response);
 
                     // Показываем уведомление об ошибке
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Ошибка");
                     alert.setHeaderText(null);
-                    alert.setContentText("Не удалось отменить бронирование.");
+                    alert.setContentText("Не удалось отменить бронирование: " + response);
                     alert.showAndWait();
                 }
             } catch (IOException e) {
@@ -264,8 +278,15 @@ public class BookingController {
                 // Получаем текущую дату
                 String currentDate = LocalDate.now().toString(); // Формат: "2023-10-25"
 
-                // Отправка запроса на сервер
-                out.println("MAKE_PAYMENT " + selectedBooking.getId() + " " + selectedBooking.getPrice() + " " + currentDate);
+                // Получаем ID текущего пользователя
+                UserModel currentUser = MainClient.getCurrentUser();
+                if (currentUser == null) {
+                    System.out.println("Пользователь не авторизован!");
+                    return;
+                }
+
+                // Отправка запроса на сервер с ID текущего пользователя
+                out.println("MAKE_PAYMENT " + selectedBooking.getId() + " " + selectedBooking.getPrice() + " " + currentDate + " " + currentUser.getId());
 
                 // Получение ответа от сервера
                 String response = in.readLine();
@@ -276,15 +297,37 @@ public class BookingController {
                     double balance = getUserBalance();
                     balanceLabel.setText(String.format("%.2f", balance));
 
-                    loadBookings(); // Обновляем список бронирований
+                    // Обновляем список бронирований
+                    handleRefresh(); // Добавлено обновление данных
                 } else {
-                    System.out.println("Ошибка при оплате.");
+                    System.out.println("Ошибка при оплате: " + response);
+
+                    // Показываем уведомление об ошибке
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Ошибка");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Не удалось выполнить оплату: " + response);
+                    alert.showAndWait();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+
+                // Показываем уведомление об ошибке подключения
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка");
+                alert.setHeaderText(null);
+                alert.setContentText("Ошибка подключения к серверу.");
+                alert.showAndWait();
             }
         } else {
             System.out.println("Бронирование не выбрано!");
+
+            // Показываем уведомление, если бронирование не выбрано
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Предупреждение");
+            alert.setHeaderText(null);
+            alert.setContentText("Пожалуйста, выберите бронирование для оплаты.");
+            alert.showAndWait();
         }
     }
 

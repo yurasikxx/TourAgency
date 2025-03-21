@@ -11,4 +11,6 @@ public interface UserDAO {
     void addUser(User user);
     void updateUser(User user);
     void deleteUser(int id);
+    double getBalance(int userId);
+    void updateBalance(int userId, double newBalance);
 }

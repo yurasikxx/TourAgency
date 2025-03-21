@@ -16,7 +16,7 @@ public class MainServer {
     private ExecutorService threadPool;
     private boolean isRunning;
 
-    private AuthService authService;
+    private UserService userService;
     private TourService tourService;
     private BookingService bookingService;
     private PaymentService paymentService;
@@ -24,7 +24,7 @@ public class MainServer {
 
     public MainServer() {
         // Инициализация сервисов
-        this.authService = new AuthServiceImpl(new UserDAOImpl());
+        this.userService = new UserServiceImpl(new UserDAOImpl());
         this.tourService = new TourServiceImpl(new TourDAOImpl());
         this.bookingService = new BookingServiceImpl(new BookingDAOImpl());
         this.paymentService = new PaymentServiceImpl(new PaymentDAOImpl());
@@ -44,7 +44,7 @@ public class MainServer {
 
                 // Создаем ClientHandler с передачей сервисов
                 ClientHandler clientHandler = new ClientHandler(
-                        clientSocket, authService, tourService, bookingService, paymentService, destinationService
+                        clientSocket, userService, tourService, bookingService, paymentService, destinationService
                 );
                 threadPool.execute(clientHandler);
             }

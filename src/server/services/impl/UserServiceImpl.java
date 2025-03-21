@@ -2,12 +2,12 @@ package server.services.impl;
 
 import server.models.User;
 import server.database.DAO.UserDAO;
-import server.services.AuthService;
+import server.services.UserService;
 
-public class AuthServiceImpl implements AuthService {
+public class UserServiceImpl implements UserService {
     private UserDAO userDAO;
 
-    public AuthServiceImpl(UserDAO userDAO) {
+    public UserServiceImpl(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
 
@@ -28,5 +28,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void register(User user) {
         userDAO.addUser(user);
+    }
+
+    @Override
+    public double getBalance(int userId) {
+        return userDAO.getBalance(userId);
+    }
+
+    @Override
+    public void updateBalance(int userId, double newBalance) {
+        userDAO.updateBalance(userId, newBalance);
     }
 }

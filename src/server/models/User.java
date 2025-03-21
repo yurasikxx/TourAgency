@@ -1,52 +1,31 @@
 package server.models;
 
-/**
- * Класс, представляющий сущность "Пользователь".
- */
 public class User {
-    private int id;          // Уникальный идентификатор пользователя
-    private String username; // Логин пользователя
-    private String password; // Пароль пользователя
-    private String role;     // Роль пользователя (администратор, сотрудник, гость)
+    private int id;
+    private String username;
+    private String password;
+    private String role;
+    private double balance; // Новое поле
 
     // Конструкторы
+    public User() {}
 
-    /**
-     * Конструктор по умолчанию.
-     */
-    public User() {
+    public User(String username, String password, String role, double balance) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.balance = balance;
     }
 
-    /**
-     * Конструктор с параметрами.
-     *
-     * @param id       Уникальный идентификатор пользователя.
-     * @param username Логин пользователя.
-     * @param password Пароль пользователя.
-     * @param role     Роль пользователя.
-     */
-    public User(int id, String username, String password, String role) {
+    public User(int id, String username, String password, String role, double balance) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
-    }
-
-    /**
-     * Конструктор без ID (используется при создании нового пользователя).
-     *
-     * @param username Логин пользователя.
-     * @param password Пароль пользователя.
-     * @param role     Роль пользователя.
-     */
-    public User(String username, String password, String role) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
+        this.balance = balance;
     }
 
     // Геттеры и сеттеры
-
     public int getId() {
         return id;
     }
@@ -79,7 +58,13 @@ public class User {
         this.role = role;
     }
 
-    // Переопределение метода toString()
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
 
     @Override
     public String toString() {
@@ -88,6 +73,7 @@ public class User {
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
+                ", balance=" + balance +
                 '}';
     }
 }

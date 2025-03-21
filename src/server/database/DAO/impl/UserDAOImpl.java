@@ -33,7 +33,8 @@ public class UserDAOImpl implements UserDAO {
                         resultSet.getInt("id"),
                         resultSet.getString("username"),
                         resultSet.getString("password"),
-                        resultSet.getString("role")
+                        resultSet.getString("role"),
+                        resultSet.getDouble("balance")
                 );
             }
         } catch (SQLException e) {
@@ -53,7 +54,8 @@ public class UserDAOImpl implements UserDAO {
                         resultSet.getInt("id"),
                         resultSet.getString("username"),
                         resultSet.getString("password"),
-                        resultSet.getString("role")
+                        resultSet.getString("role"),
+                        resultSet.getDouble("balance")
                 );
             }
         } catch (SQLException e) {
@@ -73,7 +75,8 @@ public class UserDAOImpl implements UserDAO {
                         resultSet.getInt("id"),
                         resultSet.getString("username"),
                         resultSet.getString("password"),
-                        resultSet.getString("role")
+                        resultSet.getString("role"),
+                        resultSet.getDouble("balance")
                 ));
             }
         } catch (SQLException e) {
@@ -84,11 +87,12 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void addUser(User user) {
-        String query = "INSERT INTO Users (username, password, role) VALUES (?, ?, ?)";
+        String query = "INSERT INTO Users (username, password, role, balance) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getRole());
+            statement.setDouble(4, user.getBalance());
             statement.executeUpdate();
             System.out.println("Пользователь успешно добавлен в базу данных: " + user.getUsername());
         } catch (SQLException e) {
@@ -99,12 +103,13 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void updateUser(User user) {
-        String query = "UPDATE Users SET username = ?, password = ?, role = ? WHERE id = ?";
+        String query = "UPDATE Users SET username = ?, password = ?, role = ?, balance = ? WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getRole());
-            statement.setInt(4, user.getId());
+            statement.setDouble(4, user.getBalance());
+            statement.setInt(5, user.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -116,6 +121,33 @@ public class UserDAOImpl implements UserDAO {
         String query = "DELETE FROM Users WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public double getBalance(int userId) {
+        String query = "SELECT balance FROM Users WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getDouble("balance");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    @Override
+    public void updateBalance(int userId, double newBalance) {
+        String query = "UPDATE Users SET balance = ? WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setDouble(1, newBalance);
+            statement.setInt(2, userId);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

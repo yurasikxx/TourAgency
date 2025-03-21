@@ -15,17 +15,17 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private PrintWriter out;
 
-    private AuthService authService;
+    private UserService userService;
     private TourService tourService;
     private BookingService bookingService;
     private PaymentService paymentService;
     private DestinationService destinationService;
 
-    public ClientHandler(Socket socket, AuthService authService, TourService tourService,
+    public ClientHandler(Socket socket, UserService authService, TourService tourService,
                          BookingService bookingService, PaymentService paymentService,
                          DestinationService destinationService) {
         this.clientSocket = socket;
-        this.authService = authService;
+        this.userService = authService;
         this.tourService = tourService;
         this.bookingService = bookingService;
         this.paymentService = paymentService;
@@ -112,7 +112,7 @@ public class ClientHandler implements Runnable {
         if (parts.length == 3) {
             String username = parts[1];
             String password = parts[2];
-            User user = authService.authenticate(username, password);
+            User user = userService.authenticate(username, password);
             if (user != null) {
                 return "LOGIN_SUCCESS " + user.getRole();
             }
@@ -126,13 +126,13 @@ public class ClientHandler implements Runnable {
             String password = parts[2];
 
             // Проверка, существует ли пользователь с таким логином
-            if (authService.getUserByUsername(username) != null) {
+            if (userService.getUserByUsername(username) != null) {
                 return "REGISTER_FAILURE: Пользователь с таким логином уже существует.";
             }
 
             // Создание нового пользователя
-            User newUser = new User(username, password, "USER"); // Роль по умолчанию
-            authService.register(newUser);
+            User newUser = new User(username, password, "USER", 1000);
+            userService.register(newUser);
             return "REGISTER_SUCCESS";
         }
         return "REGISTER_FAILURE: Неверный запрос.";

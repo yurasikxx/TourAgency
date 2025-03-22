@@ -251,3 +251,9 @@
      -fx-text-fill: #333333;
      -fx-padding: 5px;
  }
+
+ .welcome-label {
+     -fx-font-size: 18px;
+     -fx-text-fill: #4CAF50;
+     -fx-font-weight: bold;
+ }

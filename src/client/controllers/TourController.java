@@ -1,10 +1,13 @@
 package client.controllers;
 
+import client.MainClient;
 import client.models.TourModel;
+import client.models.UserModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -30,6 +33,9 @@ public class TourController {
     @FXML
     private TableColumn<TourModel, Double> priceColumn;
 
+    @FXML
+    private Label welcomeLabel;
+
     private Stage primaryStage;
 
     /**
@@ -39,7 +45,15 @@ public class TourController {
      */
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        loadTours(); // Загружаем туры при инициализации
+        loadTours();
+        UserModel currentUser = MainClient.getCurrentUser();
+        if (currentUser != null) {
+            setWelcomeMessage(currentUser.getUsername());
+        }
+    }
+
+    public void setWelcomeMessage(String username) {
+        welcomeLabel.setText("Добро пожаловать, " + username + "!");
     }
 
     @FXML

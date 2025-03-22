@@ -11,7 +11,10 @@
 
     <!-- Верхняя панель -->
     <top>
-        <Text text="Список туров" styleClass="title"/>
+        <VBox spacing="10" alignment="CENTER">
+            <Text text="Список туров" styleClass="title"/>
+            <Label fx:id="welcomeLabel" styleClass="welcome-label"/>
+        </VBox>
     </top>
 
     <!-- Центральная панель -->

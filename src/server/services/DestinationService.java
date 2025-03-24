@@ -10,4 +10,5 @@ public interface DestinationService {
     void addDestination(Destination destination);
     void updateDestination(Destination destination);
     void deleteDestination(int id);
+    boolean exists(int destinationId);
 }

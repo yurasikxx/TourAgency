@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" styleClass="root" fx:controller="client.controllers.TourManagementController">
+    <Text text="Управление турами" styleClass="title"/>
+
+    <TableView fx:id="toursTable" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="nameColumn" text="Название" prefWidth="150"/>
+            <TableColumn fx:id="descriptionColumn" text="Описание" prefWidth="250"/>
+            <TableColumn fx:id="priceColumn" text="Цена" prefWidth="80"/>
+            <TableColumn fx:id="startDateColumn" text="Дата начала" prefWidth="100"/>
+            <TableColumn fx:id="endDateColumn" text="Дата окончания" prefWidth="100"/>
+            <TableColumn fx:id="destinationColumn" text="Направление" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="Название:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Описание:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextArea fx:id="descriptionField" GridPane.columnIndex="1" GridPane.rowIndex="1" prefRowCount="3"/>
+
+        <Label text="Цена:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="priceField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Дата начала:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <DatePicker fx:id="startDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+        <Label text="Дата окончания:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <DatePicker fx:id="endDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+        <Label text="Направление:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+        <ComboBox fx:id="destinationComboBox" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="200"/>
+    </GridPane>
+
+    <HBox spacing="10">
+        <Button text="Добавить" onAction="#handleAddTour" styleClass="button"/>
+        <Button text="Изменить" onAction="#handleUpdateTour" styleClass="button"/>
+        <Button text="Удалить" onAction="#handleDeleteTour" styleClass="button"/>
+        <Button text="Назад" onAction="#handleBack" styleClass="button"/>
+    </HBox>
+</VBox>

@@ -37,4 +37,9 @@ public class DestinationServiceImpl implements DestinationService {
     public void deleteDestination(int id) {
         destinationDAO.deleteDestination(id);
     }
+
+    @Override
+    public boolean exists(int destinationId) {
+        return destinationDAO.getDestinationById(destinationId) != null;
+    }
 }

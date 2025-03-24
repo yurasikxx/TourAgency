@@ -57,7 +57,7 @@ public class DestinationDAOImpl implements DestinationDAO {
                 ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Ошибка при загрузке направлений: " + e.getMessage());
         }
         return destinations;
     }

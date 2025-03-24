@@ -37,11 +37,18 @@
     <!-- Нижняя панель -->
     <bottom>
         <HBox spacing="10" alignment="CENTER_RIGHT">
-            <Button text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
-            <Button text="Мои бронирования" onAction="#handleViewBookings" styleClass="button"/>
-            <Button text="Обновить" onAction="#handleRefresh" styleClass="button"/>
-            <Button text="Направления" onAction="#handleViewDestinations" styleClass="button"/>
-            <Button text="Выйти" onAction="#handleLogout" styleClass="button"/>
+            <!-- Кнопки для пользователя -->
+            <Button fx:id="bookTourButton" text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
+            <Button fx:id="viewBookingsButton" text="Мои бронирования" onAction="#handleViewBookings" styleClass="button"/>
+            <Button fx:id="viewDestinationsButton" text="Направления" onAction="#handleViewDestinations" styleClass="button"/>
+
+            <!-- Кнопка для администратора -->
+            <Button fx:id="manageUsersButton" text="Управление пользователями" onAction="#handleManageUsers" styleClass="button" visible="false"/>
+            <Button fx:id="manageToursButton" text="Управление турами" onAction="#handleManageTours" styleClass="button" visible="false"/>
+
+            <!-- Общие кнопки -->
+            <Button fx:id="refreshButton" text="Обновить" onAction="#handleRefresh" styleClass="button"/>
+            <Button fx:id="logoutButton" text="Выйти" onAction="#handleLogout" styleClass="button"/>
         </HBox>
     </bottom>
 

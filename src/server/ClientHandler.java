@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 public class ClientHandler implements Runnable {
@@ -94,11 +96,27 @@ public class ClientHandler implements Runnable {
             case "MAKE_PAYMENT":
                 return handleMakePayment(parts);
             case "GET_DESTINATIONS":
-                return handleGetDestinations();
+                return handleGetAllDestinations();
             case "GET_TOURS_BY_DESTINATION":
                 return handleGetToursByDestination(parts);
             case "GET_BALANCE":
                 return handleGetBalance(parts);
+            case "GET_ALL_USERS":
+                return handleGetAllUsers();
+            case "ADD_USER":
+                return handleAddUser(parts);
+            case "UPDATE_USER":
+                return handleUpdateUser(parts);
+            case "DELETE_USER":
+                return handleDeleteUser(parts);
+            case "GET_ALL_TOURS_ADMIN":
+                return handleGetAllToursAdmin();
+            case "ADD_TOUR":
+                return handleAddTour(parts);
+            case "UPDATE_TOUR":
+                return handleUpdateTour(parts);
+            case "DELETE_TOUR":
+                return handleDeleteTour(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -428,5 +446,248 @@ public class ClientHandler implements Runnable {
             }
         }
         return "ERROR: Invalid request";
+    }
+
+    private String handleGetAllUsers() {
+        List<User> users = userService.getAllUsers();
+        StringBuilder response = new StringBuilder("USERS ");
+        for (User user : users) {
+            response.append(user.getId()).append(",")
+                    .append(user.getUsername()).append(",")
+                    .append(user.getRole()).append(",")
+                    .append(user.getBalance()).append("|");
+        }
+        return response.toString();
+    }
+
+    private String handleAddUser(String[] parts) {
+        if (parts.length == 5) {
+            try {
+                String username = parts[1];
+                String password = parts[2];
+                String role = parts[3];
+                double balance = Double.parseDouble(parts[4]);
+
+                User user = new User(username, password, role, balance);
+                userService.register(user);
+                return "USER_ADDED";
+            } catch (Exception e) {
+                return "ERROR: Invalid user data";
+            }
+        }
+        return "ERROR: Invalid request";
+    }
+
+    private String handleUpdateUser(String[] parts) {
+        if (parts.length == 6) {
+            try {
+                int id = Integer.parseInt(parts[1]);
+                String username = parts[2];
+                String password = parts[3];
+                String role = parts[4];
+                double balance = Double.parseDouble(parts[5]);
+
+                User user = new User(id, username, password, role, balance);
+                userService.updateUser(user);
+                return "USER_UPDATED";
+            } catch (Exception e) {
+                return "ERROR: Invalid user data";
+            }
+        }
+        return "ERROR: Invalid request";
+    }
+
+    private String handleDeleteUser(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int id = Integer.parseInt(parts[1]);
+                userService.deleteUser(id);
+                return "USER_DELETED";
+            } catch (Exception e) {
+                return "ERROR: Invalid user ID";
+            }
+        }
+        return "ERROR: Invalid request";
+    }
+
+    private String handleGetAllToursAdmin() {
+        List<Tour> tours = tourService.getAllTours();
+        StringBuilder response = new StringBuilder("TOURS_ADMIN ");
+        for (Tour tour : tours) {
+            response.append(tour.getId()).append(",")
+                    .append(tour.getName()).append(",")
+                    .append(tour.getDescription()).append(",")
+                    .append(tour.getPrice()).append(",")
+                    .append(tour.getStartDate()).append(",")
+                    .append(tour.getEndDate()).append(",")
+                    .append(tour.getDestinationId()).append("|");
+        }
+        return response.toString();
+    }
+
+    private String handleAddTour(String[] parts) {
+        try {
+            // Объединяем все части после команды
+            String input = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
+
+            // Разбиваем по разделителю (используем ~ или --)
+            String delimiter = input.contains("--") ? "--" : "~";
+            String[] combined = input.split(delimiter, -1);
+
+            if (combined.length < 6) {
+                return "ERROR: Неверное количество параметров. Ожидается: название" + delimiter +
+                        "описание" + delimiter + "цена" + delimiter + "дата_начала" + delimiter +
+                        "дата_окончания" + delimiter + "id_направления";
+            }
+
+            try {
+                // Извлекаем параметры
+                String name = combined[0].trim();
+                String description = combined[1].trim();
+                double price = Double.parseDouble(combined[2].trim());
+                String startDate = combined[3].trim();
+                String endDate = combined[4].trim();
+                int destinationId = Integer.parseInt(combined[5].trim());
+
+                // Валидация
+                if (price <= 0) return "ERROR: Цена должна быть положительной";
+                if (destinationId <= 0) return "ERROR: Неверный ID направления";
+                if (name.isEmpty() || description.isEmpty()) return "ERROR: Название и описание не могут быть пустыми";
+
+                Tour tour = new Tour(0, name, description, price, startDate, endDate, destinationId);
+                tourService.addTour(tour);
+                return "TOUR_ADDED";
+            } catch (NumberFormatException e) {
+                return "ERROR: Неверный формат числового значения (цена или ID направления)";
+            }
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
+    }
+
+    private String handleUpdateTour(String[] parts) {
+        try {
+            // Объединяем все части после команды
+            String input = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
+
+            // Разбиваем по разделителю (используем ~ или --)
+            String delimiter = input.contains("--") ? "--" : "~";
+            String[] combined = input.split(delimiter, -1);
+
+            if (combined.length < 7) {
+                return "ERROR: Неверное количество параметров. Ожидается: id" + delimiter +
+                        "название" + delimiter + "описание" + delimiter + "цена" + delimiter +
+                        "дата_начала" + delimiter + "дата_окончания" + delimiter + "id_направления";
+            }
+
+            try {
+                // Извлекаем параметры
+                int id = Integer.parseInt(combined[0].trim());
+                String name = combined[1].trim();
+                String description = combined[2].trim();
+                double price = Double.parseDouble(combined[3].trim());
+                String startDate = combined[4].trim();
+                String endDate = combined[5].trim();
+                int destinationId = Integer.parseInt(combined[6].trim());
+
+                // Валидация
+                if (id <= 0) return "ERROR: Неверный ID тура";
+                if (price <= 0) return "ERROR: Цена должна быть положительной";
+                if (destinationId <= 0) return "ERROR: Неверный ID направления";
+                if (name.isEmpty() || description.isEmpty()) {
+                    return "ERROR: Название и описание не могут быть пустыми";
+                }
+
+                Tour tour = new Tour(id, name, description, price, startDate, endDate, destinationId);
+                tourService.updateTour(tour);
+                return "TOUR_UPDATED";
+            } catch (NumberFormatException e) {
+                return "ERROR: Неверный формат числового значения";
+            }
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
+    }
+
+    private String validateTourData(String name, String description, double price,
+                                    String startDate, String endDate, int destinationId) {
+        if (name == null || name.trim().isEmpty()) {
+            return "Название тура не может быть пустым";
+        }
+        if (description == null || description.trim().isEmpty()) {
+            return "Описание тура не может быть пустым";
+        }
+        if (price <= 0) {
+            return "Стоимость тура должна быть положительным числом";
+        }
+        if (!isValidDate(startDate)) {
+            return "Неверный формат даты начала (используйте YYYY-MM-DD)";
+        }
+        if (!isValidDate(endDate)) {
+            return "Неверный формат даты окончания (используйте YYYY-MM-DD)";
+        }
+        if (!destinationService.exists(destinationId)) {
+            return "Указанное направление не существует";
+        }
+        try {
+            LocalDate start = LocalDate.parse(startDate);
+            LocalDate end = LocalDate.parse(endDate);
+            if (end.isBefore(start)) {
+                return "Дата окончания должна быть после даты начала";
+            }
+        } catch (Exception e) {
+            return "Неверный формат даты";
+        }
+        return null;
+    }
+
+    private boolean isValidDate(String date) {
+        try {
+            LocalDate.parse(date);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String handleDeleteTour(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int id = Integer.parseInt(parts[1]);
+                tourService.deleteTour(id);
+                return "TOUR_DELETED";
+            } catch (Exception e) {
+                return "ERROR: Invalid tour ID";
+            }
+        }
+        return "ERROR: Invalid request";
+    }
+
+    private String handleGetAllDestinations() {
+        try {
+            List<Destination> destinations = destinationService.getAllDestinations();
+            if (destinations == null || destinations.isEmpty()) {
+                return "DESTINATIONS EMPTY";
+            }
+
+            StringBuilder response = new StringBuilder("DESTINATIONS ");
+            for (Destination destination : destinations) {
+                // Экранируем запятые и вертикальные черты в данных
+                String name = destination.getName().replace(",", "\\,").replace("|", "\\|");
+                String country = destination.getCountry().replace(",", "\\,").replace("|", "\\|");
+                String description = destination.getDescription().replace(",", "\\,").replace("|", "\\|");
+
+                response.append(destination.getId()).append(",")
+                        .append(name).append(",")
+                        .append(country).append(",")
+                        .append(description).append("|");
+            }
+
+            // Удаляем последний разделитель
+            response.setLength(response.length() - 1);
+            return response.toString();
+        } catch (Exception e) {
+            return "ERROR: Failed to get destinations - " + e.getMessage();
+        }
     }
 }

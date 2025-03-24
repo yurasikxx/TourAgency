@@ -257,3 +257,30 @@
      -fx-text-fill: #4CAF50;
      -fx-font-weight: bold;
  }
+
+ /* Стиль для кнопок администратора */
+ .button-admin {
+     -fx-background-color: #FF5722; /* Оранжевый */
+     -fx-text-fill: white;
+ }
+
+ .button-admin:hover {
+     -fx-background-color: #E64A19;
+ }
+
+ .button-admin:pressed {
+     -fx-background-color: #D84315;
+ }
+
+ .button-management {
+     -fx-background-color: #2196F3; /* Синий */
+     -fx-text-fill: white;
+ }
+
+ .button-management:hover {
+     -fx-background-color: #1976D2;
+ }
+
+ .button-management:pressed {
+     -fx-background-color: #0D47A1;
+ }

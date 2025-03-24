@@ -4,6 +4,8 @@ import server.models.User;
 import server.database.DAO.UserDAO;
 import server.services.UserService;
 
+import java.util.List;
+
 public class UserServiceImpl implements UserService {
     private UserDAO userDAO;
 
@@ -19,6 +21,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByUsername(String username) {
         return userDAO.getUserByUsername(username);
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userDAO.getAllUsers();
     }
 
     @Override
@@ -43,5 +50,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateBalance(int userId, double newBalance) {
         userDAO.updateBalance(userId, newBalance);
+    }
+
+    @Override
+    public void updateUser(User user) {
+        userDAO.updateUser(user);
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        userDAO.deleteUser(id);
     }
 }

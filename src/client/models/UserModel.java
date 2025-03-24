@@ -1,5 +1,7 @@
 package client.models;
 
+import java.util.Objects;
+
 /**
  * Модель пользователя для клиентской части.
  */
@@ -7,9 +9,7 @@ public class UserModel {
     private int id;
     private String username;
     private String role;
-
-    // Конструкторы
-    public UserModel() {}
+    private double balance;
 
     public UserModel(int id, String username, String role) {
         this.id = id;
@@ -17,16 +17,13 @@ public class UserModel {
         this.role = role;
     }
 
-    // Метод преобразования серверной модели в клиентскую
-    public static UserModel fromServerModel(server.models.User serverUser) {
-        return new UserModel(
-                serverUser.getId(),
-                serverUser.getUsername(),
-                serverUser.getRole()
-        );
+    public UserModel(int id, String username, String role, double balance) {
+        this.id = id;
+        this.username = username;
+        this.role = role;
+        this.balance = balance;
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }
@@ -51,12 +48,33 @@ public class UserModel {
         this.role = role;
     }
 
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        UserModel userModel = (UserModel) o;
+        return id == userModel.id && Double.compare(balance, userModel.balance) == 0 && Objects.equals(username, userModel.username) && Objects.equals(role, userModel.role);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, role, balance);
+    }
+
     @Override
     public String toString() {
         return "UserModel{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", role='" + role + '\'' +
+                ", balance=" + balance +
                 '}';
     }
 }

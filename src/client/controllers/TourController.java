@@ -7,9 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
@@ -36,6 +34,27 @@ public class TourController {
     @FXML
     private Label welcomeLabel;
 
+    @FXML
+    private Button bookTourButton;
+
+    @FXML
+    private Button viewBookingsButton;
+
+    @FXML
+    private Button viewDestinationsButton;
+
+    @FXML
+    private Button manageUsersButton;
+
+    @FXML
+    private Button manageToursButton;
+
+    @FXML
+    private Button refreshButton;
+
+    @FXML
+    private Button logoutButton;
+
     private Stage primaryStage;
 
     /**
@@ -46,14 +65,39 @@ public class TourController {
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         loadTours();
+
         UserModel currentUser = MainClient.getCurrentUser();
         if (currentUser != null) {
             setWelcomeMessage(currentUser.getUsername());
+            setupUIForRole(currentUser.getRole());
         }
     }
 
     public void setWelcomeMessage(String username) {
         welcomeLabel.setText("Добро пожаловать, " + username + "!");
+    }
+
+    private void setupUIForRole(String role) {
+        if ("ADMIN".equals(role)) {
+            // Показываем только кнопки для администратора
+            bookTourButton.setVisible(false);
+            viewBookingsButton.setVisible(false);
+            viewDestinationsButton.setVisible(false);
+
+            manageUsersButton.setVisible(true);
+            manageToursButton.setVisible(true);
+        } else {
+            // Показываем только кнопки для пользователя
+            bookTourButton.setVisible(true);
+            viewBookingsButton.setVisible(true);
+            viewDestinationsButton.setVisible(true);
+
+            manageUsersButton.setVisible(false);
+            manageToursButton.setVisible(false);
+        }
+
+        refreshButton.setVisible(true);
+        logoutButton.setVisible(true);
     }
 
     @FXML
@@ -203,5 +247,41 @@ public class TourController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void handleManageUsers() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/user_management.fxml"));
+            Parent root = loader.load();
+            UserManagementController controller = loader.getController();
+            controller.setPrimaryStage(primaryStage);
+            primaryStage.setScene(new Scene(root, 1280, 720));
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Ошибка", "Не удалось загрузить интерфейс управления пользователями");
+        }
+    }
+
+    @FXML
+    private void handleManageTours() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour_management.fxml"));
+            Parent root = loader.load();
+            TourManagementController controller = loader.getController();
+            controller.setPrimaryStage(primaryStage);
+            primaryStage.setScene(new Scene(root, 1280, 720));
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Ошибка", "Не удалось загрузить интерфейс управления турами");
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

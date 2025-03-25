@@ -59,6 +59,7 @@ public class TourManagementController {
         initializeTable();
         loadTours();
         loadDestinations();
+        setupTableSelectionListener();
     }
 
     private void initializeControls() {
@@ -92,14 +93,6 @@ public class TourManagementController {
                 }
             }
         });
-
-        // Установка обработчика изменения выбора
-        destinationComboBox.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldVal, newVal) -> {
-                    if (newVal != null) {
-                        // Дополнительные действия при выборе направления
-                    }
-                });
     }
 
     private void initializeTable() {
@@ -110,6 +103,37 @@ public class TourManagementController {
         startDateColumn.setCellValueFactory(new PropertyValueFactory<>("startDate"));
         endDateColumn.setCellValueFactory(new PropertyValueFactory<>("endDate"));
         destinationColumn.setCellValueFactory(new PropertyValueFactory<>("destination"));
+    }
+
+    private void setupTableSelectionListener() {
+        toursTable.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSelection, newSelection) -> {
+                    if (newSelection != null) {
+                        fillFieldsWithSelectedTour(newSelection);
+                    }
+                });
+    }
+
+    private void fillFieldsWithSelectedTour(TourModel tour) {
+        nameField.setText(tour.getName());
+        descriptionField.setText(tour.getDescription());
+        priceField.setText(String.valueOf(tour.getPrice()));
+
+        try {
+            startDatePicker.setValue(LocalDate.parse(tour.getStartDate()));
+            endDatePicker.setValue(LocalDate.parse(tour.getEndDate()));
+        } catch (Exception e) {
+            startDatePicker.setValue(null);
+            endDatePicker.setValue(null);
+        }
+
+        // Находим соответствующее направление в ComboBox
+        for (DestinationModel dest : destinationComboBox.getItems()) {
+            if (dest.getId() == Integer.parseInt(tour.getDestination())) {
+                destinationComboBox.setValue(dest);
+                break;
+            }
+        }
     }
 
     private void loadTours() {

@@ -42,6 +42,7 @@ public class UserManagementController {
         initializeTable();
         loadUsers();
         setupRoleComboBox();
+        setupTableSelectionListener();
     }
 
     private void initializeTable() {
@@ -54,6 +55,22 @@ public class UserManagementController {
     private void setupRoleComboBox() {
         roleComboBox.getItems().addAll("USER", "ADMIN");
         roleComboBox.setValue("USER");
+    }
+
+    private void setupTableSelectionListener() {
+        usersTable.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSelection, newSelection) -> {
+                    if (newSelection != null) {
+                        fillFieldsWithSelectedUser(newSelection);
+                    }
+                });
+    }
+
+    private void fillFieldsWithSelectedUser(UserModel user) {
+        usernameField.setText(user.getUsername());
+        passwordField.setText(""); // Пароль не показываем из соображений безопасности
+        roleComboBox.setValue(user.getRole());
+        balanceField.setText(String.valueOf(user.getBalance()));
     }
 
     private void loadUsers() {

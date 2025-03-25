@@ -45,6 +45,7 @@
             <!-- Кнопка для администратора -->
             <Button fx:id="manageUsersButton" text="Управление пользователями" onAction="#handleManageUsers" styleClass="button" visible="false"/>
             <Button fx:id="manageToursButton" text="Управление турами" onAction="#handleManageTours" styleClass="button" visible="false"/>
+            <Button fx:id="manageDestinationsButton" text="Управление направлениями" onAction="#handleManageDestinations" styleClass="button" visible="false"/>
 
             <!-- Общие кнопки -->
             <Button fx:id="refreshButton" text="Обновить" onAction="#handleRefresh" styleClass="button"/>

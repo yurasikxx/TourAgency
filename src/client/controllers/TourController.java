@@ -50,6 +50,9 @@ public class TourController {
     private Button manageToursButton;
 
     @FXML
+    private Button manageDestinationsButton;
+
+    @FXML
     private Button refreshButton;
 
     @FXML
@@ -86,6 +89,7 @@ public class TourController {
 
             manageUsersButton.setVisible(true);
             manageToursButton.setVisible(true);
+            manageDestinationsButton.setVisible(true);
         } else {
             // Показываем только кнопки для пользователя
             bookTourButton.setVisible(true);
@@ -94,6 +98,7 @@ public class TourController {
 
             manageUsersButton.setVisible(false);
             manageToursButton.setVisible(false);
+            manageDestinationsButton.setVisible(false);
         }
 
         refreshButton.setVisible(true);
@@ -274,6 +279,20 @@ public class TourController {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Ошибка", "Не удалось загрузить интерфейс управления турами");
+        }
+    }
+
+    @FXML
+    private void handleManageDestinations() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/destination_management.fxml"));
+            Parent root = loader.load();
+            DestinationManagementController controller = loader.getController();
+            controller.setPrimaryStage(primaryStage);
+            primaryStage.setScene(new Scene(root, 1280, 720));
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Ошибка", "Не удалось загрузить интерфейс управления направлениями");
         }
     }
 

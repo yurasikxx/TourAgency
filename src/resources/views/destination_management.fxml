@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" styleClass="root"
+      fx:controller="client.controllers.DestinationManagementController">
+    <Text text="Управление направлениями" styleClass="title"/>
+
+    <TableView fx:id="destinationsTable" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="nameColumn" text="Название" prefWidth="150"/>
+            <TableColumn fx:id="countryColumn" text="Страна" prefWidth="100"/>
+            <TableColumn fx:id="descriptionColumn" text="Описание" prefWidth="300"/>
+        </columns>
+    </TableView>
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="Название:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Страна:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="countryField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Описание:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextArea fx:id="descriptionField" GridPane.columnIndex="1" GridPane.rowIndex="2" prefRowCount="3"/>
+    </GridPane>
+
+    <HBox spacing="10">
+        <Button text="Добавить" onAction="#handleAddDestination" styleClass="button"/>
+        <Button text="Изменить" onAction="#handleUpdateDestination" styleClass="button"/>
+        <Button text="Удалить" onAction="#handleDeleteDestination" styleClass="button"/>
+        <Button text="Назад" onAction="#handleBack" styleClass="button"/>
+    </HBox>
+</VBox>

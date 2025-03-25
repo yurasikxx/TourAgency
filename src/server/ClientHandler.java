@@ -117,6 +117,14 @@ public class ClientHandler implements Runnable {
                 return handleUpdateTour(parts);
             case "DELETE_TOUR":
                 return handleDeleteTour(parts);
+            case "GET_ALL_DESTINATIONS":
+                return handleGetAllDestinations();
+            case "ADD_DESTINATION":
+                return handleAddDestination(parts);
+            case "UPDATE_DESTINATION":
+                return handleUpdateDestination(parts);
+            case "DELETE_DESTINATION":
+                return handleDeleteDestination(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -689,5 +697,79 @@ public class ClientHandler implements Runnable {
         } catch (Exception e) {
             return "ERROR: Failed to get destinations - " + e.getMessage();
         }
+    }
+
+    private String handleAddDestination(String[] parts) {
+        try {
+            // Объединяем все части после команды
+            String input = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
+
+            // Разбиваем по запятым, учитывая экранирование
+            String[] data = input.split("(?<!\\\\),", -1);
+            if (data.length != 3) {
+                return "ERROR: Неверное количество параметров. Ожидается: название,страна,описание";
+            }
+
+            // Убираем экранирование
+            String name = data[0].replace("\\,", ",").replace("\\|", "|");
+            String country = data[1].replace("\\,", ",").replace("\\|", "|");
+            String description = data[2].replace("\\,", ",").replace("\\|", "|");
+
+            // Валидация
+            if (name.isEmpty() || country.isEmpty() || description.isEmpty()) {
+                return "ERROR: Все поля должны быть заполнены";
+            }
+
+            Destination destination = new Destination(0, name, country, description);
+            destinationService.addDestination(destination);
+            return "DESTINATION_ADDED";
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
+    }
+
+    private String handleUpdateDestination(String[] parts) {
+        try {
+            // Объединяем все части после команды
+            String input = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
+
+            // Разбиваем по запятым, учитывая экранирование
+            String[] data = input.split("(?<!\\\\),", -1);
+            if (data.length != 4) {
+                return "ERROR: Неверное количество параметров. Ожидается: id,название,страна,описание";
+            }
+
+            int id = Integer.parseInt(data[0]);
+
+            // Убираем экранирование
+            String name = data[1].replace("\\,", ",").replace("\\|", "|");
+            String country = data[2].replace("\\,", ",").replace("\\|", "|");
+            String description = data[3].replace("\\,", ",").replace("\\|", "|");
+
+            // Валидация
+            if (id <= 0) return "ERROR: Неверный ID направления";
+            if (name.isEmpty() || country.isEmpty() || description.isEmpty()) {
+                return "ERROR: Все поля должны быть заполнены";
+            }
+
+            Destination destination = new Destination(id, name, country, description);
+            destinationService.updateDestination(destination);
+            return "DESTINATION_UPDATED";
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
+    }
+
+    private String handleDeleteDestination(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int id = Integer.parseInt(parts[1]);
+                destinationService.deleteDestination(id);
+                return "DESTINATION_DELETED";
+            } catch (Exception e) {
+                return "ERROR: Invalid destination ID";
+            }
+        }
+        return "ERROR: Invalid request";
     }
 }

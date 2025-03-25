@@ -4,6 +4,7 @@ import server.database.DAO.BookingDAO;
 import server.models.Booking;
 import server.services.BookingService;
 
+import java.util.Collections;
 import java.util.List;
 
 public class BookingServiceImpl implements BookingService {
@@ -21,6 +22,11 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<Booking> getBookingsByUserId(int userId) {
         return bookingDAO.getBookingsByUserId(userId);
+    }
+
+    @Override
+    public List<Booking> getAllBookings() {
+        return bookingDAO.getAllBookings();
     }
 
     @Override

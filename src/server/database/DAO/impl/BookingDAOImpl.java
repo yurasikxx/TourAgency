@@ -66,6 +66,28 @@ public class BookingDAOImpl implements BookingDAO {
     }
 
     @Override
+    public List<Booking> getAllBookings() {
+        String sql = "SELECT * FROM bookings";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<Booking> bookings = new ArrayList<>();
+            while (resultSet.next()) {
+                bookings.add(new Booking(
+                        resultSet.getInt("id"),
+                        resultSet.getInt("user_id"),
+                        resultSet.getInt("tour_id"),
+                        resultSet.getString("booking_date"),
+                        resultSet.getString("status")
+                ));
+            }
+            return bookings;
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting all bookings", e);
+        }
+    }
+
+    @Override
     public void addBooking(Booking booking) {
         String query = "INSERT INTO Bookings (user_id, tour_id, booking_date, status) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {

@@ -4,6 +4,7 @@ import server.models.Payment;
 import server.database.DAO.PaymentDAO;
 import server.services.PaymentService;
 
+import java.util.Collections;
 import java.util.List;
 
 public class PaymentServiceImpl implements PaymentService {
@@ -21,6 +22,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public List<Payment> getPaymentsByBookingId(int bookingId) {
         return paymentDAO.getPaymentsByBookingId(bookingId);
+    }
+
+    @Override
+    public List<Payment> getAllPayments() {
+        return paymentDAO.getAllPayments();
     }
 
     @Override

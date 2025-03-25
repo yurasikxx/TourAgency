@@ -66,6 +66,28 @@ public class PaymentDAOImpl implements PaymentDAO {
     }
 
     @Override
+    public List<Payment> getAllPayments() {
+        String sql = "SELECT * FROM payments";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+            List<Payment> payments = new ArrayList<>();
+            while (resultSet.next()) {
+                payments.add(new Payment(
+                        resultSet.getInt("id"),
+                        resultSet.getInt("booking_id"),
+                        resultSet.getDouble("amount"),
+                        resultSet.getString("payment_date"),
+                        resultSet.getString("status")
+                ));
+            }
+            return payments;
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting all payments", e);
+        }
+    }
+
+    @Override
     public void addPayment(Payment payment) {
         String query = "INSERT INTO Payments (booking_id, amount, payment_date, status) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {

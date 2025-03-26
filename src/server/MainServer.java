@@ -21,6 +21,7 @@ public class MainServer {
     private BookingService bookingService;
     private PaymentService paymentService;
     private DestinationService destinationService;
+    private ReviewService reviewService;
 
     public MainServer() {
         // Инициализация сервисов
@@ -29,6 +30,7 @@ public class MainServer {
         this.bookingService = new BookingServiceImpl(new BookingDAOImpl());
         this.paymentService = new PaymentServiceImpl(new PaymentDAOImpl());
         this.destinationService = new DestinationServiceImpl(new DestinationDAOImpl());
+        this.reviewService = new ReviewServiceImpl(new ReviewDAOImpl());
     }
 
     public void start(int port) {
@@ -44,7 +46,8 @@ public class MainServer {
 
                 // Создаем ClientHandler с передачей сервисов
                 ClientHandler clientHandler = new ClientHandler(
-                        clientSocket, userService, tourService, bookingService, paymentService, destinationService
+                        clientSocket, userService, tourService, bookingService,
+                        paymentService, destinationService, reviewService
                 );
                 threadPool.execute(clientHandler);
             }

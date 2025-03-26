@@ -1,15 +1,22 @@
 package client.controllers;
 
 import client.MainClient;
+import client.models.ReviewModel;
 import client.models.TourModel;
 import client.models.UserModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,6 +27,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class TourController {
     @FXML
@@ -88,6 +96,15 @@ public class TourController {
     @FXML
     private ComboBox<String> sortComboBox;
 
+    @FXML
+    private Button addReviewButton;
+
+    @FXML
+    private VBox reviewsContainer;
+
+    @FXML
+    private Label ratingLabel;
+
     private Stage primaryStage;
 
     /**
@@ -113,6 +130,7 @@ public class TourController {
     private void setupUIForRole(String role) {
         if ("ADMIN".equals(role)) {
             // Показываем только кнопки для администратора
+            addReviewButton.setVisible(false);
             bookTourButton.setVisible(false);
             viewBookingsButton.setVisible(false);
             viewDestinationsButton.setVisible(false);
@@ -122,6 +140,7 @@ public class TourController {
             manageDestinationsButton.setVisible(true);
         } else {
             // Показываем только кнопки для пользователя
+            addReviewButton.setVisible(true);
             bookTourButton.setVisible(true);
             viewBookingsButton.setVisible(true);
             viewDestinationsButton.setVisible(true);
@@ -191,6 +210,15 @@ public class TourController {
                 }
             }
         });
+
+        // Обработчик выбора тура
+        tourTable.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSelection, newSelection) -> {
+                    if (newSelection != null) {
+                        loadTourReviews(newSelection.getId());
+                        checkIfUserCanReview(newSelection.getId());
+                    }
+                });
     }
 
     private String formatDate(String dateString) {
@@ -349,8 +377,8 @@ public class TourController {
 
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);
-            primaryStage.setWidth(400);
-            primaryStage.setHeight(300);
+            primaryStage.setWidth(800);
+            primaryStage.setHeight(600);
             primaryStage.centerOnScreen();
             primaryStage.setTitle("Авторизация");
             primaryStage.show();
@@ -510,5 +538,165 @@ public class TourController {
         endDatePicker.setValue(null);
         sortComboBox.setValue("По умолчанию");
         handleRefresh(); // Загружаем все туры без фильтров
+    }
+
+    // Добавим новые методы
+    private void loadTourReviews(int tourId) {
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            out.println("GET_REVIEWS " + tourId);
+            String response = in.readLine();
+
+            reviewsContainer.getChildren().clear();
+
+            if (response.startsWith("REVIEWS")) {
+                String[] reviewsData = response.substring(7).split("\\|");
+                for (String reviewData : reviewsData) {
+                    String[] fields = reviewData.split(",(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
+                    if (fields.length >= 6) {
+                        ReviewModel review = new ReviewModel(
+                                Integer.parseInt(fields[0]),
+                                Integer.parseInt(fields[1]),
+                                fields[2],
+                                Integer.parseInt(fields[3]),
+                                fields[4],
+                                fields[5]
+                        );
+                        addReviewToUI(review);
+                    }
+                }
+            }
+
+            // Загрузка рейтинга тура
+            out.println("GET_TOUR_RATING " + tourId);
+            response = in.readLine();
+            if (response.startsWith("TOUR_RATING")) {
+                String[] parts = response.split(" ");
+                double rating = Double.parseDouble(parts[1]);
+                int count = Integer.parseInt(parts[2]);
+                ratingLabel.setText(String.format("Рейтинг: %.1f/5 (%d отзывов)", rating, count));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addReviewToUI(ReviewModel review) {
+        VBox reviewBox = new VBox(5);
+        reviewBox.setStyle("-fx-padding: 10; -fx-border-color: #ddd; -fx-border-width: 0 0 1 0;");
+
+        HBox headerBox = new HBox(10);
+        Label userLabel = new Label(review.getUsername());
+        Label ratingLabel = new Label("Оценка: " + review.getRating() + "/5");
+        Label dateLabel = new Label(review.getReviewDate());
+
+        headerBox.getChildren().addAll(userLabel, ratingLabel, dateLabel);
+
+        Text commentText = new Text(review.getComment());
+        commentText.setWrappingWidth(600);
+
+        reviewBox.getChildren().addAll(headerBox, commentText);
+        reviewsContainer.getChildren().add(reviewBox);
+    }
+
+    private void checkIfUserCanReview(int tourId) {
+        UserModel currentUser = MainClient.getCurrentUser();
+        if (currentUser != null) {
+            try (Socket socket = new Socket("localhost", 12345);
+                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+                out.println("HAS_REVIEWED " + currentUser.getId() + " " + tourId);
+                String response = in.readLine();
+
+                if (response.startsWith("HAS_REVIEWED")) {
+                    boolean hasReviewed = Boolean.parseBoolean(response.split(" ")[1]);
+                    addReviewButton.setVisible(!hasReviewed);
+
+                    // Проверяем, был ли тур забронирован пользователем
+                    out.println("HAS_BOOKED " + currentUser.getId() + " " + tourId);
+                    response = in.readLine();
+                    boolean hasBooked = response.startsWith("HAS_BOOKED true");
+                    addReviewButton.setDisable(!hasBooked);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            addReviewButton.setVisible(false);
+        }
+    }
+
+    @FXML
+    private void handleAddReview() {
+        TourModel selectedTour = tourTable.getSelectionModel().getSelectedItem();
+        if (selectedTour != null) {
+            Dialog<Pair<Integer, String>> dialog = new Dialog<>();
+            dialog.setTitle("Добавить отзыв");
+            dialog.setHeaderText("Оставьте отзыв о туре: " + selectedTour.getName());
+
+            // Установка кнопок
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            // Создание содержимого
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            ComboBox<Integer> ratingCombo = new ComboBox<>();
+            ratingCombo.getItems().addAll(1, 2, 3, 4, 5);
+            ratingCombo.setValue(5);
+
+            TextArea commentField = new TextArea();
+            commentField.setPromptText("Ваш отзыв...");
+            commentField.setWrapText(true);
+
+            grid.add(new Label("Оценка:"), 0, 0);
+            grid.add(ratingCombo, 1, 0);
+            grid.add(new Label("Комментарий:"), 0, 1);
+            grid.add(commentField, 1, 1);
+
+            dialog.getDialogPane().setContent(grid);
+
+            // Преобразование результата
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == ButtonType.OK) {
+                    return new Pair<>(ratingCombo.getValue(), commentField.getText());
+                }
+                return null;
+            });
+
+            Optional<Pair<Integer, String>> result = dialog.showAndWait();
+
+            result.ifPresent(ratingAndComment -> {
+                try (Socket socket = new Socket("localhost", 12345);
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+                    UserModel currentUser = MainClient.getCurrentUser();
+                    String currentDate = java.time.LocalDate.now().toString();
+
+                    String command = String.format("ADD_REVIEW %d %d %d %s %s",
+                            currentUser.getId(),
+                            selectedTour.getId(),
+                            ratingAndComment.getKey(),
+                            ratingAndComment.getValue().replace(" ", "~"),
+                            currentDate);
+
+                    out.println(command);
+                    String response = in.readLine();
+
+                    if ("REVIEW_ADDED".equals(response)) {
+                        loadTourReviews(selectedTour.getId());
+                        checkIfUserCanReview(selectedTour.getId());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 }

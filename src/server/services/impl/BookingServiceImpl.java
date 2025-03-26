@@ -54,4 +54,9 @@ public class BookingServiceImpl implements BookingService {
                         Collectors.counting()
                 ));
     }
+
+    @Override
+    public boolean hasUserBookedTour(int userId, int tourId) {
+        return bookingDAO.hasUserBookedTour(userId, tourId);
+    }
 }

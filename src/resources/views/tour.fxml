@@ -4,6 +4,7 @@
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 
+<?import javafx.geometry.Insets?>
 <BorderPane fx:controller="client.controllers.TourController"
             xmlns:fx="http://javafx.com/fxml/1"
             prefWidth="1280" prefHeight="720"
@@ -96,26 +97,36 @@
 
     <!-- Нижняя панель -->
     <bottom>
-        <HBox spacing="10" alignment="CENTER_RIGHT">
-            <!-- Кнопки для пользователя -->
-            <Button fx:id="bookTourButton" text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
-            <Button fx:id="viewBookingsButton" text="Мои бронирования" onAction="#handleViewBookings"
-                    styleClass="button"/>
-            <Button fx:id="viewDestinationsButton" text="Направления" onAction="#handleViewDestinations"
-                    styleClass="button"/>
+        <VBox spacing="10.0">
+            <!-- Блок с отзывами -->
+            <VBox>
+                <HBox spacing="10.0" alignment="CENTER">
+                    <Button fx:id="addReviewButton" text="Оставить отзыв" onAction="#handleAddReview" visible="false"/>
+                </HBox>
+                <Label fx:id="ratingLabel" styleClass="detail-label"/>
+                <ScrollPane fitToWidth="true">
+                    <VBox fx:id="reviewsContainer" spacing="10.0">
+                        <padding>
+                            <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+                        </padding>
+                    </VBox>
+                </ScrollPane>
+            </VBox>
 
-            <!-- Кнопка для администратора -->
-            <Button fx:id="manageUsersButton" text="Управление пользователями" onAction="#handleManageUsers"
-                    styleClass="button" visible="false"/>
-            <Button fx:id="manageToursButton" text="Управление турами" onAction="#handleManageTours" styleClass="button"
-                    visible="false"/>
-            <Button fx:id="manageDestinationsButton" text="Управление направлениями"
-                    onAction="#handleManageDestinations" styleClass="button" visible="false"/>
+            <!-- Блок с кнопками -->
+            <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                <Button fx:id="bookTourButton" text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
+                <Button fx:id="viewBookingsButton" text="Мои бронирования" onAction="#handleViewBookings" styleClass="button"/>
+                <Button fx:id="viewDestinationsButton" text="Направления" onAction="#handleViewDestinations" styleClass="button"/>
 
-            <!-- Общие кнопки -->
-            <Button fx:id="refreshButton" text="Обновить" onAction="#handleRefresh" styleClass="button"/>
-            <Button fx:id="logoutButton" text="Выйти" onAction="#handleLogout" styleClass="button"/>
-        </HBox>
+                <Button fx:id="manageUsersButton" text="Управление пользователями" onAction="#handleManageUsers" styleClass="button" visible="false"/>
+                <Button fx:id="manageToursButton" text="Управление турами" onAction="#handleManageTours" styleClass="button" visible="false"/>
+                <Button fx:id="manageDestinationsButton" text="Управление направлениями" onAction="#handleManageDestinations" styleClass="button" visible="false"/>
+
+                <Button fx:id="refreshButton" text="Обновить" onAction="#handleRefresh" styleClass="button"/>
+                <Button fx:id="logoutButton" text="Выйти" onAction="#handleLogout" styleClass="button"/>
+            </HBox>
+        </VBox>
     </bottom>
 
 </BorderPane>

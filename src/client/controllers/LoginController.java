@@ -102,7 +102,7 @@ public class LoginController {
             RegisterController registerController = loader.getController();
             registerController.setPrimaryStage(primaryStage);
 
-            Scene scene = new Scene(root, 400, 300);
+            Scene scene = new Scene(root, 800, 600);
             primaryStage.setScene(scene);
             primaryStage.centerOnScreen();
             primaryStage.setTitle("Регистрация");

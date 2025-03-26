@@ -13,4 +13,5 @@ public interface BookingService {
     void updateBooking(Booking booking);
     void deleteBooking(int id);
     Map<Integer, Long> getTourPopularity();
+    boolean hasUserBookedTour(int userId, int tourId);
 }

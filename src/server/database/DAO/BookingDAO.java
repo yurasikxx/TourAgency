@@ -11,4 +11,5 @@ public interface BookingDAO {
     void addBooking(Booking booking);
     void updateBooking(Booking booking);
     void deleteBooking(int id);
+    boolean hasUserBookedTour(int userId, int tourId);
 }

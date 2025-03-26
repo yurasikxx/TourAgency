@@ -22,16 +22,18 @@ public class ClientHandler implements Runnable {
     private BookingService bookingService;
     private PaymentService paymentService;
     private DestinationService destinationService;
+    private ReviewService reviewService;
 
     public ClientHandler(Socket socket, UserService authService, TourService tourService,
                          BookingService bookingService, PaymentService paymentService,
-                         DestinationService destinationService) {
+                         DestinationService destinationService, ReviewService reviewService) {
         this.clientSocket = socket;
         this.userService = authService;
         this.tourService = tourService;
         this.bookingService = bookingService;
         this.paymentService = paymentService;
         this.destinationService = destinationService;
+        this.reviewService = reviewService;
     }
 
     @Override
@@ -129,6 +131,16 @@ public class ClientHandler implements Runnable {
                 return handleSearchTours(parts);
             case "GET_POPULAR_TOURS":
                 return handleGetPopularTours(parts);
+            case "ADD_REVIEW":
+                return handleAddReview(parts);
+            case "GET_REVIEWS":
+                return handleGetReviews(parts);
+            case "HAS_REVIEWED":
+                return handleHasReviewed(parts);
+            case "GET_TOUR_RATING":
+                return handleGetTourRating(parts);
+            case "HAS_BOOKED":
+                return handleHasBooked(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -824,5 +836,91 @@ public class ClientHandler implements Runnable {
                     .append(tour.getDestinationId()).append("|");
         }
         return response.toString();
+    }
+
+    private String handleAddReview(String[] parts) {
+        if (parts.length == 6) {
+            try {
+                int userId = Integer.parseInt(parts[1]);
+                int tourId = Integer.parseInt(parts[2]);
+                int rating = Integer.parseInt(parts[3]);
+                String comment = parts[4].replace("~", " ");
+                String reviewDate = parts[5];
+
+                Review review = new Review(0, userId, tourId, rating, comment, reviewDate);
+                reviewService.addReview(review);
+                return "REVIEW_ADDED";
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid parameters";
+            }
+        }
+        return "ERROR: Invalid add review request";
+    }
+
+    private String handleGetReviews(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int tourId = Integer.parseInt(parts[1]);
+                List<Review> reviews = reviewService.getReviewsByTourId(tourId);
+                StringBuilder response = new StringBuilder("REVIEWS ");
+                for (Review review : reviews) {
+                    response.append(review.getId()).append(",")
+                            .append(review.getUserId()).append(",")
+                            .append(review.getRating()).append(",")
+                            .append(review.getComment().replace(",", "\\,").replace("|", "\\|")).append(",")
+                            .append(review.getReviewDate()).append("|");
+                }
+                return response.toString();
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid tour ID";
+            }
+        }
+        return "ERROR: Invalid get reviews request";
+    }
+
+    private String handleHasReviewed(String[] parts) {
+        if (parts.length == 3) {
+            try {
+                int userId = Integer.parseInt(parts[1]);
+                int tourId = Integer.parseInt(parts[2]);
+                boolean hasReviewed = reviewService.hasUserReviewedTour(userId, tourId);
+                return "HAS_REVIEWED " + hasReviewed;
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid parameters";
+            }
+        }
+        return "ERROR: Invalid has reviewed request";
+    }
+
+    private String handleGetTourRating(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int tourId = Integer.parseInt(parts[1]);
+                TourRating rating = reviewService.getTourRating(tourId);
+                if (rating != null) {
+                    return String.format("TOUR_RATING %.2f %d",
+                            rating.getAverageRating(),
+                            rating.getReviewCount());
+                }
+                return "TOUR_RATING 0.00 0";
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid tour ID";
+            }
+        }
+        return "ERROR: Invalid get tour rating request";
+    }
+
+    private String handleHasBooked(String[] parts) {
+        if (parts.length == 3) {
+            try {
+                int userId = Integer.parseInt(parts[1]);
+                int tourId = Integer.parseInt(parts[2]);
+                boolean hasBooked = bookingService.hasUserBookedTour(userId, tourId);
+                return "HAS_BOOKED " + hasBooked;
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid parameters";
+            }
+        }
+        return "ERROR: Invalid has booked request";
     }
 }

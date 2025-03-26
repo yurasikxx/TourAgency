@@ -104,6 +104,7 @@ public class LoginController {
 
             Scene scene = new Scene(root, 400, 300);
             primaryStage.setScene(scene);
+            primaryStage.centerOnScreen();
             primaryStage.setTitle("Регистрация");
             primaryStage.show();
         } catch (IOException e) {
@@ -129,8 +130,9 @@ public class LoginController {
 
             // Устанавливаем размер сцены
             primaryStage.setScene(scene);
-            primaryStage.setWidth(1280); // Ширина окна
-            primaryStage.setHeight(720); // Высота окна
+            primaryStage.setWidth(1600); // Ширина окна
+            primaryStage.setHeight(900); // Высота окна
+            primaryStage.centerOnScreen();
             primaryStage.setTitle("Туры");
             primaryStage.show();
         } catch (IOException e) {

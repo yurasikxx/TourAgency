@@ -29,8 +29,9 @@ public class MainClient extends Application {
         // Настройка сцены и отображение окна
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
-        primaryStage.setWidth(1280); // Ширина окна
-        primaryStage.setHeight(720); // Высота окна
+        primaryStage.setWidth(400);
+        primaryStage.setHeight(300);
+        primaryStage.centerOnScreen();
         primaryStage.setTitle("Туристическое агентство - Авторизация");
         primaryStage.show();
     }

@@ -11,10 +11,49 @@
 
     <!-- Верхняя панель -->
     <top>
-        <VBox spacing="10" alignment="CENTER">
-            <Text text="Список туров" styleClass="title"/>
-            <Label fx:id="welcomeLabel" styleClass="welcome-label"/>
-        </VBox>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <VBox spacing="10" alignment="CENTER">
+                <Text text="Список туров" styleClass="title"/>
+                <Label fx:id="welcomeLabel" styleClass="welcome-label"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Поиск по названию/описанию:"/>
+                <TextField fx:id="searchField" promptText="Введите текст..." prefWidth="250"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Диапазон цен:"/>
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <Label text="до:"/>
+                    <Slider fx:id="priceSlider" prefWidth="150" max="10000" blockIncrement="500"/>
+                    <Label fx:id="priceLabel" text="10000" minWidth="40"/>
+                </HBox>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Дата начала:"/>
+                <DatePicker fx:id="startDatePicker"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Дата окончания:"/>
+                <DatePicker fx:id="endDatePicker"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Сортировка:"/>
+                <ComboBox fx:id="sortComboBox" prefWidth="150"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Действия:"/>
+                <HBox spacing="5">
+                    <Button text="Применить" onAction="#handleSearch" styleClass="button"/>
+                    <Button text="Сбросить" onAction="#handleResetFilters" styleClass="button"/>
+                </HBox>
+            </VBox>
+        </HBox>
     </top>
 
     <!-- Центральная панель -->
@@ -22,13 +61,34 @@
         <TableView fx:id="tourTable">
             <columns>
                 <TableColumn fx:id="nameColumn" text="Название" prefWidth="150">
-                    <cellValueFactory><PropertyValueFactory property="name"/></cellValueFactory>
+                    <cellValueFactory>
+                        <PropertyValueFactory property="name"/>
+                    </cellValueFactory>
                 </TableColumn>
                 <TableColumn fx:id="descriptionColumn" text="Описание" prefWidth="300">
-                    <cellValueFactory><PropertyValueFactory property="description"/></cellValueFactory>
+                    <cellValueFactory>
+                        <PropertyValueFactory property="description"/>
+                    </cellValueFactory>
                 </TableColumn>
                 <TableColumn fx:id="priceColumn" text="Цена" prefWidth="100">
-                    <cellValueFactory><PropertyValueFactory property="price"/></cellValueFactory>
+                    <cellValueFactory>
+                        <PropertyValueFactory property="price"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn fx:id="startDateColumn" text="Дата начала" prefWidth="120">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="startDate"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn fx:id="endDateColumn" text="Дата окончания" prefWidth="120">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="endDate"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn fx:id="destinationColumn" text="Направление" prefWidth="150">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="destination"/>
+                    </cellValueFactory>
                 </TableColumn>
             </columns>
         </TableView>
@@ -39,13 +99,18 @@
         <HBox spacing="10" alignment="CENTER_RIGHT">
             <!-- Кнопки для пользователя -->
             <Button fx:id="bookTourButton" text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
-            <Button fx:id="viewBookingsButton" text="Мои бронирования" onAction="#handleViewBookings" styleClass="button"/>
-            <Button fx:id="viewDestinationsButton" text="Направления" onAction="#handleViewDestinations" styleClass="button"/>
+            <Button fx:id="viewBookingsButton" text="Мои бронирования" onAction="#handleViewBookings"
+                    styleClass="button"/>
+            <Button fx:id="viewDestinationsButton" text="Направления" onAction="#handleViewDestinations"
+                    styleClass="button"/>
 
             <!-- Кнопка для администратора -->
-            <Button fx:id="manageUsersButton" text="Управление пользователями" onAction="#handleManageUsers" styleClass="button" visible="false"/>
-            <Button fx:id="manageToursButton" text="Управление турами" onAction="#handleManageTours" styleClass="button" visible="false"/>
-            <Button fx:id="manageDestinationsButton" text="Управление направлениями" onAction="#handleManageDestinations" styleClass="button" visible="false"/>
+            <Button fx:id="manageUsersButton" text="Управление пользователями" onAction="#handleManageUsers"
+                    styleClass="button" visible="false"/>
+            <Button fx:id="manageToursButton" text="Управление турами" onAction="#handleManageTours" styleClass="button"
+                    visible="false"/>
+            <Button fx:id="manageDestinationsButton" text="Управление направлениями"
+                    onAction="#handleManageDestinations" styleClass="button" visible="false"/>
 
             <!-- Общие кнопки -->
             <Button fx:id="refreshButton" text="Обновить" onAction="#handleRefresh" styleClass="button"/>

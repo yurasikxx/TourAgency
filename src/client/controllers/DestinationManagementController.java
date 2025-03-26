@@ -198,7 +198,10 @@ public class DestinationManagementController {
             Parent root = loader.load();
             TourController controller = loader.getController();
             controller.setPrimaryStage(primaryStage);
-            primaryStage.setScene(new Scene(root, 1280, 720));
+            primaryStage.setScene(new Scene(root));
+            primaryStage.setWidth(1600);
+            primaryStage.setHeight(900);
+            primaryStage.centerOnScreen();
         } catch (Exception e) {
             e.printStackTrace();
         }

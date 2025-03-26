@@ -17,6 +17,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TourController {
     @FXML
@@ -30,6 +33,15 @@ public class TourController {
 
     @FXML
     private TableColumn<TourModel, Double> priceColumn;
+
+    @FXML
+    private TableColumn<TourModel, String> startDateColumn;
+
+    @FXML
+    private TableColumn<TourModel, String> endDateColumn;
+
+    @FXML
+    private TableColumn<TourModel, String> destinationColumn;
 
     @FXML
     private Label welcomeLabel;
@@ -57,6 +69,24 @@ public class TourController {
 
     @FXML
     private Button logoutButton;
+
+    @FXML
+    private TextField searchField;
+
+    @FXML
+    private Slider priceSlider;
+
+    @FXML
+    private Label priceLabel;
+
+    @FXML
+    private DatePicker startDatePicker;
+
+    @FXML
+    private DatePicker endDatePicker;
+
+    @FXML
+    private ComboBox<String> sortComboBox;
 
     private Stage primaryStage;
 
@@ -111,6 +141,66 @@ public class TourController {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+        // Настройка комбобокса сортировки
+        sortComboBox.getItems().addAll(
+                "По умолчанию",
+                "По цене (возрастание)",
+                "По цене (убывание)",
+                "По дате (возрастание)",
+                "По дате (убывание)",
+                "По популярности"
+        );
+        sortComboBox.setValue("По умолчанию");
+
+        // Настройка слайдера цены
+        priceSlider.setMin(0);
+        priceSlider.setMax(10000);
+        priceSlider.setValue(10000);
+        priceSlider.setShowTickLabels(true);
+        priceSlider.setShowTickMarks(true);
+        priceSlider.setMajorTickUnit(2000);
+        priceSlider.setMinorTickCount(4);
+        priceSlider.setBlockIncrement(500);
+
+        priceSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            priceLabel.setText(String.format("%.0f", newVal));
+        });
+
+        // Форматирование дат
+        startDateColumn.setCellFactory(column -> new TableCell<TourModel, String>() {
+            @Override
+            protected void updateItem(String date, boolean empty) {
+                super.updateItem(date, empty);
+                if (empty || date == null) {
+                    setText(null);
+                } else {
+                    setText(formatDate(date));
+                }
+            }
+        });
+
+        endDateColumn.setCellFactory(column -> new TableCell<TourModel, String>() {
+            @Override
+            protected void updateItem(String date, boolean empty) {
+                super.updateItem(date, empty);
+                if (empty || date == null) {
+                    setText(null);
+                } else {
+                    setText(formatDate(date));
+                }
+            }
+        });
+    }
+
+    private String formatDate(String dateString) {
+        try {
+            LocalDate date = LocalDate.parse(dateString);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            return date.format(formatter);
+        } catch (Exception e) {
+            return dateString; // Возвращаем как есть, если не удалось распарсить
+        }
     }
 
     /**
@@ -121,30 +211,64 @@ public class TourController {
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            // Отправка запроса на сервер
             out.println("GET_TOURS");
-
-            // Получение ответа от сервера
             String response = in.readLine();
+
             if (response.startsWith("TOURS")) {
+                tourTable.getItems().clear();
                 String[] toursData = response.substring(6).split("\\|");
+
+                // Сначала загрузим все направления для маппинга
+                Map<Integer, String> destinations = loadDestinationsMap();
+
                 for (String tourData : toursData) {
                     String[] fields = tourData.split(",");
-                    TourModel tour = new TourModel(
-                            Integer.parseInt(fields[0]),
-                            fields[1],
-                            fields[2],
-                            Double.parseDouble(fields[3]),
-                            fields[4],
-                            fields[5],
-                            fields[6]
-                    );
-                    tourTable.getItems().add(tour);
+                    if (fields.length >= 7) {
+                        int destinationId = Integer.parseInt(fields[6]);
+                        String destinationName = destinations.getOrDefault(destinationId, "Направление " + destinationId);
+
+                        TourModel tour = new TourModel(
+                                Integer.parseInt(fields[0]),
+                                fields[1],
+                                fields[2],
+                                Double.parseDouble(fields[3]),
+                                fields[4],
+                                fields[5],
+                                destinationName
+                        );
+                        tourTable.getItems().add(tour);
+                    }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private Map<Integer, String> loadDestinationsMap() {
+        Map<Integer, String> destinations = new HashMap<>();
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            out.println("GET_DESTINATIONS");
+            String response = in.readLine();
+
+            if (response.startsWith("DESTINATIONS")) {
+                String[] destinationsData = response.substring(12).split("\\|");
+                for (String destData : destinationsData) {
+                    String[] fields = destData.split("(?<!\\\\),");
+                    if (fields.length >= 4) {
+                        int id = Integer.parseInt(fields[0].trim());
+                        String name = fields[1].replace("\\,", ",").replace("\\|", "|");
+                        destinations.put(id, name);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return destinations;
     }
 
     /**
@@ -158,11 +282,11 @@ public class TourController {
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                // Получаем текущую дату
-                String currentDate = LocalDate.now().toString(); // Формат: "2023-10-25"
+                UserModel currentUser = MainClient.getCurrentUser();
+                String currentDate = LocalDate.now().toString();
 
                 // Отправка запроса на сервер
-                out.println("BOOK_TOUR 1 " + selectedTour.getId() + " " + currentDate); // Пример: userId = 1, bookingDate = текущая дата
+                out.println("BOOK_TOUR " + currentUser.getId() + " " + selectedTour.getId() + " " + currentDate); // Пример: userId = 1, bookingDate = текущая дата
 
                 // Получение ответа от сервера
                 String response = in.readLine();
@@ -204,8 +328,9 @@ public class TourController {
 
             // Устанавливаем размер сцены
             primaryStage.setScene(scene);
-            primaryStage.setWidth(1280); // Ширина окна
-            primaryStage.setHeight(720); // Высота окна
+            primaryStage.setWidth(1600);
+            primaryStage.setHeight(900);
+            primaryStage.centerOnScreen();
             primaryStage.setTitle("Направления");
             primaryStage.show();
         } catch (IOException e) {
@@ -222,8 +347,11 @@ public class TourController {
             LoginController loginController = loader.getController();
             loginController.setPrimaryStage(primaryStage);
 
-            Scene scene = new Scene(root, 400, 300);
+            Scene scene = new Scene(root);
             primaryStage.setScene(scene);
+            primaryStage.setWidth(400);
+            primaryStage.setHeight(300);
+            primaryStage.centerOnScreen();
             primaryStage.setTitle("Авторизация");
             primaryStage.show();
         } catch (IOException e) {
@@ -245,8 +373,9 @@ public class TourController {
 
             // Устанавливаем размер сцены
             primaryStage.setScene(scene);
-            primaryStage.setWidth(1280); // Ширина окна
-            primaryStage.setHeight(720); // Высота окна
+            primaryStage.setWidth(1600);
+            primaryStage.setHeight(900);
+            primaryStage.centerOnScreen();
             primaryStage.setTitle("Мои бронирования");
             primaryStage.show();
         } catch (IOException e) {
@@ -302,5 +431,84 @@ public class TourController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // client/controllers/TourController.java
+    @FXML
+    private void handleSearch() {
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            // Получаем параметры поиска
+            String searchTerm = searchField.getText();
+            Double maxPrice = priceSlider.getValue() < priceSlider.getMax() ?
+                    priceSlider.getValue() : null;
+            String startDate = startDatePicker.getValue() != null ?
+                    startDatePicker.getValue().toString() : "null";
+            String endDate = endDatePicker.getValue() != null ?
+                    endDatePicker.getValue().toString() : "null";
+
+            // Определяем параметр сортировки
+            String sortBy;
+            switch (sortComboBox.getValue()) {
+                case "По цене (возрастание)": sortBy = "price_asc"; break;
+                case "По цене (убывание)": sortBy = "price_desc"; break;
+                case "По дате (возрастание)": sortBy = "date_asc"; break;
+                case "По дате (убывание)": sortBy = "date_desc"; break;
+                case "По популярности": sortBy = "popular"; break;
+                default: sortBy = "null";
+            }
+
+            // Формируем команду с учетом всех возможных комбинаций фильтров
+            String command = String.format("SEARCH_TOURS %s %s %s %s %s %s",
+                    searchTerm.isEmpty() ? "null" : searchTerm,
+                    maxPrice != null ? String.format("%.2f", maxPrice) : "null",
+                    "null", // minPrice (не используем в интерфейсе)
+                    startDate,
+                    endDate,
+                    sortBy);
+
+            out.println(command);
+
+            // Обработка ответа остается без изменений
+            String response = in.readLine();
+            if (response.startsWith("TOURS")) {
+                tourTable.getItems().clear();
+                String[] toursData = response.substring(6).split("\\|");
+                Map<Integer, String> destinations = loadDestinationsMap();
+
+                for (String tourData : toursData) {
+                    String[] fields = tourData.split(",");
+                    if (fields.length >= 7) {
+                        int destinationId = Integer.parseInt(fields[6]);
+                        String destinationName = destinations.getOrDefault(destinationId, "Направление " + destinationId);
+
+                        TourModel tour = new TourModel(
+                                Integer.parseInt(fields[0]),
+                                fields[1],
+                                fields[2],
+                                Double.parseDouble(fields[3]),
+                                fields[4],
+                                fields[5],
+                                destinationName
+                        );
+                        tourTable.getItems().add(tour);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleResetFilters() {
+        searchField.clear();
+        priceSlider.setValue(10000);
+        startDatePicker.setValue(null);
+        endDatePicker.setValue(null);
+        sortComboBox.setValue("По умолчанию");
+        handleRefresh(); // Загружаем все туры без фильтров
     }
 }

@@ -125,6 +125,10 @@ public class ClientHandler implements Runnable {
                 return handleUpdateDestination(parts);
             case "DELETE_DESTINATION":
                 return handleDeleteDestination(parts);
+            case "SEARCH_TOURS":
+                return handleSearchTours(parts);
+            case "GET_POPULAR_TOURS":
+                return handleGetPopularTours(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -771,5 +775,54 @@ public class ClientHandler implements Runnable {
             }
         }
         return "ERROR: Invalid request";
+    }
+
+    // server/ClientHandler.java
+    private String handleSearchTours(String[] parts) {
+        try {
+            // Парсим параметры (теперь все параметры независимы)
+            String searchTerm = parts.length > 1 && !parts[1].equals("null") ? parts[1] : null;
+            Double maxPrice = parts.length > 2 && !parts[2].equals("null") ? Double.parseDouble(parts[2]) : null;
+            Double minPrice = parts.length > 3 && !parts[3].equals("null") ? Double.parseDouble(parts[3]) : null;
+            String startDate = parts.length > 4 && !parts[4].equals("null") ? parts[4] : null;
+            String endDate = parts.length > 5 && !parts[5].equals("null") ? parts[5] : null;
+            String sortBy = parts.length > 6 && !parts[6].equals("null") ? parts[6] : null;
+
+            List<Tour> tours = tourService.searchTours(
+                    searchTerm, minPrice, maxPrice, startDate, endDate, sortBy
+            );
+
+            // Формирование ответа остается без изменений
+            StringBuilder response = new StringBuilder("TOURS ");
+            for (Tour tour : tours) {
+                response.append(tour.getId()).append(",")
+                        .append(tour.getName()).append(",")
+                        .append(tour.getDescription()).append(",")
+                        .append(tour.getPrice()).append(",")
+                        .append(tour.getStartDate()).append(",")
+                        .append(tour.getEndDate()).append(",")
+                        .append(tour.getDestinationId()).append("|");
+            }
+            return response.toString();
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
+    }
+
+    private String handleGetPopularTours(String[] parts) {
+        int limit = parts.length > 1 ? Integer.parseInt(parts[1]) : 5;
+        List<Tour> popularTours = tourService.getPopularTours(limit);
+
+        StringBuilder response = new StringBuilder("TOURS ");
+        for (Tour tour : popularTours) {
+            response.append(tour.getId()).append(",")
+                    .append(tour.getName()).append(",")
+                    .append(tour.getDescription()).append(",")
+                    .append(tour.getPrice()).append(",")
+                    .append(tour.getStartDate()).append(",")
+                    .append(tour.getEndDate()).append(",")
+                    .append(tour.getDestinationId()).append("|");
+        }
+        return response.toString();
     }
 }

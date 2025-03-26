@@ -4,8 +4,9 @@ import server.database.DAO.BookingDAO;
 import server.models.Booking;
 import server.services.BookingService;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class BookingServiceImpl implements BookingService {
     private BookingDAO bookingDAO;
@@ -42,5 +43,15 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void deleteBooking(int id) {
         bookingDAO.deleteBooking(id);
+    }
+
+    @Override
+    public Map<Integer, Long> getTourPopularity() {
+        List<Booking> allBookings = bookingDAO.getAllBookings();
+        return allBookings.stream()
+                .collect(Collectors.groupingBy(
+                        Booking::getTourId,
+                        Collectors.counting()
+                ));
     }
 }

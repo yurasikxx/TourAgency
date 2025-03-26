@@ -123,8 +123,11 @@ public class DestinationController {
                         TourController tourController = loader.getController();
                         tourController.setPrimaryStage(primaryStage);
 
-                        Scene scene = new Scene(root, 800, 600);
+                        Scene scene = new Scene(root);
                         primaryStage.setScene(scene);
+                        primaryStage.setWidth(1600);
+                        primaryStage.setHeight(900);
+                        primaryStage.centerOnScreen();
                         primaryStage.setTitle("Туры");
                         primaryStage.show();
                     } catch (IOException e) {

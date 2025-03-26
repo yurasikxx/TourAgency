@@ -284,3 +284,16 @@
  .button-management:pressed {
      -fx-background-color: #0D47A1;
  }
+
+ .table-view .table-cell {
+     -fx-alignment: CENTER-LEFT;
+     -fx-padding: 5px;
+ }
+
+ #startDateColumn, #endDateColumn {
+     -fx-alignment: CENTER;
+ }
+
+ #priceColumn {
+     -fx-alignment: CENTER-RIGHT;
+ }

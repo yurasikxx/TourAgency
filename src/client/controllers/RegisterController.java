@@ -93,8 +93,11 @@ public class RegisterController {
             LoginController loginController = loader.getController();
             loginController.setPrimaryStage(primaryStage);
 
-            Scene scene = new Scene(root, 400, 300);
+            Scene scene = new Scene(root);
             primaryStage.setScene(scene);
+            primaryStage.setWidth(400);
+            primaryStage.setHeight(300);
+            primaryStage.centerOnScreen();
             primaryStage.setTitle("Авторизация");
             primaryStage.show();
         } catch (IOException e) {

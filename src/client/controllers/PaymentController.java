@@ -101,8 +101,11 @@ public class PaymentController {
             BookingController bookingController = loader.getController();
             bookingController.setPrimaryStage(primaryStage);
 
-            Scene scene = new Scene(root, 800, 600);
+            Scene scene = new Scene(root);
             primaryStage.setScene(scene);
+            primaryStage.setWidth(1600);
+            primaryStage.setHeight(900);
+            primaryStage.centerOnScreen();
             primaryStage.setTitle("Бронирования");
             primaryStage.show();
         } catch (IOException e) {

@@ -13,20 +13,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class TourDAOImpl implements TourDAO {
-    private Connection connection;
-
-    public TourDAOImpl() {
-        try {
-            this.connection = DatabaseConnection.getInstance().getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public Tour getTourById(int id) {
         String query = "SELECT * FROM Tours WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -50,7 +42,8 @@ public class TourDAOImpl implements TourDAO {
     public List<Tour> getAllTours() {
         List<Tour> tours = new ArrayList<>();
         String query = "SELECT * FROM Tours";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 tours.add(new Tour(
@@ -74,7 +67,8 @@ public class TourDAOImpl implements TourDAO {
         List<Tour> tours = new ArrayList<>();
         String query = "SELECT * FROM Tours WHERE destination_id = ?"; // SQL-запрос
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             // Устанавливаем параметр destinationId в запрос
             statement.setInt(1, destinationId);
 
@@ -104,7 +98,8 @@ public class TourDAOImpl implements TourDAO {
     @Override
     public void addTour(Tour tour) {
         String query = "INSERT INTO Tours (name, description, price, start_date, end_date, destination_id) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, tour.getName());
             statement.setString(2, tour.getDescription());
             statement.setDouble(3, tour.getPrice());
@@ -120,7 +115,8 @@ public class TourDAOImpl implements TourDAO {
     @Override
     public void updateTour(Tour tour) {
         String query = "UPDATE Tours SET name = ?, description = ?, price = ?, start_date = ?, end_date = ?, destination_id = ? WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, tour.getName());
             statement.setString(2, tour.getDescription());
             statement.setDouble(3, tour.getPrice());
@@ -137,7 +133,8 @@ public class TourDAOImpl implements TourDAO {
     @Override
     public void deleteTour(int id) {
         String query = "DELETE FROM Tours WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {

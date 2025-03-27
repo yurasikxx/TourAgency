@@ -151,6 +151,22 @@ public class BookingController {
     private void handleCancelBooking() {
         BookingModel selectedBooking = bookingTable.getSelectionModel().getSelectedItem();
         if (selectedBooking != null) {
+            // Проверяем статус бронирования
+            if (!selectedBooking.getStatus().equals("В ожидании")) {
+                String message = selectedBooking.getStatus().equals("Подтверждено") ?
+                        "Этот тур уже оплачен и не может быть отменён" : "Этот тур уже отменён";
+                showAlert("Ошибка", message);
+                return;
+            }
+            if (selectedBooking.getStatus().equals("confirmed")) {
+                showAlert("Информация", "Этот тур уже оплачен и не может быть отменён");
+                return;
+            }
+            if (selectedBooking.getStatus().equals("cancelled")) {
+                showAlert("Ошибка", "Этот тур уже отменён");
+                return;
+            }
+
             try (Socket socket = new Socket("localhost", 12345);
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
@@ -194,24 +210,11 @@ public class BookingController {
                     alert.showAndWait();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-
-                // Показываем уведомление об ошибке подключения
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Ошибка");
-                alert.setHeaderText(null);
-                alert.setContentText("Ошибка подключения к серверу.");
-                alert.showAndWait();
+                showAlert("Ошибка", "Ошибка подключения к серверу.");
             }
         } else {
             System.out.println("Бронирование не выбрано!");
-
-            // Показываем уведомление, если бронирование не выбрано
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Предупреждение");
-            alert.setHeaderText(null);
-            alert.setContentText("Пожалуйста, выберите бронирование для отмены.");
-            alert.showAndWait();
+            showAlert("Предупреждение", "Выберите бронирование для отмены.");
         }
     }
 
@@ -275,6 +278,23 @@ public class BookingController {
     private void handlePay() {
         BookingModel selectedBooking = bookingTable.getSelectionModel().getSelectedItem();
         if (selectedBooking != null) {
+            // Проверяем статус бронирования
+            if (!selectedBooking.getStatus().equals("В ожидании")) {
+                String message = selectedBooking.getStatus().equals("Подтверждено") ?
+                        "Этот тур уже оплачен" : "Нельзя оплатить отменённый тур";
+                showAlert("Ошибка", message);
+                return;
+            }
+
+            if (selectedBooking.getStatus().equals("confirmed")) {
+                showAlert("Информация", "Этот тур уже оплачен");
+                return;
+            }
+            if (selectedBooking.getStatus().equals("cancelled")) {
+                showAlert("Ошибка", "Нельзя оплатить отменённый тур");
+                return;
+            }
+
             try (Socket socket = new Socket("localhost", 12345);
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
@@ -325,13 +345,7 @@ public class BookingController {
             }
         } else {
             System.out.println("Бронирование не выбрано!");
-
-            // Показываем уведомление, если бронирование не выбрано
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Предупреждение");
-            alert.setHeaderText(null);
-            alert.setContentText("Пожалуйста, выберите бронирование для оплаты.");
-            alert.showAndWait();
+            showAlert("Предупреждение", "Выберите бронирование для оплаты");
         }
     }
 
@@ -361,5 +375,17 @@ public class BookingController {
             e.printStackTrace();
         }
         return 0.0; // Возвращаем 0, если не удалось получить баланс
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.centerOnScreen();
+
+        alert.showAndWait();
     }
 }

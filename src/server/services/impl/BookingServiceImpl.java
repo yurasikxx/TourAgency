@@ -56,7 +56,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public boolean canUserBookTour(int userId, int tourId) {
+        String status = bookingDAO.getBookingStatus(userId, tourId);
+        // Можно бронировать, если нет текущей брони или предыдущая была отменена
+        return status == null || status.equals("cancelled");
+    }
+
+    @Override
     public boolean hasUserBookedTour(int userId, int tourId) {
-        return bookingDAO.hasUserBookedTour(userId, tourId);
+        String status = bookingDAO.getBookingStatus(userId, tourId);
+        // Считаем, что тур забронирован, если статус pending или confirmed
+        return status != null && (status.equals("pending") || status.equals("confirmed"));
+    }
+
+    @Override
+    public String getBookingStatus(int userId, int tourId) {
+        return bookingDAO.getBookingStatus(userId, tourId);
     }
 }

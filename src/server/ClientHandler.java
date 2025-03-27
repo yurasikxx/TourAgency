@@ -141,6 +141,8 @@ public class ClientHandler implements Runnable {
                 return handleGetTourRating(parts);
             case "HAS_BOOKED":
                 return handleHasBooked(parts);
+            case "GET_BOOKING_STATUS":
+                return handleGetBookingStatus(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -213,10 +215,23 @@ public class ClientHandler implements Runnable {
             try {
                 int userId = Integer.parseInt(parts[1]);
                 int tourId = Integer.parseInt(parts[2]);
-                String bookingDate = parts[3]; // Текущая дата, переданная с клиента
+                String bookingDate = parts[3];
 
-                // Создаем объект Booking с текущей датой
-                Booking booking = new Booking(0, userId, tourId, bookingDate, "pending"); // Статус по умолчанию: "pending"
+                // Проверяем текущий статус бронирования
+                String currentStatus = bookingService.getBookingStatus(userId, tourId);
+
+                if (currentStatus != null) {
+                    if (currentStatus.equals("pending")) {
+                        return "BOOKING_FAILURE: У вас уже есть бронь на этот тур (статус: в ожидании)";
+                    } else if (currentStatus.equals("confirmed")) {
+                        return "BOOKING_FAILURE: Этот тур уже оплачен и не может быть забронирован повторно";
+                    } else if (currentStatus.equals("cancelled")) {
+                        // Можно создать новую бронь, если предыдущая была отменена
+                    }
+                }
+
+                // Создаем бронирование
+                Booking booking = new Booking(0, userId, tourId, bookingDate, "pending");
                 bookingService.addBooking(booking);
                 return "BOOKING_SUCCESS";
             } catch (NumberFormatException e) {
@@ -922,5 +937,19 @@ public class ClientHandler implements Runnable {
             }
         }
         return "ERROR: Invalid has booked request";
+    }
+
+    private String handleGetBookingStatus(String[] parts) {
+        if (parts.length == 3) {
+            try {
+                int userId = Integer.parseInt(parts[1]);
+                int tourId = Integer.parseInt(parts[2]);
+                String status = bookingService.getBookingStatus(userId, tourId);
+                return "BOOKING_STATUS " + (status != null ? status : "none");
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid parameters";
+            }
+        }
+        return "ERROR: Invalid get booking status request";
     }
 }

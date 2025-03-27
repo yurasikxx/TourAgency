@@ -14,4 +14,6 @@ public interface BookingService {
     void deleteBooking(int id);
     Map<Integer, Long> getTourPopularity();
     boolean hasUserBookedTour(int userId, int tourId);
+    boolean canUserBookTour(int userId, int tourId);
+    String getBookingStatus(int userId, int tourId);
 }

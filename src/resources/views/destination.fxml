@@ -26,6 +26,6 @@
     </VBox>
 
     <!-- Кнопка для перехода к турам -->
-    <Button text="Туры" onAction="#handleViewTours" styleClass="button"/>
+    <Button text="Назад" onAction="#handleBack" styleClass="button"/>
 
 </VBox>

@@ -306,28 +306,44 @@ public class TourController {
     private void handleBookTour() {
         TourModel selectedTour = tourTable.getSelectionModel().getSelectedItem();
         if (selectedTour != null) {
+            UserModel currentUser = MainClient.getCurrentUser();
+
             try (Socket socket = new Socket("localhost", 12345);
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                UserModel currentUser = MainClient.getCurrentUser();
+                // Проверяем статус бронирования
+                out.println("GET_BOOKING_STATUS " + currentUser.getId() + " " + selectedTour.getId());
+                String statusResponse = in.readLine();
+
+                if (statusResponse.startsWith("BOOKING_STATUS")) {
+                    String status = statusResponse.split(" ")[1];
+
+                    if (status.equals("pending")) {
+                        showAlert("Информация", "У вас уже есть бронь на этот тур (статус: в ожидании)");
+                        return;
+                    } else if (status.equals("confirmed")) {
+                        showAlert("Информация", "Этот тур уже оплачен и не может быть забронирован повторно");
+                        return;
+                    }
+                }
+
+                // Если брони нет или она отменена - создаем новую
                 String currentDate = LocalDate.now().toString();
-
-                // Отправка запроса на сервер
-                out.println("BOOK_TOUR " + currentUser.getId() + " " + selectedTour.getId() + " " + currentDate); // Пример: userId = 1, bookingDate = текущая дата
-
-                // Получение ответа от сервера
+                out.println("BOOK_TOUR " + currentUser.getId() + " " + selectedTour.getId() + " " + currentDate);
                 String response = in.readLine();
+
                 if (response.equals("BOOKING_SUCCESS")) {
-                    System.out.println("Тур успешно забронирован!");
+                    showAlert("Успех", "Тур успешно забронирован");
                 } else {
-                    System.out.println("Ошибка при бронировании тура.");
+                    showAlert("Ошибка", response.substring(response.indexOf(":") + 1));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                showAlert("Ошибка", "Ошибка подключения к серверу");
             }
         } else {
-            System.out.println("Тур не выбран!");
+            showAlert("Предупреждение", "Выберите тур для бронирования");
         }
     }
 
@@ -454,10 +470,14 @@ public class TourController {
     }
 
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.centerOnScreen();
+
         alert.showAndWait();
     }
 

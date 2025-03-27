@@ -12,20 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookingDAOImpl implements BookingDAO {
-    private Connection connection;
-
-    public BookingDAOImpl() {
-        try {
-            this.connection = DatabaseConnection.getInstance().getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public Booking getBookingById(int id) {
         String query = "SELECT * FROM Bookings WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -47,7 +39,8 @@ public class BookingDAOImpl implements BookingDAO {
     public List<Booking> getBookingsByUserId(int userId) {
         List<Booking> bookings = new ArrayList<>();
         String query = "SELECT * FROM Bookings WHERE user_id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, userId);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -90,7 +83,8 @@ public class BookingDAOImpl implements BookingDAO {
     @Override
     public void addBooking(Booking booking) {
         String query = "INSERT INTO Bookings (user_id, tour_id, booking_date, status) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, booking.getUserId());
             statement.setInt(2, booking.getTourId());
             statement.setString(3, booking.getBookingDate());
@@ -105,7 +99,8 @@ public class BookingDAOImpl implements BookingDAO {
     @Override
     public void updateBooking(Booking booking) {
         String query = "UPDATE Bookings SET user_id = ?, tour_id = ?, booking_date = ?, status = ? WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, booking.getUserId());
             statement.setInt(2, booking.getTourId());
             statement.setString(3, booking.getBookingDate());
@@ -121,7 +116,8 @@ public class BookingDAOImpl implements BookingDAO {
     @Override
     public void deleteBooking(int id) {
         String query = "DELETE FROM Bookings WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             statement.executeUpdate();
             System.out.println("Бронирование успешно удалено.");
@@ -132,18 +128,33 @@ public class BookingDAOImpl implements BookingDAO {
 
     @Override
     public boolean hasUserBookedTour(int userId, int tourId) {
-        String sql = "SELECT COUNT(*) FROM Bookings WHERE user_id = ? AND tour_id = ?";
+        String sql = "SELECT status FROM Bookings WHERE user_id = ? AND tour_id = ?";
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, tourId);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // Возвращает true, если есть любая запись (независимо от статуса)
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public String getBookingStatus(int userId, int tourId) {
+        String sql = "SELECT status FROM Bookings WHERE user_id = ? AND tour_id = ? ORDER BY id DESC LIMIT 1";
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
             stmt.setInt(2, tourId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1) > 0;
+                return rs.getString("status");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
+        return null;
     }
 }

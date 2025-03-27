@@ -100,45 +100,26 @@ public class DestinationController {
     }
 
     /**
-     * Обрабатывает нажатие кнопки "Туры".
+     * Обрабатывает нажатие кнопки "Назад".
      */
     @FXML
-    private void handleViewTours() {
-        DestinationModel selectedDestination = destinationList.getSelectionModel().getSelectedItem();
-        if (selectedDestination != null) {
-            try (Socket socket = new Socket("localhost", 12345);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+    private void handleBack() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour.fxml"));
+            Parent root = loader.load();
 
-                // Отправка запроса на сервер
-                out.println("GET_TOURS_BY_DESTINATION " + selectedDestination.getId());
+            TourController tourController = loader.getController();
+            tourController.setPrimaryStage(primaryStage);
 
-                // Получение ответа от сервера
-                String response = in.readLine();
-                if (response.startsWith("TOURS")) {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour.fxml"));
-                        Parent root = loader.load();
-
-                        TourController tourController = loader.getController();
-                        tourController.setPrimaryStage(primaryStage);
-
-                        Scene scene = new Scene(root);
-                        primaryStage.setScene(scene);
-                        primaryStage.setWidth(1600);
-                        primaryStage.setHeight(900);
-                        primaryStage.centerOnScreen();
-                        primaryStage.setTitle("Туры");
-                        primaryStage.show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Направление не выбрано!");
+            Scene scene = new Scene(root);
+            primaryStage.setScene(scene);
+            primaryStage.setWidth(1600);
+            primaryStage.setHeight(900);
+            primaryStage.centerOnScreen();
+            primaryStage.setTitle("Туры");
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

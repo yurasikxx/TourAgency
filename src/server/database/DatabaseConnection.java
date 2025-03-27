@@ -7,8 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static DatabaseConnection instance;
-    private Connection connection;
+    private static volatile DatabaseConnection instance;
     private final ConfigLoader configLoader;
     private final String url;
     private final String user;
@@ -19,55 +18,35 @@ public class DatabaseConnection {
         url = configLoader.getProperty("db.url");
         user = configLoader.getProperty("db.user");
         password = configLoader.getProperty("db.password");
-        createConnection();
     }
 
-    public static synchronized DatabaseConnection getInstance() {
+    public static DatabaseConnection getInstance() {
         if (instance == null) {
-            instance = new DatabaseConnection();
+            synchronized (DatabaseConnection.class) {
+                if (instance == null) {
+                    instance = new DatabaseConnection();
+                }
+            }
         }
         return instance;
     }
 
     public Connection getConnection() throws SQLException {
         try {
-            if (connection == null || connection.isClosed() || !connection.isValid(1)) {
-                createConnection();
-            }
-        } catch (SQLException e) {
-            createConnection(); // Попробуем пересоздать при ошибке проверки
-        }
-        return connection;
-    }
-
-    private void createConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-
             Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection(url, user, password);
+            Connection connection = DriverManager.getConnection(url, user, password);
 
-            // Установка параметров для предотвращения преждевременного закрытия
+            // Устанавливаем параметры соединения
             connection.setNetworkTimeout(
                     java.util.concurrent.Executors.newSingleThreadExecutor(),
-                    10000 // 10 секунд таймаут на операции
+                    30000 // 30 секунд таймаут
             );
 
-            System.out.println("Соединение с базой данных (пере)установлено.");
-        } catch (Exception e) {
-            throw new RuntimeException("Не удалось подключиться к базе данных", e);
-        }
-    }
-
-    public void closeConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Ошибка при закрытии соединения: " + e.getMessage());
+            // Добавляем параметры в URL для автоматического переподключения
+            System.out.println("Соединение с базой данных установлено.");
+            return connection;
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("MySQL JDBC Driver not found", e);
         }
     }
 }

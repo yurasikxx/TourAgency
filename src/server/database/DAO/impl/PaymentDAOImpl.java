@@ -12,20 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PaymentDAOImpl implements PaymentDAO {
-    private Connection connection;
-
-    public PaymentDAOImpl() {
-        try {
-            this.connection = DatabaseConnection.getInstance().getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public Payment getPaymentById(int id) {
         String query = "SELECT * FROM Payments WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -47,7 +39,8 @@ public class PaymentDAOImpl implements PaymentDAO {
     public List<Payment> getPaymentsByBookingId(int bookingId) {
         List<Payment> payments = new ArrayList<>();
         String query = "SELECT * FROM Payments WHERE booking_id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, bookingId);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -90,7 +83,8 @@ public class PaymentDAOImpl implements PaymentDAO {
     @Override
     public void addPayment(Payment payment) {
         String query = "INSERT INTO Payments (booking_id, amount, payment_date, status) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, payment.getBookingId());
             statement.setDouble(2, payment.getAmount());
             statement.setString(3, payment.getPaymentDate());
@@ -104,7 +98,8 @@ public class PaymentDAOImpl implements PaymentDAO {
     @Override
     public void updatePayment(Payment payment) {
         String query = "UPDATE Payments SET booking_id = ?, amount = ?, payment_date = ?, status = ? WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, payment.getBookingId());
             statement.setDouble(2, payment.getAmount());
             statement.setString(3, payment.getPaymentDate());
@@ -119,7 +114,8 @@ public class PaymentDAOImpl implements PaymentDAO {
     @Override
     public void deletePayment(int id) {
         String query = "DELETE FROM Payments WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {

@@ -12,20 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DestinationDAOImpl implements DestinationDAO {
-    private Connection connection;
-
-    public DestinationDAOImpl() {
-        try {
-            this.connection = DatabaseConnection.getInstance().getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public Destination getDestinationById(int id) {
         String query = "SELECT * FROM Destinations WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -46,7 +38,8 @@ public class DestinationDAOImpl implements DestinationDAO {
     public List<Destination> getAllDestinations() {
         List<Destination> destinations = new ArrayList<>();
         String query = "SELECT * FROM Destinations";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 destinations.add(new Destination(
@@ -65,7 +58,8 @@ public class DestinationDAOImpl implements DestinationDAO {
     @Override
     public void addDestination(Destination destination) {
         String query = "INSERT INTO Destinations (name, country, description) VALUES (?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, destination.getName());
             statement.setString(2, destination.getCountry());
             statement.setString(3, destination.getDescription());
@@ -78,7 +72,8 @@ public class DestinationDAOImpl implements DestinationDAO {
     @Override
     public void updateDestination(Destination destination) {
         String query = "UPDATE Destinations SET name = ?, country = ?, description = ? WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, destination.getName());
             statement.setString(2, destination.getCountry());
             statement.setString(3, destination.getDescription());
@@ -92,7 +87,8 @@ public class DestinationDAOImpl implements DestinationDAO {
     @Override
     public void deleteDestination(int id) {
         String query = "DELETE FROM Destinations WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {

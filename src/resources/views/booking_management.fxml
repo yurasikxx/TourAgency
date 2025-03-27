@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane stylesheets="@../styles.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="client.controllers.BookingManagementController">
+    <center>
+        <TableView fx:id="bookingsTable">
+            <columns>
+                <TableColumn text="ID" fx:id="idColumn" prefWidth="50"/>
+                <TableColumn text="Пользователь" fx:id="userColumn" prefWidth="150"/>
+                <TableColumn text="Тур" fx:id="tourColumn" prefWidth="200"/>
+                <TableColumn text="Дата бронирования" fx:id="bookingDateColumn" prefWidth="120"/>
+                <TableColumn text="Статус" fx:id="statusColumn" prefWidth="100"/>
+                <TableColumn text="Сумма" fx:id="amountColumn" prefWidth="100"/>
+            </columns>
+        </TableView>
+    </center>
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Button text="Обновить" onAction="#handleRefresh"/>
+            <Button text="Назад" onAction="#handleBack"/>
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -141,4 +141,20 @@ public class TourDAOImpl implements TourDAO {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public boolean hasToursForDestination(int destinationId) {
+        String query = "SELECT COUNT(*) FROM Tours WHERE destination_id = ?";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, destinationId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

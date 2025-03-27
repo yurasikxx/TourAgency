@@ -11,4 +11,5 @@ public interface TourDAO {
     void addTour(Tour tour);
     void updateTour(Tour tour);
     void deleteTour(int id);
+    boolean hasToursForDestination(int destinationId);
 }

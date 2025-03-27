@@ -567,4 +567,22 @@ public class TourManagementController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void handleManageBookings() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/booking_management.fxml"));
+            Parent root = loader.load();
+
+            BookingManagementController controller = loader.getController();
+            controller.setPrimaryStage(primaryStage);
+
+            Scene scene = new Scene(root);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Управление бронированиями");
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

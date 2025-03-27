@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Optional;
 
 public class DestinationManagementController {
     @FXML
@@ -39,6 +40,7 @@ public class DestinationManagementController {
         this.primaryStage = primaryStage;
         initializeTable();
         loadDestinations();
+        setupFieldValidation();
     }
 
     private void initializeTable() {
@@ -47,13 +49,27 @@ public class DestinationManagementController {
         countryColumn.setCellValueFactory(new PropertyValueFactory<>("country"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-        // Обработчик выбора строки в таблице
         destinationsTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
                         fillFieldsWithSelectedDestination(newSelection);
                     }
                 });
+    }
+
+    private void setupFieldValidation() {
+        // Ограничение длины полей
+        nameField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.length() > 100) {
+                nameField.setText(oldVal);
+            }
+        });
+
+        countryField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.length() > 50) {
+                countryField.setText(oldVal);
+            }
+        });
     }
 
     private void fillFieldsWithSelectedDestination(DestinationModel destination) {
@@ -77,7 +93,6 @@ public class DestinationManagementController {
                 for (String destinationData : destinationsData) {
                     String[] fields = destinationData.split("(?<!\\\\),");
                     if (fields.length == 4) {
-                        // Убираем экранирование
                         String name = fields[1].replace("\\,", ",").replace("\\|", "|");
                         String country = fields[2].replace("\\,", ",").replace("\\|", "|");
                         String description = fields[3].replace("\\,", ",").replace("\\|", "|");
@@ -104,15 +119,27 @@ public class DestinationManagementController {
             return;
         }
 
+        String name = nameField.getText().trim();
+
+        // Проверка на уникальность названия
+        if (isDestinationNameExists(name)) {
+            showAlert("Ошибка", "Направление с таким названием уже существует");
+            nameField.setStyle("-fx-border-color: red;");
+            return;
+        }
+
         try (Socket socket = new Socket("localhost", 12345);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            String name = escapeSpecialChars(nameField.getText().trim());
-            String country = escapeSpecialChars(countryField.getText().trim());
-            String description = escapeSpecialChars(descriptionField.getText().trim());
+            String country = countryField.getText().trim();
+            String description = descriptionField.getText().trim();
 
-            out.println("ADD_DESTINATION " + name + "," + country + "," + description);
+            out.println("ADD_DESTINATION " +
+                    escapeSpecialChars(name) + "," +
+                    escapeSpecialChars(country) + "," +
+                    escapeSpecialChars(description));
+
             String response = in.readLine();
 
             if ("DESTINATION_ADDED".equals(response)) {
@@ -131,63 +158,98 @@ public class DestinationManagementController {
     @FXML
     private void handleUpdateDestination() {
         DestinationModel selectedDestination = destinationsTable.getSelectionModel().getSelectedItem();
-        if (selectedDestination != null) {
-            if (!validateInput()) {
-                return;
-            }
-
-            try (Socket socket = new Socket("localhost", 12345);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-
-                String name = escapeSpecialChars(nameField.getText().trim());
-                String country = escapeSpecialChars(countryField.getText().trim());
-                String description = escapeSpecialChars(descriptionField.getText().trim());
-
-                out.println("UPDATE_DESTINATION " + selectedDestination.getId() + "," +
-                        name + "," + country + "," + description);
-                String response = in.readLine();
-
-                if ("DESTINATION_UPDATED".equals(response)) {
-                    showAlert("Успех", "Направление обновлено");
-                    loadDestinations();
-                    clearFields();
-                } else {
-                    showAlert("Ошибка", response);
-                }
-            } catch (Exception e) {
-                showAlert("Ошибка", "Ошибка при обновлении направления");
-                e.printStackTrace();
-            }
-        } else {
+        if (selectedDestination == null) {
             showAlert("Ошибка", "Выберите направление для изменения");
+            return;
+        }
+
+        if (!validateInput()) {
+            return;
+        }
+
+        String newName = nameField.getText().trim();
+
+        // Проверка на уникальность названия (кроме текущего направления)
+        if (!newName.equals(selectedDestination.getName()) &&
+                isDestinationNameExists(newName)) {
+            showAlert("Ошибка", "Направление с таким названием уже существует");
+            nameField.setStyle("-fx-border-color: red;");
+            return;
+        }
+
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            String country = countryField.getText().trim();
+            String description = descriptionField.getText().trim();
+
+            out.println("UPDATE_DESTINATION " + selectedDestination.getId() + "," +
+                    escapeSpecialChars(newName) + "," +
+                    escapeSpecialChars(country) + "," +
+                    escapeSpecialChars(description));
+
+            String response = in.readLine();
+
+            if ("DESTINATION_UPDATED".equals(response)) {
+                showAlert("Успех", "Направление обновлено");
+                loadDestinations();
+                clearFields();
+            } else {
+                showAlert("Ошибка", response);
+            }
+        } catch (Exception e) {
+            showAlert("Ошибка", "Ошибка при обновлении направления");
+            e.printStackTrace();
         }
     }
 
     @FXML
     private void handleDeleteDestination() {
         DestinationModel selectedDestination = destinationsTable.getSelectionModel().getSelectedItem();
-        if (selectedDestination != null) {
-            try (Socket socket = new Socket("localhost", 12345);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-
-                out.println("DELETE_DESTINATION " + selectedDestination.getId());
-                String response = in.readLine();
-
-                if ("DESTINATION_DELETED".equals(response)) {
-                    showAlert("Успех", "Направление удалено");
-                    loadDestinations();
-                    clearFields();
-                } else {
-                    showAlert("Ошибка", response);
-                }
-            } catch (Exception e) {
-                showAlert("Ошибка", "Не удалось удалить направление");
-                e.printStackTrace();
-            }
-        } else {
+        if (selectedDestination == null) {
             showAlert("Ошибка", "Выберите направление для удаления");
+            return;
+        }
+
+        // Подтверждение удаления
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Подтверждение удаления");
+        confirmation.setHeaderText(null);
+        confirmation.setContentText("Вы уверены, что хотите удалить направление \"" +
+                selectedDestination.getName() + "\"?");
+
+        if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
+
+        try (Socket socket = new Socket("localhost", 12345);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            // Сначала проверяем, есть ли туры с этим направлением
+            out.println("HAS_TOURS_FOR_DESTINATION " + selectedDestination.getId());
+            String hasToursResponse = in.readLine();
+
+            if ("HAS_TOURS true".equals(hasToursResponse)) {
+                showAlert("Ошибка", "Нельзя удалить направление, так как к нему привязаны туры");
+                return;
+            }
+
+            // Если туров нет, удаляем направление
+            out.println("DELETE_DESTINATION " + selectedDestination.getId());
+            String response = in.readLine();
+
+            if ("DESTINATION_DELETED".equals(response)) {
+                showAlert("Успех", "Направление удалено");
+                loadDestinations();
+                clearFields();
+            } else {
+                showAlert("Ошибка", response);
+            }
+        } catch (Exception e) {
+            showAlert("Ошибка", "Не удалось удалить направление");
+            e.printStackTrace();
         }
     }
 
@@ -208,19 +270,35 @@ public class DestinationManagementController {
     }
 
     private boolean validateInput() {
+        boolean isValid = true;
+        resetFieldStyles();
+
         if (nameField.getText().trim().isEmpty()) {
-            showAlert("Ошибка", "Введите название направления");
-            return false;
+            nameField.setStyle("-fx-border-color: red;");
+            isValid = false;
         }
+
         if (countryField.getText().trim().isEmpty()) {
-            showAlert("Ошибка", "Введите страну");
-            return false;
+            countryField.setStyle("-fx-border-color: red;");
+            isValid = false;
         }
-        if (descriptionField.getText().trim().isEmpty()) {
-            showAlert("Ошибка", "Введите описание");
-            return false;
+
+        if (!isValid) {
+            showAlert("Ошибка", "Заполните все обязательные поля");
         }
-        return true;
+
+        return isValid;
+    }
+
+    private void resetFieldStyles() {
+        nameField.setStyle("");
+        countryField.setStyle("");
+        descriptionField.setStyle("");
+    }
+
+    private boolean isDestinationNameExists(String name) {
+        return destinationsTable.getItems().stream()
+                .anyMatch(dest -> dest.getName().equalsIgnoreCase(name));
     }
 
     private String escapeSpecialChars(String input) {
@@ -231,6 +309,8 @@ public class DestinationManagementController {
         nameField.clear();
         countryField.clear();
         descriptionField.clear();
+        resetFieldStyles();
+        destinationsTable.getSelectionModel().clearSelection();
     }
 
     private void showAlert(String title, String message) {

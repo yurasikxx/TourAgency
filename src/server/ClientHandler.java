@@ -147,6 +147,10 @@ public class ClientHandler implements Runnable {
                 return handleGetAllPaymentsAdmin();
             case "HAS_BOOKINGS":
                 return handleHasBookings(parts);
+            case "GET_ALL_BOOKINGS_ADMIN":
+                return handleGetAllBookingsAdmin();
+            case "HAS_TOURS_FOR_DESTINATION":
+            return handleHasToursForDestination(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -996,6 +1000,43 @@ public class ClientHandler implements Runnable {
                 return "HAS_BOOKINGS " + hasBookings;
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid tour ID";
+            }
+        }
+        return "ERROR: Invalid request";
+    }
+
+    private String handleGetAllBookingsAdmin() {
+        try {
+            List<Booking> bookings = bookingService.getAllBookings();
+            StringBuilder response = new StringBuilder("BOOKINGS_ADMIN ");
+
+            for (Booking booking : bookings) {
+                // Получаем информацию о пользователе и туре
+                User user = userService.getUserById(booking.getUserId());
+                Tour tour = tourService.getTourById(booking.getTourId());
+
+                response.append(booking.getId()).append(",")
+                        .append(user != null ? user.getUsername() : "N/A").append(",")
+                        .append(tour != null ? tour.getName() : "N/A").append(",")
+                        .append(booking.getBookingDate()).append(",")
+                        .append(booking.getStatus()).append(",")
+                        .append(tour != null ? tour.getPrice() : 0.0).append("|");
+            }
+
+            return response.toString();
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
+    }
+
+    private String handleHasToursForDestination(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int destinationId = Integer.parseInt(parts[1]);
+                boolean hasTours = tourService.hasToursForDestination(destinationId);
+                return "HAS_TOURS " + hasTours;
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid destination ID";
             }
         }
         return "ERROR: Invalid request";

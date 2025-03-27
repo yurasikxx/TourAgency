@@ -44,7 +44,10 @@
         <Button text="Добавить" onAction="#handleAddTour" styleClass="button"/>
         <Button text="Изменить" onAction="#handleUpdateTour" styleClass="button"/>
         <Button text="Удалить" onAction="#handleDeleteTour" styleClass="button"/>
+
         <Button text="Управление платежами" onAction="#handleManagePayments"/>
+        <Button text="Управление бронированиями" onAction="#handleManageBookings"/>
+
         <Button text="Назад" onAction="#handleBack" styleClass="button"/>
     </HBox>
 </VBox>

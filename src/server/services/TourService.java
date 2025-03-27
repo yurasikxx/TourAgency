@@ -14,4 +14,5 @@ public interface TourService {
     List<Tour> searchTours(String searchTerm, Double minPrice, Double maxPrice,
                            String startDate, String endDate, String sortBy);
     List<Tour> getPopularTours(int limit);
+    boolean hasToursForDestination(int destinationId);
 }

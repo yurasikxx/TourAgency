@@ -2,12 +2,13 @@ package client.models;
 
 public class BookingModel {
     private int id;
+    private String userName;
     private String tourName;
     private String bookingDate;
-    private double price;
     private String status;
+    private double price;
+    private double amount;
 
-    // Конструкторы
     public BookingModel() {}
 
     public BookingModel(int id, String tourName, String bookingDate, double price, String status) {
@@ -16,6 +17,31 @@ public class BookingModel {
         this.bookingDate = bookingDate;
         this.price = price;
         this.status = status;
+    }
+    public BookingModel(int id, String userName, String tourName,
+                        String bookingDate, String status, double amount) {
+        this.id = id;
+        this.userName = userName;
+        this.tourName = tourName;
+        this.bookingDate = bookingDate;
+        this.status = status;
+        this.amount = amount;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     // Геттеры

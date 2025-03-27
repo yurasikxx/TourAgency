@@ -124,4 +124,9 @@ public class TourServiceImpl implements TourService {
                 .limit(limit)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean hasToursForDestination(int destinationId) {
+        return tourDAO.hasToursForDestination(destinationId);
+    }
 }

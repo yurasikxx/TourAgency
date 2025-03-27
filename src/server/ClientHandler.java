@@ -145,6 +145,8 @@ public class ClientHandler implements Runnable {
                 return handleGetBookingStatus(parts);
             case "GET_ALL_PAYMENTS_ADMIN":
                 return handleGetAllPaymentsAdmin();
+            case "HAS_BOOKINGS":
+                return handleHasBookings(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -524,9 +526,15 @@ public class ClientHandler implements Runnable {
             try {
                 int id = Integer.parseInt(parts[1]);
                 String username = parts[2];
-                String password = parts[3];
+                String password = parts[3]; // Пароль остается прежним
                 String role = parts[4];
                 double balance = Double.parseDouble(parts[5]);
+
+                // Проверяем, существует ли пользователь с таким именем (кроме текущего)
+                User existingUser = userService.getUserByUsername(username);
+                if (existingUser != null && existingUser.getId() != id) {
+                    return "ERROR: Пользователь с таким именем уже существует";
+                }
 
                 User user = new User(id, username, password, role, balance);
                 userService.updateUser(user);
@@ -978,5 +986,18 @@ public class ClientHandler implements Runnable {
         } catch (Exception e) {
             return "ERROR: " + e.getMessage();
         }
+    }
+
+    private String handleHasBookings(String[] parts) {
+        if (parts.length == 2) {
+            try {
+                int tourId = Integer.parseInt(parts[1]);
+                boolean hasBookings = bookingService.hasBookingsForTour(tourId);
+                return "HAS_BOOKINGS " + hasBookings;
+            } catch (NumberFormatException e) {
+                return "ERROR: Invalid tour ID";
+            }
+        }
+        return "ERROR: Invalid request";
     }
 }

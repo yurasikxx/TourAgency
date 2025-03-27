@@ -73,4 +73,9 @@ public class BookingServiceImpl implements BookingService {
     public String getBookingStatus(int userId, int tourId) {
         return bookingDAO.getBookingStatus(userId, tourId);
     }
+
+    @Override
+    public boolean hasBookingsForTour(int tourId) {
+        return bookingDAO.hasBookingsForTour(tourId);
+    }
 }

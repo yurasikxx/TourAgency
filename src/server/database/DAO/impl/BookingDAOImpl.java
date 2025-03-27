@@ -157,4 +157,20 @@ public class BookingDAOImpl implements BookingDAO {
         }
         return null;
     }
+
+    @Override
+    public boolean hasBookingsForTour(int tourId) {
+        String query = "SELECT COUNT(*) FROM Bookings WHERE tour_id = ? AND status != 'cancelled'";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, tourId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

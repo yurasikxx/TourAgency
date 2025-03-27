@@ -16,4 +16,5 @@ public interface BookingService {
     boolean hasUserBookedTour(int userId, int tourId);
     boolean canUserBookTour(int userId, int tourId);
     String getBookingStatus(int userId, int tourId);
+    boolean hasBookingsForTour(int tourId);
 }

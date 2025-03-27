@@ -13,4 +13,5 @@ public interface BookingDAO {
     void deleteBooking(int id);
     boolean hasUserBookedTour(int userId, int tourId);
     String getBookingStatus(int userId, int tourId);
+    boolean hasBookingsForTour(int tourId);
 }

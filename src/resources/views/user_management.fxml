@@ -21,14 +21,11 @@
         <Label text="Логин:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
         <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-        <Label text="Пароль:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-        <TextField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        <Label text="Роль:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <ComboBox fx:id="roleComboBox" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-        <Label text="Роль:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-        <ComboBox fx:id="roleComboBox" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-
-        <Label text="Баланс:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-        <TextField fx:id="balanceField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        <Label text="Баланс:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="balanceField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
     </GridPane>
 
     <HBox spacing="10">

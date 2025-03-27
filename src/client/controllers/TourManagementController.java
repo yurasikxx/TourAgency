@@ -20,6 +20,7 @@ import java.net.Socket;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class TourManagementController {
     @FXML
@@ -244,7 +245,14 @@ public class TourManagementController {
             String endDate = endDatePicker.getValue().format(DateTimeFormatter.ISO_DATE);
             int destinationId = destinationComboBox.getValue().getId();
 
-            // Формируем команду - название и описание передаем как есть
+            // Проверка на уникальность названия тура
+            if (isTourNameExists(name)) {
+                showAlert("Ошибка", "Тур с таким названием уже существует");
+                nameField.setStyle("-fx-border-color: red;");
+                return;
+            }
+
+            // Формируем команду
             String delimiter = "--";
             String command = String.format("ADD_TOUR %s%s%s%s%.2f%s%s%s%s%s%d",
                     name, delimiter,
@@ -280,7 +288,7 @@ public class TourManagementController {
         TourModel selectedTour = toursTable.getSelectionModel().getSelectedItem();
         if (selectedTour != null) {
             try {
-                String name = nameField.getText().trim();
+                String newName = nameField.getText().trim();
                 String description = descriptionField.getText().trim();
                 String priceText = priceField.getText().trim();
                 LocalDate startDate = startDatePicker.getValue();
@@ -288,9 +296,16 @@ public class TourManagementController {
                 DestinationModel selectedDestination = destinationComboBox.getValue();
 
                 // Валидация
-                String error = validateInput(name, description, priceText, startDate, endDate, selectedDestination);
+                String error = validateInput(newName, description, priceText, startDate, endDate, selectedDestination);
                 if (error != null) {
                     showAlert("Ошибка", error);
+                    return;
+                }
+
+                // Проверяем, не пытаемся ли изменить на существующее имя (кроме текущего тура)
+                if (!newName.equals(selectedTour.getName()) && isTourNameExists(newName)) {
+                    showAlert("Ошибка", "Тур с таким названием уже существует");
+                    nameField.setStyle("-fx-border-color: red;");
                     return;
                 }
 
@@ -301,11 +316,10 @@ public class TourManagementController {
                      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                    // Используем тот же разделитель, что и в ADD_TOUR
                     String delimiter = "--";
                     String command = String.format("UPDATE_TOUR %d%s%s%s%s%s%.2f%s%s%s%s%s%d",
                             selectedTour.getId(), delimiter,
-                            name, delimiter,
+                            newName, delimiter,
                             description, delimiter,
                             price, delimiter,
                             startDate.toString(), delimiter,
@@ -335,26 +349,51 @@ public class TourManagementController {
     private void handleDeleteTour() {
         TourModel selectedTour = toursTable.getSelectionModel().getSelectedItem();
         if (selectedTour != null) {
-            try (Socket socket = new Socket("localhost", 12345);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+            // Подтверждение удаления
+            Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmation.setTitle("Подтверждение удаления");
+            confirmation.setHeaderText(null);
+            confirmation.setContentText("Вы уверены, что хотите удалить тур \"" + selectedTour.getName() + "\"?");
 
-                out.println("DELETE_TOUR " + selectedTour.getId());
-                String response = in.readLine();
+            Optional<ButtonType> result = confirmation.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                try (Socket socket = new Socket("localhost", 12345);
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                if ("TOUR_DELETED".equals(response)) {
-                    showAlert("Успех", "Тур удален");
-                    loadTours();
-                    clearFields();
-                } else {
-                    showAlert("Ошибка", response);
+                    // Сначала проверяем, есть ли бронирования для этого тура
+                    out.println("HAS_BOOKINGS " + selectedTour.getId());
+                    String hasBookingsResponse = in.readLine();
+
+                    if ("HAS_BOOKINGS true".equals(hasBookingsResponse)) {
+                        showAlert("Ошибка", "Нельзя удалить тур, так как он забронирован или оплачен");
+                        return;
+                    }
+
+                    // Если бронирований нет, удаляем тур
+                    out.println("DELETE_TOUR " + selectedTour.getId());
+                    String response = in.readLine();
+
+                    if ("TOUR_DELETED".equals(response)) {
+                        showAlert("Успех", "Тур удален");
+                        loadTours();
+                        clearFields();
+                    } else {
+                        showAlert("Ошибка", response);
+                    }
+                } catch (Exception e) {
+                    showAlert("Ошибка", "Не удалось удалить тур: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                showAlert("Ошибка", "Не удалось удалить тур");
             }
         } else {
             showAlert("Ошибка", "Выберите тур для удаления");
         }
+    }
+
+    // Проверяет, существует ли тур с таким названием
+    private boolean isTourNameExists(String tourName) {
+        return toursTable.getItems().stream()
+                .anyMatch(tour -> tour.getName().equalsIgnoreCase(tourName));
     }
 
     @FXML
@@ -376,35 +415,60 @@ public class TourManagementController {
     private String validateInput(String name, String description, String priceText,
                                  LocalDate startDate, LocalDate endDate, DestinationModel destination) {
         if (name.isEmpty()) {
+            nameField.setStyle("-fx-border-color: red;");
             return "Введите название тура";
+        } else {
+            nameField.setStyle("");
         }
+
         if (description.isEmpty()) {
+            descriptionField.setStyle("-fx-border-color: red;");
             return "Введите описание тура";
+        } else {
+            descriptionField.setStyle("");
         }
 
         try {
             double price = Double.parseDouble(priceText);
             if (price <= 0) {
+                priceField.setStyle("-fx-border-color: red;");
                 return "Стоимость должна быть положительным числом";
+            } else {
+                priceField.setStyle("");
             }
         } catch (NumberFormatException e) {
+            priceField.setStyle("-fx-border-color: red;");
             return "Некорректная стоимость тура";
         }
 
         if (startDate == null) {
+            startDatePicker.setStyle("-fx-border-color: red;");
             return "Выберите дату начала";
+        } else {
+            startDatePicker.setStyle("");
         }
 
         if (endDate == null) {
+            endDatePicker.setStyle("-fx-border-color: red;");
             return "Выберите дату окончания";
+        } else {
+            endDatePicker.setStyle("");
         }
 
         if (endDate.isBefore(startDate)) {
+            startDatePicker.setStyle("-fx-border-color: red;");
+            endDatePicker.setStyle("-fx-border-color: red;");
             return "Дата окончания должна быть после даты начала";
+        } else {
+            startDatePicker.setStyle("");
+            endDatePicker.setStyle("");
         }
 
         if (destination == null) {
+            destinationComboBox.setStyle("-fx-border-color: red;");
             return "Выберите направление";
+        } else {
+            destinationComboBox.setStyle("");
         }
 
         return null;

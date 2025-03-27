@@ -1,5 +1,6 @@
 package client.controllers;
 
+import client.MainClient;
 import client.models.UserModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,30 +16,22 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class UserManagementController {
-    @FXML
-    private TableView<UserModel> usersTable;
-    @FXML
-    private TableColumn<UserModel, Integer> idColumn;
-    @FXML
-    private TableColumn<UserModel, String> usernameColumn;
-    @FXML
-    private TableColumn<UserModel, String> roleColumn;
-    @FXML
-    private TableColumn<UserModel, Double> balanceColumn;
+    @FXML private TableView<UserModel> usersTable;
+    @FXML private TableColumn<UserModel, Integer> idColumn;
+    @FXML private TableColumn<UserModel, String> usernameColumn;
+    @FXML private TableColumn<UserModel, String> roleColumn;
+    @FXML private TableColumn<UserModel, Double> balanceColumn;
 
-    @FXML
-    private TextField usernameField;
-    @FXML
-    private TextField passwordField;
-    @FXML
-    private ComboBox<String> roleComboBox;
-    @FXML
-    private TextField balanceField;
+    @FXML private TextField usernameField;
+    @FXML private ComboBox<String> roleComboBox;
+    @FXML private TextField balanceField;
 
     private Stage primaryStage;
+    private UserModel currentAdmin; // Текущий администратор
 
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        this.currentAdmin = MainClient.getCurrentUser(); // Сохраняем текущего пользователя
         initializeTable();
         loadUsers();
         setupRoleComboBox();
@@ -68,7 +61,6 @@ public class UserManagementController {
 
     private void fillFieldsWithSelectedUser(UserModel user) {
         usernameField.setText(user.getUsername());
-        passwordField.setText(""); // Пароль не показываем из соображений безопасности
         roleComboBox.setValue(user.getRole());
         balanceField.setText(String.valueOf(user.getBalance()));
     }
@@ -107,10 +99,29 @@ public class UserManagementController {
     @FXML
     private void handleAddUser() {
         try {
-            String username = usernameField.getText();
-            String password = passwordField.getText();
+            String username = usernameField.getText().trim();
             String role = roleComboBox.getValue();
             double balance = Double.parseDouble(balanceField.getText());
+
+            // Валидация
+            if (username.isEmpty()) {
+                showAlert("Ошибка", "Логин не может быть пустым");
+                return;
+            }
+
+            if (balance < 0) {
+                showAlert("Ошибка", "Баланс не может быть отрицательным");
+                return;
+            }
+
+            // Проверка на уникальность имени пользователя
+            if (isUsernameExists(username)) {
+                showAlert("Ошибка", "Пользователь с таким именем уже существует");
+                return;
+            }
+
+            // Пароль делаем таким же как логин
+            String password = username;
 
             try (Socket socket = new Socket("localhost", 12345);
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -127,6 +138,8 @@ public class UserManagementController {
                     showAlert("Ошибка", response);
                 }
             }
+        } catch (NumberFormatException e) {
+            showAlert("Ошибка", "Некорректное значение баланса");
         } catch (Exception e) {
             showAlert("Ошибка", "Проверьте введенные данные");
         }
@@ -137,16 +150,34 @@ public class UserManagementController {
         UserModel selectedUser = usersTable.getSelectionModel().getSelectedItem();
         if (selectedUser != null) {
             try {
-                String username = usernameField.getText();
-                String password = passwordField.getText();
-                String role = roleComboBox.getValue();
-                double balance = Double.parseDouble(balanceField.getText());
+                String newUsername = usernameField.getText().trim();
+                String newRole = roleComboBox.getValue();
+                double newBalance = Double.parseDouble(balanceField.getText());
+
+                // Валидация
+                if (newUsername.isEmpty()) {
+                    showAlert("Ошибка", "Логин не может быть пустым");
+                    return;
+                }
+
+                if (newBalance < 0) {
+                    showAlert("Ошибка", "Баланс не может быть отрицательным");
+                    return;
+                }
+
+                // Проверяем, не пытаемся ли изменить на существующее имя (кроме себя)
+                if (!newUsername.equals(selectedUser.getUsername()) && isUsernameExists(newUsername)) {
+                    showAlert("Ошибка", "Пользователь с таким именем уже существует");
+                    return;
+                }
 
                 try (Socket socket = new Socket("localhost", 12345);
                      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                    out.println("UPDATE_USER " + selectedUser.getId() + " " + username + " " + password + " " + role + " " + balance);
+                    // При обновлении пароль не меняем (используем старый)
+                    out.println("UPDATE_USER " + selectedUser.getId() + " " + newUsername + " " +
+                            selectedUser.getUsername() + " " + newRole + " " + newBalance);
                     String response = in.readLine();
 
                     if ("USER_UPDATED".equals(response)) {
@@ -157,6 +188,8 @@ public class UserManagementController {
                         showAlert("Ошибка", response);
                     }
                 }
+            } catch (NumberFormatException e) {
+                showAlert("Ошибка", "Некорректное значение баланса");
             } catch (Exception e) {
                 showAlert("Ошибка", "Проверьте введенные данные");
             }
@@ -169,6 +202,12 @@ public class UserManagementController {
     private void handleDeleteUser() {
         UserModel selectedUser = usersTable.getSelectionModel().getSelectedItem();
         if (selectedUser != null) {
+            // Проверяем, не пытается ли администратор удалить самого себя
+            if (selectedUser.getId() == currentAdmin.getId()) {
+                showAlert("Ошибка", "Вы не можете удалить самого себя");
+                return;
+            }
+
             try (Socket socket = new Socket("localhost", 12345);
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
@@ -193,7 +232,6 @@ public class UserManagementController {
 
     @FXML
     private void handleBack() {
-        // Вернуться к списку туров
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour.fxml"));
             Parent root = loader.load();
@@ -210,9 +248,17 @@ public class UserManagementController {
 
     private void clearFields() {
         usernameField.clear();
-        passwordField.clear();
         roleComboBox.setValue("USER");
         balanceField.clear();
+    }
+
+    private boolean isUsernameExists(String username) {
+        for (UserModel user : usersTable.getItems()) {
+            if (user.getUsername().equalsIgnoreCase(username)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void showAlert(String title, String message) {

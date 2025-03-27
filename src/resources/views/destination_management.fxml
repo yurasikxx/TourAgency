@@ -3,7 +3,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" styleClass="root"
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" styleClass="root" stylesheets="@../styles.css"
       fx:controller="client.controllers.DestinationManagementController">
     <Text text="Управление направлениями" styleClass="title"/>
 

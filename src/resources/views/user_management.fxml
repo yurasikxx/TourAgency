@@ -3,7 +3,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" styleClass="root" fx:controller="client.controllers.UserManagementController">
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" styleClass="root"
+      fx:controller="client.controllers.UserManagementController"
+      stylesheets="@../styles.css">
     <Text text="Управление пользователями" styleClass="title"/>
 
     <TableView fx:id="usersTable">

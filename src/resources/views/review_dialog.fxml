@@ -5,7 +5,7 @@
 
 <?import java.lang.Integer?>
 <?import javafx.collections.FXCollections?>
-<DialogPane xmlns:fx="http://javafx.com/fxml/1" prefWidth="400">
+<DialogPane xmlns:fx="http://javafx.com/fxml/1" prefWidth="400" stylesheets="@../styles.css">
     <headerText>
         <Text text="Оставить отзыв" styleClass="title"/>
     </headerText>

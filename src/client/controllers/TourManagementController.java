@@ -13,6 +13,7 @@ import javafx.util.StringConverter;
 import javafx.util.converter.LocalDateStringConverter;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -483,5 +484,23 @@ public class TourManagementController {
         }
 
         return isValid;
+    }
+
+    @FXML
+    private void handleManagePayments() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/payment_management.fxml"));
+            Parent root = loader.load();
+
+            PaymentManagementController controller = loader.getController();
+            controller.setPrimaryStage(primaryStage);
+
+            Scene scene = new Scene(root);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Управление платежами");
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

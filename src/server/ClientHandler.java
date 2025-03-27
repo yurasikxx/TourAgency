@@ -143,6 +143,8 @@ public class ClientHandler implements Runnable {
                 return handleHasBooked(parts);
             case "GET_BOOKING_STATUS":
                 return handleGetBookingStatus(parts);
+            case "GET_ALL_PAYMENTS_ADMIN":
+                return handleGetAllPaymentsAdmin();
             default:
                 return "ERROR: Unknown command";
         }
@@ -951,5 +953,30 @@ public class ClientHandler implements Runnable {
             }
         }
         return "ERROR: Invalid get booking status request";
+    }
+
+    private String handleGetAllPaymentsAdmin() {
+        try {
+            List<Payment> payments = paymentService.getAllPayments();
+            StringBuilder response = new StringBuilder("PAYMENTS_ADMIN ");
+
+            for (Payment payment : payments) {
+                // Получаем информацию о бронировании и пользователе
+                Booking booking = bookingService.getBookingById(payment.getBookingId());
+                Tour tour = tourService.getTourById(booking.getTourId());
+
+                response.append(payment.getId()).append(",")
+                        .append(payment.getBookingId()).append(",")
+                        .append(booking.getUserId()).append(",")
+                        .append(payment.getAmount()).append(",")
+                        .append(payment.getPaymentDate()).append(",")
+                        .append(payment.getStatus()).append(",")
+                        .append(tour != null ? tour.getName() : "N/A").append("|");
+            }
+
+            return response.toString();
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
     }
 }

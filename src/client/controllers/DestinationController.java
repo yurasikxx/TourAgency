@@ -30,36 +30,25 @@ public class DestinationController {
 
     private Stage primaryStage;
 
-    /**
-     * Устанавливает primaryStage для контроллера.
-     *
-     * @param primaryStage Основное окно приложения.
-     */
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        loadDestinations(); // Загружаем направления при инициализации
+        loadDestinations();
     }
 
     @FXML
     private void initialize() {
-        // Обработка выбора направления
         destinationList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showDestinationDetails(newValue)
         );
     }
 
-    /**
-     * Загружает список направлений с сервера.
-     */
     private void loadDestinations() {
         try (Socket socket = new Socket("localhost", 12345);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            // Отправка запроса на сервер
             out.println("GET_DESTINATIONS");
 
-            // Получение ответа от сервера
             String response = in.readLine();
             if (response.startsWith("DESTINATIONS")) {
                 String[] destinationsData = response.substring(12).split("\\|");
@@ -71,7 +60,6 @@ public class DestinationController {
                         String country = fields[2];
                         String description = fields[3];
 
-                        // Создаем объект DestinationModel
                         DestinationModel destination = new DestinationModel(id, name, country, description);
                         destinationList.getItems().add(destination);
                     }
@@ -82,11 +70,6 @@ public class DestinationController {
         }
     }
 
-    /**
-     * Отображает детали выбранного направления.
-     *
-     * @param destination Выбранное направление.
-     */
     private void showDestinationDetails(DestinationModel destination) {
         if (destination != null) {
             nameLabel.setText(destination.getName());
@@ -99,9 +82,6 @@ public class DestinationController {
         }
     }
 
-    /**
-     * Обрабатывает нажатие кнопки "Назад".
-     */
     @FXML
     private void handleBack() {
         try {

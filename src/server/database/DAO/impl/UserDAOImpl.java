@@ -142,7 +142,7 @@ public class UserDAOImpl implements UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 0.0; // Возвращаем 0, если что-то пошло не так
+        return 0.0;
     }
 
     @Override

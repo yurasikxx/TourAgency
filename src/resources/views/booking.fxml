@@ -11,16 +11,13 @@
       stylesheets="@../styles.css"
       styleClass="root">
 
-    <!-- Заголовок -->
     <Text text="Мои бронирования" styleClass="title"/>
 
-    <!-- Баланс пользователя -->
     <HBox spacing="10" alignment="CENTER">
         <Label text="Ваш баланс:" styleClass="detail-label"/>
         <Label fx:id="balanceLabel" styleClass="detail-label"/>
     </HBox>
 
-    <!-- Таблица бронирований -->
     <TableView fx:id="bookingTable" prefWidth="600">
         <columns>
             <TableColumn fx:id="tourNameColumn" text="Название тура" prefWidth="200">
@@ -38,7 +35,6 @@
         </columns>
     </TableView>
 
-    <!-- Кнопки -->
     <HBox spacing="10" alignment="CENTER">
         <Button text="Оплатить" onAction="#handlePay" styleClass="button"/>
         <Button text="Отменить бронь" onAction="#handleCancelBooking" styleClass="button"/>

@@ -1,13 +1,13 @@
 package server.services.impl;
 
-import server.models.User;
 import server.database.DAO.UserDAO;
+import server.models.User;
 import server.services.UserService;
 
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
-    private UserDAO userDAO;
+    private final UserDAO userDAO;
 
     public UserServiceImpl(UserDAO userDAO) {
         this.userDAO = userDAO;

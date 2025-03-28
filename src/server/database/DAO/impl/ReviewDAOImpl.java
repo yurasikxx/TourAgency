@@ -5,11 +5,17 @@ import server.database.DatabaseConnection;
 import server.models.Review;
 import server.models.TourRating;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewDAOImpl implements ReviewDAO {
+
     @Override
     public void addReview(Review review) {
         String sql = "INSERT INTO Reviews (user_id, tour_id, rating, comment, review_date) VALUES (?, ?, ?, ?, ?)";
@@ -81,9 +87,9 @@ public class ReviewDAOImpl implements ReviewDAO {
         String sqlInsert = "INSERT INTO TourRatings (tour_id, average_rating, review_count) VALUES (?, ?, ?)";
         String sqlSelect = "SELECT AVG(rating) as avg_rating, COUNT(*) as count FROM Reviews WHERE tour_id = ?";
 
-        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
-            // Получаем средний рейтинг и количество отзывов
-            PreparedStatement selectStmt = conn.prepareStatement(sqlSelect);
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement selectStmt = conn.prepareStatement(sqlSelect)) {
+
             selectStmt.setInt(1, tourId);
             ResultSet rs = selectStmt.executeQuery();
 
@@ -91,7 +97,6 @@ public class ReviewDAOImpl implements ReviewDAO {
                 double avgRating = rs.getDouble("avg_rating");
                 int count = rs.getInt("count");
 
-                // Пытаемся обновить существующую запись
                 PreparedStatement updateStmt = conn.prepareStatement(sqlUpdate);
                 updateStmt.setDouble(1, avgRating);
                 updateStmt.setInt(2, count);
@@ -99,7 +104,6 @@ public class ReviewDAOImpl implements ReviewDAO {
 
                 int rowsAffected = updateStmt.executeUpdate();
 
-                // Если запись не существует, создаем новую
                 if (rowsAffected == 0) {
                     PreparedStatement insertStmt = conn.prepareStatement(sqlInsert);
                     insertStmt.setInt(1, tourId);
@@ -129,7 +133,6 @@ public class ReviewDAOImpl implements ReviewDAO {
                         rs.getInt("review_count")
                 );
             } else {
-                // Если запись не найдена, возвращаем рейтинг по умолчанию
                 return new TourRating(tourId, 0.0, 0);
             }
         } catch (SQLException e) {

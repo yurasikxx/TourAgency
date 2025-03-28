@@ -1,7 +1,5 @@
 package server.models;
 
-import java.time.LocalDate;
-
 public class Review {
     private int id;
     private int userId;
@@ -10,7 +8,6 @@ public class Review {
     private String comment;
     private String reviewDate;
 
-    // Конструкторы, геттеры и сеттеры
     public Review() {}
 
     public Review(int id, int userId, int tourId, int rating, String comment, String reviewDate) {
@@ -22,7 +19,6 @@ public class Review {
         this.reviewDate = reviewDate;
     }
 
-    // Геттеры и сеттеры...
     public int getId() {
         return id;
     }
@@ -69,5 +65,17 @@ public class Review {
 
     public void setReviewDate(String reviewDate) {
         this.reviewDate = reviewDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", tourId=" + tourId +
+                ", rating=" + rating +
+                ", comment='" + comment + '\'' +
+                ", reviewDate='" + reviewDate + '\'' +
+                '}';
     }
 }

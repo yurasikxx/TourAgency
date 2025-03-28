@@ -5,8 +5,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
@@ -31,36 +31,25 @@ public class PaymentController {
 
     private Stage primaryStage;
 
-    /**
-     * Устанавливает primaryStage для контроллера.
-     *
-     * @param primaryStage Основное окно приложения.
-     */
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        loadPayments(); // Загружаем платежи при инициализации
+        loadPayments();
     }
 
     @FXML
     private void initialize() {
-        // Настройка колонок таблицы
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         paymentDateColumn.setCellValueFactory(new PropertyValueFactory<>("paymentDate"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
     }
 
-    /**
-     * Загружает список платежей с сервера.
-     */
     private void loadPayments() {
         try (Socket socket = new Socket("localhost", 12345);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            // Отправка запроса на сервер
-            out.println("GET_PAYMENTS 1"); // Пример: bookingId = 1
+            out.println("GET_PAYMENTS 1");
 
-            // Получение ответа от сервера
             String response = in.readLine();
             if (response.startsWith("PAYMENTS")) {
                 String[] paymentsData = response.substring(9).split("\\|");
@@ -80,18 +69,12 @@ public class PaymentController {
         }
     }
 
-    /**
-     * Обрабатывает нажатие кнопки "Обновить".
-     */
     @FXML
     private void handleRefresh() {
-        paymentTable.getItems().clear(); // Очищаем таблицу
-        loadPayments(); // Загружаем платежи заново
+        paymentTable.getItems().clear();
+        loadPayments();
     }
 
-    /**
-     * Обрабатывает нажатие кнопки "Назад".
-     */
     @FXML
     private void handleViewBookings() {
         try {

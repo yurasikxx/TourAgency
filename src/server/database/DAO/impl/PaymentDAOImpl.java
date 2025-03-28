@@ -1,8 +1,8 @@
 package server.database.DAO.impl;
 
 import server.database.DAO.PaymentDAO;
-import server.models.Payment;
 import server.database.DatabaseConnection;
+import server.models.Payment;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

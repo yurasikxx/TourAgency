@@ -18,13 +18,20 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class BookingManagementController {
-    @FXML private TableView<BookingModel> bookingsTable;
-    @FXML private TableColumn<BookingModel, Integer> idColumn;
-    @FXML private TableColumn<BookingModel, String> userColumn;
-    @FXML private TableColumn<BookingModel, String> tourColumn;
-    @FXML private TableColumn<BookingModel, String> bookingDateColumn;
-    @FXML private TableColumn<BookingModel, String> statusColumn;
-    @FXML private TableColumn<BookingModel, Double> amountColumn;
+    @FXML
+    private TableView<BookingModel> bookingsTable;
+    @FXML
+    private TableColumn<BookingModel, Integer> idColumn;
+    @FXML
+    private TableColumn<BookingModel, String> userColumn;
+    @FXML
+    private TableColumn<BookingModel, String> tourColumn;
+    @FXML
+    private TableColumn<BookingModel, String> bookingDateColumn;
+    @FXML
+    private TableColumn<BookingModel, String> statusColumn;
+    @FXML
+    private TableColumn<BookingModel, Double> amountColumn;
 
     private Stage primaryStage;
 
@@ -61,11 +68,11 @@ public class BookingManagementController {
                     if (fields.length == 6) {
                         BookingModel booking = new BookingModel(
                                 Integer.parseInt(fields[0]),
-                                fields[1], // userName
-                                fields[2], // tourName
-                                fields[3], // bookingDate
-                                fields[4], // status
-                                Double.parseDouble(fields[5]) // amount
+                                fields[1],
+                                fields[2],
+                                fields[3],
+                                fields[4],
+                                Double.parseDouble(fields[5])
                         );
                         bookingsTable.getItems().add(booking);
                     }
@@ -73,7 +80,7 @@ public class BookingManagementController {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Ошибка", "Не удалось загрузить бронирования");
+            showAlert();
         }
     }
 
@@ -98,11 +105,11 @@ public class BookingManagementController {
         }
     }
 
-    private void showAlert(String title, String message) {
+    private void showAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
+        alert.setTitle("Ошибка");
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText("Не удалось загрузить бронирования");
         alert.showAndWait();
     }
 }

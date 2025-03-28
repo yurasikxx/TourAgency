@@ -1,6 +1,5 @@
 package client.controllers;
 
-import client.MainClient;
 import client.models.PaymentModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,14 +17,29 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class PaymentManagementController {
-    @FXML private TableView<PaymentModel> paymentsTable;
-    @FXML private TableColumn<PaymentModel, Integer> idColumn;
-    @FXML private TableColumn<PaymentModel, Integer> bookingIdColumn;
-    @FXML private TableColumn<PaymentModel, Integer> userIdColumn;
-    @FXML private TableColumn<PaymentModel, Double> amountColumn;
-    @FXML private TableColumn<PaymentModel, String> paymentDateColumn;
-    @FXML private TableColumn<PaymentModel, String> statusColumn;
-    @FXML private TableColumn<PaymentModel, String> tourColumn;
+    @FXML
+    private TableView<PaymentModel> paymentsTable;
+
+    @FXML
+    private TableColumn<PaymentModel, Integer> idColumn;
+
+    @FXML
+    private TableColumn<PaymentModel, Integer> bookingIdColumn;
+
+    @FXML
+    private TableColumn<PaymentModel, Integer> userIdColumn;
+
+    @FXML
+    private TableColumn<PaymentModel, Double> amountColumn;
+
+    @FXML
+    private TableColumn<PaymentModel, String> paymentDateColumn;
+
+    @FXML
+    private TableColumn<PaymentModel, String> statusColumn;
+
+    @FXML
+    private TableColumn<PaymentModel, String> tourColumn;
 
     private Stage primaryStage;
 

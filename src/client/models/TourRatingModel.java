@@ -9,7 +9,6 @@ public class TourRatingModel {
         this.reviewCount = reviewCount;
     }
 
-    // Геттеры и сеттеры...
     public double getAverageRating() {
         return averageRating;
     }
@@ -24,5 +23,13 @@ public class TourRatingModel {
 
     public void setReviewCount(int reviewCount) {
         this.reviewCount = reviewCount;
+    }
+
+    @Override
+    public String toString() {
+        return "TourRatingModel{" +
+                "averageRating=" + averageRating +
+                ", reviewCount=" + reviewCount +
+                '}';
     }
 }

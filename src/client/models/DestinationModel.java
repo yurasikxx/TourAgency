@@ -1,16 +1,13 @@
 package client.models;
 
-/**
- * Модель направления для клиентской части.
- */
 public class DestinationModel {
     private int id;
     private String name;
     private String country;
     private String description;
 
-    // Конструкторы
-    public DestinationModel() {}
+    public DestinationModel() {
+    }
 
     public DestinationModel(int id, String name, String country, String description) {
         this.id = id;
@@ -19,7 +16,6 @@ public class DestinationModel {
         this.description = description;
     }
 
-    // Метод преобразования серверной модели в клиентскую
     public static DestinationModel fromServerModel(server.models.Destination serverDestination) {
         return new DestinationModel(
                 serverDestination.getId(),
@@ -29,7 +25,6 @@ public class DestinationModel {
         );
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }

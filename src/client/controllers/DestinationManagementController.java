@@ -5,7 +5,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
@@ -13,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Optional;
 
 public class DestinationManagementController {
     @FXML
@@ -58,7 +62,6 @@ public class DestinationManagementController {
     }
 
     private void setupFieldValidation() {
-        // Ограничение длины полей
         nameField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.length() > 100) {
                 nameField.setText(oldVal);
@@ -93,16 +96,7 @@ public class DestinationManagementController {
                 for (String destinationData : destinationsData) {
                     String[] fields = destinationData.split("(?<!\\\\),");
                     if (fields.length == 4) {
-                        String name = fields[1].replace("\\,", ",").replace("\\|", "|");
-                        String country = fields[2].replace("\\,", ",").replace("\\|", "|");
-                        String description = fields[3].replace("\\,", ",").replace("\\|", "|");
-
-                        DestinationModel destination = new DestinationModel(
-                                Integer.parseInt(fields[0].trim()),
-                                name,
-                                country,
-                                description
-                        );
+                        DestinationModel destination = getDestinationModel(fields);
                         destinationsTable.getItems().add(destination);
                     }
                 }
@@ -113,15 +107,27 @@ public class DestinationManagementController {
         }
     }
 
+    private static DestinationModel getDestinationModel(String[] fields) {
+        String name = fields[1].replace("\\,", ",").replace("\\|", "|");
+        String country = fields[2].replace("\\,", ",").replace("\\|", "|");
+        String description = fields[3].replace("\\,", ",").replace("\\|", "|");
+
+        return new DestinationModel(
+                Integer.parseInt(fields[0].trim()),
+                name,
+                country,
+                description
+        );
+    }
+
     @FXML
     private void handleAddDestination() {
-        if (!validateInput()) {
+        if (validateInput()) {
             return;
         }
 
         String name = nameField.getText().trim();
 
-        // Проверка на уникальность названия
         if (isDestinationNameExists(name)) {
             showAlert("Ошибка", "Направление с таким названием уже существует");
             nameField.setStyle("-fx-border-color: red;");
@@ -163,13 +169,12 @@ public class DestinationManagementController {
             return;
         }
 
-        if (!validateInput()) {
+        if (validateInput()) {
             return;
         }
 
         String newName = nameField.getText().trim();
 
-        // Проверка на уникальность названия (кроме текущего направления)
         if (!newName.equals(selectedDestination.getName()) &&
                 isDestinationNameExists(newName)) {
             showAlert("Ошибка", "Направление с таким названием уже существует");
@@ -212,7 +217,6 @@ public class DestinationManagementController {
             return;
         }
 
-        // Подтверждение удаления
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Подтверждение удаления");
         confirmation.setHeaderText(null);
@@ -227,7 +231,6 @@ public class DestinationManagementController {
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            // Сначала проверяем, есть ли туры с этим направлением
             out.println("HAS_TOURS_FOR_DESTINATION " + selectedDestination.getId());
             String hasToursResponse = in.readLine();
 
@@ -236,7 +239,6 @@ public class DestinationManagementController {
                 return;
             }
 
-            // Если туров нет, удаляем направление
             out.println("DELETE_DESTINATION " + selectedDestination.getId());
             String response = in.readLine();
 
@@ -287,7 +289,7 @@ public class DestinationManagementController {
             showAlert("Ошибка", "Заполните все обязательные поля");
         }
 
-        return isValid;
+        return !isValid;
     }
 
     private void resetFieldStyles() {

@@ -127,21 +127,6 @@ public class BookingDAOImpl implements BookingDAO {
     }
 
     @Override
-    public boolean hasUserBookedTour(int userId, int tourId) {
-        String sql = "SELECT status FROM Bookings WHERE user_id = ? AND tour_id = ?";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, userId);
-            stmt.setInt(2, tourId);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next(); // Возвращает true, если есть любая запись (независимо от статуса)
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
     public String getBookingStatus(int userId, int tourId) {
         String sql = "SELECT status FROM Bookings WHERE user_id = ? AND tour_id = ? ORDER BY id DESC LIMIT 1";
         try (Connection conn = DatabaseConnection.getInstance().getConnection();

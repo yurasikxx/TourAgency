@@ -2,9 +2,6 @@ package client.models;
 
 import java.util.Objects;
 
-/**
- * Модель пользователя для клиентской части.
- */
 public class UserModel {
     private int id;
     private String username;

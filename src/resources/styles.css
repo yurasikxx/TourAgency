@@ -1,20 +1,17 @@
-/* Общие стили для корневого элемента */
 .root {
     -fx-font-family: "Arial";
-    -fx-base: #4CAF50; /* Основной цвет */
-    -fx-background-color: #f4f4f4; /* Фоновый цвет */
+    -fx-base: #4CAF50;
+    -fx-background-color: #f4f4f4;
 }
 
-/* Стили для заголовков */
 .title {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
     -fx-text-fill: #333333;
 }
 
-/* Стили для кнопок */
 .button {
-    -fx-background-color: #4CAF50; /* Зеленый цвет */
+    -fx-background-color: #4CAF50;
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-padding: 10px 20px;
@@ -23,14 +20,13 @@
 }
 
 .button:hover {
-    -fx-background-color: #45a049; /* Темно-зеленый цвет при наведении */
+    -fx-background-color: #45a049;
 }
 
 .button:pressed {
-    -fx-background-color: #3d8b40; /* Еще более темный зеленый при нажатии */
+    -fx-background-color: #3d8b40;
 }
 
-/* Стили для текстовых полей */
 .text-field {
     -fx-font-size: 14px;
     -fx-padding: 5px;
@@ -40,21 +36,19 @@
 }
 
 .text-field:focused {
-    -fx-border-color: #4CAF50; /* Зеленый цвет при фокусе */
+    -fx-border-color: #4CAF50;
 }
 
-/* Стили для меток (Label) */
 .label {
     -fx-font-size: 14px;
     -fx-text-fill: #333333;
 }
 
 .error-label {
-    -fx-text-fill: #ff0000; /* Красный цвет для ошибок */
+    -fx-text-fill: #ff0000;
     -fx-font-size: 12px;
 }
 
-/* Стили для таблиц */
 .table-view {
     -fx-base: #ffffff;
     -fx-control-inner-background: #ffffff;
@@ -81,7 +75,7 @@
 }
 
 .table-row-cell:odd {
-    -fx-background-color: #f9f9f9; /* Чередование цветов строк */
+    -fx-background-color: #f9f9f9;
 }
 
 .table-row-cell:even {
@@ -89,11 +83,10 @@
 }
 
 .table-row-cell:selected {
-    -fx-background-color: #4CAF50; /* Зеленый цвет для выбранной строки */
+    -fx-background-color: #4CAF50;
     -fx-text-fill: white;
 }
 
-/* Стили для списков (ListView) */
 .list-view {
     -fx-background-color: #ffffff;
     -fx-border-color: #cccccc;
@@ -107,7 +100,7 @@
 }
 
 .list-cell:odd {
-    -fx-background-color: #f9f9f9; /* Чередование цветов ячеек */
+    -fx-background-color: #f9f9f9;
 }
 
 .list-cell:even {
@@ -115,185 +108,57 @@
 }
 
 .list-cell:selected {
-    -fx-background-color: #4CAF50; /* Зеленый цвет для выбранной ячейки */
+    -fx-background-color: #4CAF50;
     -fx-text-fill: white;
 }
 
-/* Стили для деталей (например, в DestinationController) */
 .detail-label {
     -fx-font-size: 14px;
     -fx-text-fill: #333333;
     -fx-padding: 5px;
-}/* Общие стили для корневого элемента */
- .root {
-     -fx-font-family: "Arial";
-     -fx-base: #4CAF50; /* Основной цвет */
-     -fx-background-color: #f4f4f4; /* Фоновый цвет */
- }
+}
 
- /* Стили для заголовков */
- .title {
-     -fx-font-size: 24px;
-     -fx-font-weight: bold;
-     -fx-text-fill: #333333;
- }
+.welcome-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #4CAF50;
+    -fx-font-weight: bold;
+}
 
- /* Стили для кнопок */
- .button {
-     -fx-background-color: #4CAF50; /* Зеленый цвет */
-     -fx-text-fill: white;
-     -fx-font-size: 14px;
-     -fx-padding: 10px 20px;
-     -fx-border-radius: 5px;
-     -fx-background-radius: 5px;
- }
+.button-admin {
+    -fx-background-color: #FF5722;
+    -fx-text-fill: white;
+}
 
- .button:hover {
-     -fx-background-color: #45a049; /* Темно-зеленый цвет при наведении */
- }
+.button-admin:hover {
+    -fx-background-color: #E64A19;
+}
 
- .button:pressed {
-     -fx-background-color: #3d8b40; /* Еще более темный зеленый при нажатии */
- }
+.button-admin:pressed {
+    -fx-background-color: #D84315;
+}
 
- /* Стили для текстовых полей */
- .text-field {
-     -fx-font-size: 14px;
-     -fx-padding: 5px;
-     -fx-border-color: #cccccc;
-     -fx-border-radius: 5px;
-     -fx-background-radius: 5px;
- }
+.button-management {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
 
- .text-field:focused {
-     -fx-border-color: #4CAF50; /* Зеленый цвет при фокусе */
- }
+.button-management:hover {
+    -fx-background-color: #1976D2;
+}
 
- /* Стили для меток (Label) */
- .label {
-     -fx-font-size: 14px;
-     -fx-text-fill: #333333;
- }
+.button-management:pressed {
+    -fx-background-color: #0D47A1;
+}
 
- .error-label {
-     -fx-text-fill: #ff0000; /* Красный цвет для ошибок */
-     -fx-font-size: 12px;
- }
+.table-view .table-cell {
+    -fx-alignment: CENTER-LEFT;
+    -fx-padding: 5px;
+}
 
- /* Стили для таблиц */
- .table-view {
-     -fx-base: #ffffff;
-     -fx-control-inner-background: #ffffff;
-     -fx-background-color: #f4f4f4;
-     -fx-table-cell-border-color: transparent;
-     -fx-table-header-border-color: transparent;
-     -fx-padding: 5px;
- }
+#startDateColumn, #endDateColumn {
+    -fx-alignment: CENTER;
+}
 
- .table-view .column-header-background {
-     -fx-background-color: #4CAF50;
- }
-
- .table-view .column-header, .table-view .filler {
-     -fx-background-color: #4CAF50;
-     -fx-text-fill: white;
-     -fx-font-size: 14px;
- }
-
- .table-view .table-cell {
-     -fx-padding: 5px;
-     -fx-font-size: 14px;
-     -fx-border-color: transparent;
- }
-
- .table-row-cell:odd {
-     -fx-background-color: #f9f9f9; /* Чередование цветов строк */
- }
-
- .table-row-cell:even {
-     -fx-background-color: #ffffff;
- }
-
- .table-row-cell:selected {
-     -fx-background-color: #4CAF50; /* Зеленый цвет для выбранной строки */
-     -fx-text-fill: white;
- }
-
- /* Стили для списков (ListView) */
- .list-view {
-     -fx-background-color: #ffffff;
-     -fx-border-color: #cccccc;
-     -fx-border-radius: 5px;
-     -fx-background-radius: 5px;
- }
-
- .list-cell {
-     -fx-padding: 5px;
-     -fx-font-size: 14px;
- }
-
- .list-cell:odd {
-     -fx-background-color: #f9f9f9; /* Чередование цветов ячеек */
- }
-
- .list-cell:even {
-     -fx-background-color: #ffffff;
- }
-
- .list-cell:selected {
-     -fx-background-color: #4CAF50; /* Зеленый цвет для выбранной ячейки */
-     -fx-text-fill: white;
- }
-
- /* Стили для деталей (например, в DestinationController) */
- .detail-label {
-     -fx-font-size: 14px;
-     -fx-text-fill: #333333;
-     -fx-padding: 5px;
- }
-
- .welcome-label {
-     -fx-font-size: 18px;
-     -fx-text-fill: #4CAF50;
-     -fx-font-weight: bold;
- }
-
- /* Стиль для кнопок администратора */
- .button-admin {
-     -fx-background-color: #FF5722; /* Оранжевый */
-     -fx-text-fill: white;
- }
-
- .button-admin:hover {
-     -fx-background-color: #E64A19;
- }
-
- .button-admin:pressed {
-     -fx-background-color: #D84315;
- }
-
- .button-management {
-     -fx-background-color: #2196F3; /* Синий */
-     -fx-text-fill: white;
- }
-
- .button-management:hover {
-     -fx-background-color: #1976D2;
- }
-
- .button-management:pressed {
-     -fx-background-color: #0D47A1;
- }
-
- .table-view .table-cell {
-     -fx-alignment: CENTER-LEFT;
-     -fx-padding: 5px;
- }
-
- #startDateColumn, #endDateColumn {
-     -fx-alignment: CENTER;
- }
-
- #priceColumn {
-     -fx-alignment: CENTER-RIGHT;
- }
+#priceColumn {
+    -fx-alignment: CENTER-RIGHT;
+}

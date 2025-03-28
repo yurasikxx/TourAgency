@@ -5,9 +5,8 @@ public class User {
     private String username;
     private String password;
     private String role;
-    private double balance; // Новое поле
+    private double balance;
 
-    // Конструкторы
     public User() {}
 
     public User(String username, String password, String role, double balance) {
@@ -25,7 +24,6 @@ public class User {
         this.balance = balance;
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }

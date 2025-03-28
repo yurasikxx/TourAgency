@@ -6,7 +6,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -19,37 +27,48 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Optional;
 
 public class TourManagementController {
     @FXML
     private TableView<TourModel> toursTable;
+
     @FXML
     private TableColumn<TourModel, Integer> idColumn;
+
     @FXML
     private TableColumn<TourModel, String> nameColumn;
+
     @FXML
     private TableColumn<TourModel, String> descriptionColumn;
+
     @FXML
     private TableColumn<TourModel, Double> priceColumn;
+
     @FXML
     private TableColumn<TourModel, String> startDateColumn;
+
     @FXML
     private TableColumn<TourModel, String> endDateColumn;
+
     @FXML
     private TableColumn<TourModel, String> destinationColumn;
 
     @FXML
     private TextField nameField;
+
     @FXML
     private TextArea descriptionField;
+
     @FXML
     private TextField priceField;
+
     @FXML
     private DatePicker startDatePicker;
+
     @FXML
     private DatePicker endDatePicker;
+
     @FXML
     private ComboBox<DestinationModel> destinationComboBox;
 
@@ -65,13 +84,11 @@ public class TourManagementController {
     }
 
     private void initializeControls() {
-        // Настройка формата дат
         StringConverter<LocalDate> converter = new LocalDateStringConverter(
                 DateTimeFormatter.ISO_DATE, DateTimeFormatter.ISO_DATE);
         startDatePicker.setConverter(converter);
         endDatePicker.setConverter(converter);
 
-        // Настройка ComboBox для направлений
         destinationComboBox.setCellFactory(param -> new ListCell<DestinationModel>() {
             @Override
             protected void updateItem(DestinationModel item, boolean empty) {
@@ -129,7 +146,6 @@ public class TourManagementController {
             endDatePicker.setValue(null);
         }
 
-        // Находим соответствующее направление в ComboBox
         for (DestinationModel dest : destinationComboBox.getItems()) {
             if (dest.getId() == Integer.parseInt(tour.getDestination())) {
                 destinationComboBox.setValue(dest);
@@ -197,27 +213,12 @@ public class TourManagementController {
             destinationComboBox.getItems().clear();
             String destinationsData = response.substring(12);
 
-            // Обрабатываем случай, когда нет направлений
-            if (destinationsData.isEmpty()) {
-                return;
-            }
-
             String[] destinations = destinationsData.split("\\|");
             for (String destData : destinations) {
                 try {
                     String[] fields = destData.split("(?<!\\\\),"); // Разделяем по запятым, не экранированным
                     if (fields.length == 4) {
-                        // Убираем экранирование
-                        String name = fields[1].replace("\\,", ",").replace("\\|", "|");
-                        String country = fields[2].replace("\\,", ",").replace("\\|", "|");
-                        String description = fields[3].replace("\\,", ",").replace("\\|", "|");
-
-                        DestinationModel dest = new DestinationModel(
-                                Integer.parseInt(fields[0].trim()),
-                                name,
-                                country,
-                                description
-                        );
+                        DestinationModel dest = getDestinationModel(fields);
                         destinationComboBox.getItems().add(dest);
                     }
                 } catch (Exception e) {
@@ -229,6 +230,19 @@ public class TourManagementController {
             showAlert("Ошибка", "Не удалось загрузить направления: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private static DestinationModel getDestinationModel(String[] fields) {
+        String name = fields[1].replace("\\,", ",").replace("\\|", "|");
+        String country = fields[2].replace("\\,", ",").replace("\\|", "|");
+        String description = fields[3].replace("\\,", ",").replace("\\|", "|");
+
+        return new DestinationModel(
+                Integer.parseInt(fields[0].trim()),
+                name,
+                country,
+                description
+        );
     }
 
     @FXML
@@ -245,14 +259,12 @@ public class TourManagementController {
             String endDate = endDatePicker.getValue().format(DateTimeFormatter.ISO_DATE);
             int destinationId = destinationComboBox.getValue().getId();
 
-            // Проверка на уникальность названия тура
             if (isTourNameExists(name)) {
                 showAlert("Ошибка", "Тур с таким названием уже существует");
                 nameField.setStyle("-fx-border-color: red;");
                 return;
             }
 
-            // Формируем команду
             String delimiter = "--";
             String command = String.format("ADD_TOUR %s%s%s%s%.2f%s%s%s%s%s%d",
                     name, delimiter,
@@ -295,14 +307,12 @@ public class TourManagementController {
                 LocalDate endDate = endDatePicker.getValue();
                 DestinationModel selectedDestination = destinationComboBox.getValue();
 
-                // Валидация
                 String error = validateInput(newName, description, priceText, startDate, endDate, selectedDestination);
                 if (error != null) {
                     showAlert("Ошибка", error);
                     return;
                 }
 
-                // Проверяем, не пытаемся ли изменить на существующее имя (кроме текущего тура)
                 if (!newName.equals(selectedTour.getName()) && isTourNameExists(newName)) {
                     showAlert("Ошибка", "Тур с таким названием уже существует");
                     nameField.setStyle("-fx-border-color: red;");
@@ -349,7 +359,6 @@ public class TourManagementController {
     private void handleDeleteTour() {
         TourModel selectedTour = toursTable.getSelectionModel().getSelectedItem();
         if (selectedTour != null) {
-            // Подтверждение удаления
             Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
             confirmation.setTitle("Подтверждение удаления");
             confirmation.setHeaderText(null);
@@ -361,7 +370,6 @@ public class TourManagementController {
                      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                    // Сначала проверяем, есть ли бронирования для этого тура
                     out.println("HAS_BOOKINGS " + selectedTour.getId());
                     String hasBookingsResponse = in.readLine();
 
@@ -370,7 +378,6 @@ public class TourManagementController {
                         return;
                     }
 
-                    // Если бронирований нет, удаляем тур
                     out.println("DELETE_TOUR " + selectedTour.getId());
                     String response = in.readLine();
 
@@ -390,7 +397,6 @@ public class TourManagementController {
         }
     }
 
-    // Проверяет, существует ли тур с таким названием
     private boolean isTourNameExists(String tourName) {
         return toursTable.getItems().stream()
                 .anyMatch(tour -> tour.getName().equalsIgnoreCase(tourName));
@@ -502,7 +508,6 @@ public class TourManagementController {
             nameField.setStyle("");
         }
 
-        // Валидация описания
         if (descriptionField.getText().trim().isEmpty()) {
             descriptionField.setStyle("-fx-border-color: red;");
             isValid = false;
@@ -510,7 +515,6 @@ public class TourManagementController {
             descriptionField.setStyle("");
         }
 
-        // Валидация цены
         try {
             double price = Double.parseDouble(priceField.getText().trim());
             if (price <= 0) {
@@ -524,7 +528,6 @@ public class TourManagementController {
             isValid = false;
         }
 
-        // Валидация дат
         if (startDatePicker.getValue() == null) {
             startDatePicker.setStyle("-fx-border-color: red;");
             isValid = false;
@@ -539,7 +542,6 @@ public class TourManagementController {
             endDatePicker.setStyle("");
         }
 
-        // Валидация направления
         if (destinationComboBox.getValue() == null) {
             destinationComboBox.setStyle("-fx-border-color: red;");
             isValid = false;

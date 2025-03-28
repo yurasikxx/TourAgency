@@ -1,21 +1,16 @@
 package server.services.impl;
 
-import server.models.Destination;
 import server.database.DAO.DestinationDAO;
+import server.models.Destination;
 import server.services.DestinationService;
 
 import java.util.List;
 
 public class DestinationServiceImpl implements DestinationService {
-    private DestinationDAO destinationDAO;
+    private final DestinationDAO destinationDAO;
 
     public DestinationServiceImpl(DestinationDAO destinationDAO) {
         this.destinationDAO = destinationDAO;
-    }
-
-    @Override
-    public Destination getDestinationById(int id) {
-        return destinationDAO.getDestinationById(id);
     }
 
     @Override

@@ -1,8 +1,5 @@
 package client.models;
 
-/**
- * Модель тура для клиентской части.
- */
 public class TourModel {
     private int id;
     private String name;
@@ -12,8 +9,8 @@ public class TourModel {
     private String endDate;
     private String destination;
 
-    // Конструкторы
-    public TourModel() {}
+    public TourModel() {
+    }
 
     public TourModel(int id, String name, String description, double price, String startDate, String endDate, String destination) {
         this.id = id;
@@ -25,7 +22,6 @@ public class TourModel {
         this.destination = destination;
     }
 
-    // Метод преобразования серверной модели в клиентскую
     public static TourModel fromServerModel(server.models.Tour serverTour) {
         return new TourModel(
                 serverTour.getId(),
@@ -34,11 +30,10 @@ public class TourModel {
                 serverTour.getPrice(),
                 serverTour.getStartDate(),
                 serverTour.getEndDate(),
-                "Направление " + serverTour.getDestinationId() // Пример: можно загрузить название направления из базы данных
+                "Направление " + serverTour.getDestinationId()
         );
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }

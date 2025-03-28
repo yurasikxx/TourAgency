@@ -6,9 +6,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.TextField;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
@@ -31,24 +31,15 @@ public class LoginController {
 
     private Stage primaryStage;
 
-    /**
-     * Устанавливает primaryStage для контроллера.
-     *
-     * @param primaryStage Основное окно приложения.
-     */
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
 
-    /**
-     * Обрабатывает нажатие кнопки "Войти".
-     */
     @FXML
     private void handleLogin() {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        // Проверка на пустые поля
         if (username.isEmpty() || password.isEmpty()) {
             errorLabel.setText("Логин и пароль не могут быть пустыми!");
             return;
@@ -58,30 +49,26 @@ public class LoginController {
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            // Отправка запроса на сервер
             out.println("LOGIN " + username + " " + password);
 
-            // Получение ответа от сервера
             String response = in.readLine();
-            System.out.println("Ответ сервера: " + response); // Вывод для отладки
+            System.out.println("Ответ сервера: " + response);
 
             if (response.startsWith("LOGIN_SUCCESS")) {
-                // Успешная авторизация
                 String[] responseParts = response.split(" ");
-                if (responseParts.length >= 3) { // Проверяем, что ответ содержит роль и ID
-                    String role = responseParts[1]; // Роль пользователя
-                    int userId = Integer.parseInt(responseParts[2]); // ID пользователя
 
-                    // Создаем объект UserModel для текущего пользователя
+                if (responseParts.length >= 3) {
+                    String role = responseParts[1];
+                    int userId = Integer.parseInt(responseParts[2]);
+
                     UserModel user = new UserModel(userId, username, role);
-                    MainClient.setCurrentUser(user); // Сохраняем текущего пользователя
+                    MainClient.setCurrentUser(user);
 
-                    loadMainView(); // Загружаем основной интерфейс
+                    loadMainView();
                 } else {
                     errorLabel.setText("Ошибка: сервер вернул некорректный ответ.");
                 }
             } else {
-                // Ошибка авторизации
                 errorLabel.setText("Неверный логин или пароль!");
             }
         } catch (IOException e) {
@@ -113,25 +100,19 @@ public class LoginController {
         }
     }
 
-    /**
-     * Загружает основной интерфейс приложения.
-     */
     private void loadMainView() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/tour.fxml"));
             Parent root = loader.load();
 
-            // Получаем контроллер для основного интерфейса
             TourController tourController = loader.getController();
             tourController.setPrimaryStage(primaryStage);
 
-            // Устанавливаем новую сцену
             Scene scene = new Scene(root);
 
-            // Устанавливаем размер сцены
             primaryStage.setScene(scene);
-            primaryStage.setWidth(1600); // Ширина окна
-            primaryStage.setHeight(900); // Высота окна
+            primaryStage.setWidth(1600);
+            primaryStage.setHeight(900);
             primaryStage.centerOnScreen();
             primaryStage.setTitle("Туры");
             primaryStage.show();
@@ -143,8 +124,8 @@ public class LoginController {
 
     @FXML
     private void handleKeyPressed(KeyEvent event) {
-        if (event.getCode() == KeyCode.ENTER) { // Проверяем, что нажата клавиша Enter
-            handleLogin(); // Вызываем метод для входа
+        if (event.getCode() == KeyCode.ENTER) {
+            handleLogin();
         }
     }
 }

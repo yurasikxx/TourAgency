@@ -1,8 +1,8 @@
 package server.services.impl;
 
+import server.database.DAO.TourDAO;
 import server.database.DAO.impl.BookingDAOImpl;
 import server.models.Tour;
-import server.database.DAO.TourDAO;
 import server.services.BookingService;
 import server.services.TourService;
 
@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TourServiceImpl implements TourService {
-    private BookingService bookingService = new BookingServiceImpl(new BookingDAOImpl());
-    private TourDAO tourDAO;
+    private final BookingService bookingService = new BookingServiceImpl(new BookingDAOImpl());
+    private final TourDAO tourDAO;
 
     public TourServiceImpl(TourDAO tourDAO) {
         this.tourDAO = tourDAO;
@@ -50,13 +50,11 @@ public class TourServiceImpl implements TourService {
         tourDAO.deleteTour(id);
     }
 
-    // server/services/impl/TourServiceImpl.java
     @Override
     public List<Tour> searchTours(String searchTerm, Double minPrice, Double maxPrice,
                                   String startDate, String endDate, String sortBy) {
         List<Tour> tours = tourDAO.getAllTours();
 
-        // Фильтрация по поисковому запросу (не зависит от других фильтров)
         if (searchTerm != null && !searchTerm.equals("null") && !searchTerm.isEmpty()) {
             String finalSearchTerm = searchTerm.toLowerCase();
             tours = tours.stream()
@@ -65,19 +63,17 @@ public class TourServiceImpl implements TourService {
                     .collect(Collectors.toList());
         }
 
-        // Фильтрация по цене (не зависит от дат)
-        if (minPrice != null && !minPrice.equals("null")) {
+        if (minPrice != null) {
             tours = tours.stream()
                     .filter(t -> t.getPrice() >= Double.parseDouble(minPrice.toString()))
                     .collect(Collectors.toList());
         }
-        if (maxPrice != null && !maxPrice.equals("null")) {
+        if (maxPrice != null) {
             tours = tours.stream()
                     .filter(t -> t.getPrice() <= Double.parseDouble(maxPrice.toString()))
                     .collect(Collectors.toList());
         }
 
-        // Фильтрация по датам (не зависит от цены)
         if (startDate != null && !startDate.equals("null")) {
             tours = tours.stream()
                     .filter(t -> t.getStartDate().compareTo(startDate) >= 0)

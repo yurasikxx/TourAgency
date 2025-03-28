@@ -1,16 +1,12 @@
 package server.models;
 
-/**
- * Класс, представляющий сущность "Платеж".
- */
 public class Payment {
-    private int id;          // Уникальный идентификатор платежа
-    private int bookingId;   // Идентификатор бронирования
-    private double amount;   // Сумма платежа
-    private String paymentDate; // Дата платежа
-    private String status;   // Статус платежа (например, "оплачено", "ожидание")
+    private int id;
+    private int bookingId;
+    private double amount;
+    private String paymentDate;
+    private String status;
 
-    // Конструкторы
     public Payment() {}
 
     public Payment(int id, int bookingId, double amount, String paymentDate, String status) {
@@ -21,7 +17,6 @@ public class Payment {
         this.status = status;
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }

@@ -1,13 +1,14 @@
 package server.services.impl;
 
 import server.database.DAO.ReviewDAO;
+import server.models.Review;
 import server.models.TourRating;
 import server.services.ReviewService;
-import server.models.Review;
+
 import java.util.List;
 
 public class ReviewServiceImpl implements ReviewService {
-    private ReviewDAO reviewDAO;
+    private final ReviewDAO reviewDAO;
 
     public ReviewServiceImpl(ReviewDAO reviewDAO) {
         this.reviewDAO = reviewDAO;

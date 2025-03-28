@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BookingServiceImpl implements BookingService {
-    private BookingDAO bookingDAO;
+    private final BookingDAO bookingDAO;
 
     public BookingServiceImpl(BookingDAO bookingDAO) {
         this.bookingDAO = bookingDAO;
@@ -41,11 +41,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void deleteBooking(int id) {
-        bookingDAO.deleteBooking(id);
-    }
-
-    @Override
     public Map<Integer, Long> getTourPopularity() {
         List<Booking> allBookings = bookingDAO.getAllBookings();
         return allBookings.stream()
@@ -56,16 +51,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public boolean canUserBookTour(int userId, int tourId) {
-        String status = bookingDAO.getBookingStatus(userId, tourId);
-        // Можно бронировать, если нет текущей брони или предыдущая была отменена
-        return status == null || status.equals("cancelled");
-    }
-
-    @Override
     public boolean hasUserBookedTour(int userId, int tourId) {
         String status = bookingDAO.getBookingStatus(userId, tourId);
-        // Считаем, что тур забронирован, если статус pending или confirmed
         return status != null && (status.equals("pending") || status.equals("confirmed"));
     }
 

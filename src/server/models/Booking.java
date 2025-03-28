@@ -1,16 +1,12 @@
 package server.models;
 
-/**
- * Класс, представляющий сущность "Бронирование".
- */
 public class Booking {
-    private int id;          // Уникальный идентификатор бронирования
-    private int userId;      // Идентификатор пользователя
-    private int tourId;      // Идентификатор тура
-    private String bookingDate; // Дата бронирования
-    private String status;   // Статус бронирования (например, "подтверждено", "отменено")
+    private int id;
+    private int userId;
+    private int tourId;
+    private String bookingDate;
+    private String status;
 
-    // Конструкторы
     public Booking() {}
 
     public Booking(int id, int userId, int tourId, String bookingDate, String status) {
@@ -21,7 +17,6 @@ public class Booking {
         this.status = status;
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }

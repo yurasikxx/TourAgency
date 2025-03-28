@@ -1,7 +1,18 @@
 package server;
 
-import server.models.*;
-import server.services.*;
+import server.models.Booking;
+import server.models.Destination;
+import server.models.Payment;
+import server.models.Review;
+import server.models.Tour;
+import server.models.TourRating;
+import server.models.User;
+import server.services.BookingService;
+import server.services.DestinationService;
+import server.services.PaymentService;
+import server.services.ReviewService;
+import server.services.TourService;
+import server.services.UserService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,10 +57,8 @@ public class ClientHandler implements Runnable {
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("Получено от клиента: " + inputLine);
 
-                // Обработка запроса
                 String response = processRequest(inputLine);
 
-                // Отправка ответа клиенту
                 out.println(response);
             }
         } catch (IOException e) {
@@ -65,12 +74,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    /**
-     * Обрабатывает запрос от клиента и возвращает ответ.
-     *
-     * @param request Запрос от клиента.
-     * @return Ответ сервера.
-     */
     private String processRequest(String request) {
         String[] parts = request.split(" ");
         if (parts.length == 0) {
@@ -150,25 +153,19 @@ public class ClientHandler implements Runnable {
             case "GET_ALL_BOOKINGS_ADMIN":
                 return handleGetAllBookingsAdmin();
             case "HAS_TOURS_FOR_DESTINATION":
-            return handleHasToursForDestination(parts);
+                return handleHasToursForDestination(parts);
             default:
                 return "ERROR: Unknown command";
         }
     }
 
-    /**
-     * Обрабатывает запрос на авторизацию.
-     *
-     * @param parts Массив строк, содержащий команду, логин и пароль.
-     * @return Ответ сервера.
-     */
     private String handleLogin(String[] parts) {
         if (parts.length == 3) {
             String username = parts[1];
             String password = parts[2];
             User user = userService.authenticate(username, password);
             if (user != null) {
-                return "LOGIN_SUCCESS " + user.getRole() + " " + user.getId(); // Возвращаем роль и ID
+                return "LOGIN_SUCCESS " + user.getRole() + " " + user.getId();
             }
         }
         return "LOGIN_FAILURE";
@@ -179,12 +176,10 @@ public class ClientHandler implements Runnable {
             String username = parts[1];
             String password = parts[2];
 
-            // Проверка, существует ли пользователь с таким логином
             if (userService.getUserByUsername(username) != null) {
                 return "REGISTER_FAILURE: Пользователь с таким логином уже существует.";
             }
 
-            // Создание нового пользователя
             User newUser = new User(username, password, "USER", 1000);
             userService.register(newUser);
             return "REGISTER_SUCCESS";
@@ -192,11 +187,6 @@ public class ClientHandler implements Runnable {
         return "REGISTER_FAILURE: Неверный запрос.";
     }
 
-    /**
-     * Обрабатывает запрос на получение списка туров.
-     *
-     * @return Строка с данными о турах.
-     */
     private String handleGetTours() {
         List<Tour> tours = tourService.getAllTours();
         StringBuilder response = new StringBuilder("TOURS ");
@@ -212,12 +202,6 @@ public class ClientHandler implements Runnable {
         return response.toString();
     }
 
-    /**
-     * Обрабатывает запрос на бронирование тура.
-     *
-     * @param parts Массив строк, содержащий команду, ID пользователя, ID тура и дату бронирования.
-     * @return Ответ сервера.
-     */
     private String handleBookTour(String[] parts) {
         if (parts.length == 4) {
             try {
@@ -225,7 +209,6 @@ public class ClientHandler implements Runnable {
                 int tourId = Integer.parseInt(parts[2]);
                 String bookingDate = parts[3];
 
-                // Проверяем текущий статус бронирования
                 String currentStatus = bookingService.getBookingStatus(userId, tourId);
 
                 if (currentStatus != null) {
@@ -234,11 +217,10 @@ public class ClientHandler implements Runnable {
                     } else if (currentStatus.equals("confirmed")) {
                         return "BOOKING_FAILURE: Этот тур уже оплачен и не может быть забронирован повторно";
                     } else if (currentStatus.equals("cancelled")) {
-                        // Можно создать новую бронь, если предыдущая была отменена
+                        System.out.println("Можно создать новую бронь, если предыдущая была отменена");
                     }
                 }
 
-                // Создаем бронирование
                 Booking booking = new Booking(0, userId, tourId, bookingDate, "pending");
                 bookingService.addBooking(booking);
                 return "BOOKING_SUCCESS";
@@ -249,21 +231,16 @@ public class ClientHandler implements Runnable {
         return "ERROR: Invalid booking request";
     }
 
-    /**
-     * Обрабатывает запрос на получение списка бронирований пользователя.
-     *
-     * @param parts Массив строк, содержащий команду и ID пользователя.
-     * @return Строка с данными о бронированиях.
-     */
     private String handleGetBookings(String[] parts) {
         if (parts.length == 2) {
             try {
-                int userId = Integer.parseInt(parts[1]); // ID текущего пользователя
+                int userId = Integer.parseInt(parts[1]);
                 List<Booking> bookings = bookingService.getBookingsByUserId(userId);
                 StringBuilder response = new StringBuilder("BOOKINGS ");
+
                 for (Booking booking : bookings) {
-                    // Получаем тур по ID
                     Tour tour = tourService.getTourById(booking.getTourId());
+
                     if (tour != null) {
                         String status = "";
                         if (booking.getStatus().equals("confirmed")) {
@@ -274,21 +251,20 @@ public class ClientHandler implements Runnable {
                             status = "В ожидании";
                         }
 
-                        // Добавляем данные о бронировании и туре в ответ
                         response.append(booking.getId()).append(",")
-                                .append(tour.getName()).append(",") // Название тура
+                                .append(tour.getName()).append(",")
                                 .append(booking.getBookingDate()).append(",")
-                                .append(tour.getPrice()).append(",") // Стоимость тура
-                                .append(status).append("|"); // Статус на русском
+                                .append(tour.getPrice()).append(",")
+                                .append(status).append("|");
                     } else {
-                        // Если тур не найден, добавляем данные без названия и стоимости
                         response.append(booking.getId()).append(",")
-                                .append("Тур " + booking.getTourId()).append(",") // Заглушка для названия
+                                .append("Тур " + booking.getTourId()).append(",")
                                 .append(booking.getBookingDate()).append(",")
-                                .append(0.0).append(",") // Заглушка для стоимости
-                                .append("В ожидании").append("|"); // Статус по умолчанию
+                                .append(0.0).append(",")
+                                .append("В ожидании").append("|");
                     }
                 }
+
                 return response.toString();
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid user ID";
@@ -312,29 +288,23 @@ public class ClientHandler implements Runnable {
         return "ERROR: Invalid request";
     }
 
-    /**
-     * Обрабатывает запрос на получение списка платежей для бронирования.
-     *
-     * @param parts Массив строк, содержащий команду и ID бронирования.
-     * @return Строка с данными о платежах.
-     */
     private String handleGetPayments(String[] parts) {
         if (parts.length == 2) {
             try {
                 int bookingId = Integer.parseInt(parts[1]);
                 List<Payment> payments = paymentService.getPaymentsByBookingId(bookingId);
                 StringBuilder response = new StringBuilder("PAYMENTS ");
+
                 for (Payment payment : payments) {
-                    // Преобразуем статус на русский язык
                     String status = payment.getStatus().equals("paid") ? "Оплачено" : "В ожидании";
 
-                    // Добавляем данные о платеже в ответ
                     response.append(payment.getId()).append(",")
                             .append(payment.getBookingId()).append(",")
                             .append(payment.getAmount()).append(",")
                             .append(payment.getPaymentDate()).append(",")
-                            .append(status).append("|"); // Статус на русском
+                            .append(status).append("|");
                 }
+
                 return response.toString();
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid booking ID";
@@ -344,49 +314,41 @@ public class ClientHandler implements Runnable {
     }
 
     private String handleCancelBooking(String[] parts) {
-        if (parts.length == 3) { // Добавлен ID пользователя
+        if (parts.length == 3) {
             try {
                 int bookingId = Integer.parseInt(parts[1]);
-                int userId = Integer.parseInt(parts[2]); // ID текущего пользователя
+                int userId = Integer.parseInt(parts[2]);
 
-                // Получаем информацию о бронировании
                 Booking booking = bookingService.getBookingById(bookingId);
                 if (booking == null) {
                     return "ERROR: Бронирование не найдено.";
                 }
 
-                // Проверяем, что бронирование принадлежит текущему пользователю
                 if (booking.getUserId() != userId) {
                     return "ERROR: Бронирование не принадлежит текущему пользователю.";
                 }
 
-                // Получаем информацию о пользователе
                 User user = userService.getUserById(userId);
                 if (user == null) {
                     return "ERROR: Пользователь не найден.";
                 }
 
-                // Получаем стоимость тура
                 Tour tour = tourService.getTourById(booking.getTourId());
                 if (tour == null) {
                     return "ERROR: Тур не найден.";
                 }
 
-                // Вычисляем штраф (5% от стоимости тура)
                 double penalty = tour.getPrice() * 0.05;
 
-                // Проверяем, достаточно ли средств на балансе для штрафа
                 if (user.getBalance() < penalty) {
                     return "ERROR: Недостаточно средств для оплаты штрафа.";
                 }
 
-                // Списываем штраф с баланса пользователя
                 double newBalance = user.getBalance() - penalty;
                 userService.updateBalance(userId, newBalance);
 
-                // Обновляем статус бронирования на "Отменено"
                 booking.setStatus("cancelled");
-                bookingService.updateBooking(booking); // Обновляем бронирование в базе данных
+                bookingService.updateBooking(booking);
 
                 return "CANCEL_SUCCESS";
             } catch (NumberFormatException e) {
@@ -397,44 +359,37 @@ public class ClientHandler implements Runnable {
     }
 
     private String handleMakePayment(String[] parts) {
-        if (parts.length == 5) { // Добавлен ID пользователя
+        if (parts.length == 5) {
             try {
                 int bookingId = Integer.parseInt(parts[1]);
                 double amount = Double.parseDouble(parts[2]);
                 String paymentDate = parts[3];
-                int userId = Integer.parseInt(parts[4]); // ID текущего пользователя
+                int userId = Integer.parseInt(parts[4]);
 
-                // Получаем информацию о бронировании
                 Booking booking = bookingService.getBookingById(bookingId);
                 if (booking == null) {
                     return "ERROR: Бронирование не найдено.";
                 }
 
-                // Проверяем, что бронирование принадлежит текущему пользователю
                 if (booking.getUserId() != userId) {
                     return "ERROR: Бронирование не принадлежит текущему пользователю.";
                 }
 
-                // Получаем информацию о пользователе
                 User user = userService.getUserById(userId);
                 if (user == null) {
                     return "ERROR: Пользователь не найден.";
                 }
 
-                // Проверяем, достаточно ли средств на балансе
                 if (user.getBalance() < amount) {
                     return "ERROR: Недостаточно средств на балансе.";
                 }
 
-                // Списываем средства с баланса пользователя
                 double newBalance = user.getBalance() - amount;
                 userService.updateBalance(userId, newBalance);
 
-                // Обновляем статус бронирования на "confirmed"
                 booking.setStatus("confirmed");
-                bookingService.updateBooking(booking); // Обновляем бронирование в базе данных
+                bookingService.updateBooking(booking);
 
-                // Добавляем запись о платеже
                 Payment payment = new Payment(0, bookingId, amount, paymentDate, "paid");
                 paymentService.addPayment(payment);
 
@@ -446,24 +401,13 @@ public class ClientHandler implements Runnable {
         return "ERROR: Неверный запрос.";
     }
 
-    private String handleGetDestinations() {
-        List<Destination> destinations = destinationService.getAllDestinations();
-        StringBuilder response = new StringBuilder("DESTINATIONS ");
-        for (Destination destination : destinations) {
-            response.append(destination.getId()).append(",")
-                    .append(destination.getName()).append(",")
-                    .append(destination.getCountry()).append(",")
-                    .append(destination.getDescription()).append("|");
-        }
-        return response.toString();
-    }
-
     private String handleGetToursByDestination(String[] parts) {
         if (parts.length == 2) {
             try {
                 int destinationId = Integer.parseInt(parts[1]);
                 List<Tour> tours = tourService.getToursByDestinationId(destinationId);
                 StringBuilder response = new StringBuilder("TOURS ");
+
                 for (Tour tour : tours) {
                     response.append(tour.getId()).append(",")
                             .append(tour.getName()).append(",")
@@ -473,6 +417,7 @@ public class ClientHandler implements Runnable {
                             .append(tour.getEndDate()).append(",")
                             .append(tour.getDestinationId()).append("|");
                 }
+
                 return response.toString();
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid destination ID";
@@ -492,18 +437,21 @@ public class ClientHandler implements Runnable {
                 return "ERROR: Invalid user ID";
             }
         }
+
         return "ERROR: Invalid request";
     }
 
     private String handleGetAllUsers() {
         List<User> users = userService.getAllUsers();
         StringBuilder response = new StringBuilder("USERS ");
+
         for (User user : users) {
             response.append(user.getId()).append(",")
                     .append(user.getUsername()).append(",")
                     .append(user.getRole()).append(",")
                     .append(user.getBalance()).append("|");
         }
+
         return response.toString();
     }
 
@@ -517,6 +465,7 @@ public class ClientHandler implements Runnable {
 
                 User user = new User(username, password, role, balance);
                 userService.register(user);
+
                 return "USER_ADDED";
             } catch (Exception e) {
                 return "ERROR: Invalid user data";
@@ -530,11 +479,10 @@ public class ClientHandler implements Runnable {
             try {
                 int id = Integer.parseInt(parts[1]);
                 String username = parts[2];
-                String password = parts[3]; // Пароль остается прежним
+                String password = parts[3];
                 String role = parts[4];
                 double balance = Double.parseDouble(parts[5]);
 
-                // Проверяем, существует ли пользователь с таким именем (кроме текущего)
                 User existingUser = userService.getUserByUsername(username);
                 if (existingUser != null && existingUser.getId() != id) {
                     return "ERROR: Пользователь с таким именем уже существует";
@@ -542,6 +490,7 @@ public class ClientHandler implements Runnable {
 
                 User user = new User(id, username, password, role, balance);
                 userService.updateUser(user);
+
                 return "USER_UPDATED";
             } catch (Exception e) {
                 return "ERROR: Invalid user data";
@@ -580,10 +529,8 @@ public class ClientHandler implements Runnable {
 
     private String handleAddTour(String[] parts) {
         try {
-            // Объединяем все части после команды
             String input = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
 
-            // Разбиваем по разделителю (используем ~ или --)
             String delimiter = input.contains("--") ? "--" : "~";
             String[] combined = input.split(delimiter, -1);
 
@@ -594,7 +541,6 @@ public class ClientHandler implements Runnable {
             }
 
             try {
-                // Извлекаем параметры
                 String name = combined[0].trim();
                 String description = combined[1].trim();
                 double price = Double.parseDouble(combined[2].trim());
@@ -602,7 +548,6 @@ public class ClientHandler implements Runnable {
                 String endDate = combined[4].trim();
                 int destinationId = Integer.parseInt(combined[5].trim());
 
-                // Валидация
                 if (price <= 0) return "ERROR: Цена должна быть положительной";
                 if (destinationId <= 0) return "ERROR: Неверный ID направления";
                 if (name.isEmpty() || description.isEmpty()) return "ERROR: Название и описание не могут быть пустыми";
@@ -620,10 +565,8 @@ public class ClientHandler implements Runnable {
 
     private String handleUpdateTour(String[] parts) {
         try {
-            // Объединяем все части после команды
             String input = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
 
-            // Разбиваем по разделителю (используем ~ или --)
             String delimiter = input.contains("--") ? "--" : "~";
             String[] combined = input.split(delimiter, -1);
 
@@ -634,7 +577,6 @@ public class ClientHandler implements Runnable {
             }
 
             try {
-                // Извлекаем параметры
                 int id = Integer.parseInt(combined[0].trim());
                 String name = combined[1].trim();
                 String description = combined[2].trim();
@@ -643,7 +585,6 @@ public class ClientHandler implements Runnable {
                 String endDate = combined[5].trim();
                 int destinationId = Integer.parseInt(combined[6].trim());
 
-                // Валидация
                 if (id <= 0) return "ERROR: Неверный ID тура";
                 if (price <= 0) return "ERROR: Цена должна быть положительной";
                 if (destinationId <= 0) return "ERROR: Неверный ID направления";
@@ -653,6 +594,7 @@ public class ClientHandler implements Runnable {
 
                 Tour tour = new Tour(id, name, description, price, startDate, endDate, destinationId);
                 tourService.updateTour(tour);
+
                 return "TOUR_UPDATED";
             } catch (NumberFormatException e) {
                 return "ERROR: Неверный формат числового значения";
@@ -667,24 +609,31 @@ public class ClientHandler implements Runnable {
         if (name == null || name.trim().isEmpty()) {
             return "Название тура не может быть пустым";
         }
+
         if (description == null || description.trim().isEmpty()) {
             return "Описание тура не может быть пустым";
         }
+
         if (price <= 0) {
             return "Стоимость тура должна быть положительным числом";
         }
+
         if (!isValidDate(startDate)) {
             return "Неверный формат даты начала (используйте YYYY-MM-DD)";
         }
+
         if (!isValidDate(endDate)) {
             return "Неверный формат даты окончания (используйте YYYY-MM-DD)";
         }
+
         if (!destinationService.exists(destinationId)) {
             return "Указанное направление не существует";
         }
+
         try {
             LocalDate start = LocalDate.parse(startDate);
             LocalDate end = LocalDate.parse(endDate);
+
             if (end.isBefore(start)) {
                 return "Дата окончания должна быть после даты начала";
             }
@@ -708,6 +657,7 @@ public class ClientHandler implements Runnable {
             try {
                 int id = Integer.parseInt(parts[1]);
                 tourService.deleteTour(id);
+
                 return "TOUR_DELETED";
             } catch (Exception e) {
                 return "ERROR: Invalid tour ID";
@@ -719,13 +669,13 @@ public class ClientHandler implements Runnable {
     private String handleGetAllDestinations() {
         try {
             List<Destination> destinations = destinationService.getAllDestinations();
+
             if (destinations == null || destinations.isEmpty()) {
                 return "DESTINATIONS EMPTY";
             }
 
             StringBuilder response = new StringBuilder("DESTINATIONS ");
             for (Destination destination : destinations) {
-                // Экранируем запятые и вертикальные черты в данных
                 String name = destination.getName().replace(",", "\\,").replace("|", "\\|");
                 String country = destination.getCountry().replace(",", "\\,").replace("|", "\\|");
                 String description = destination.getDescription().replace(",", "\\,").replace("|", "\\|");
@@ -736,7 +686,6 @@ public class ClientHandler implements Runnable {
                         .append(description).append("|");
             }
 
-            // Удаляем последний разделитель
             response.setLength(response.length() - 1);
             return response.toString();
         } catch (Exception e) {
@@ -746,27 +695,24 @@ public class ClientHandler implements Runnable {
 
     private String handleAddDestination(String[] parts) {
         try {
-            // Объединяем все части после команды
             String input = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
 
-            // Разбиваем по запятым, учитывая экранирование
             String[] data = input.split("(?<!\\\\),", -1);
             if (data.length != 3) {
                 return "ERROR: Неверное количество параметров. Ожидается: название,страна,описание";
             }
 
-            // Убираем экранирование
             String name = data[0].replace("\\,", ",").replace("\\|", "|");
             String country = data[1].replace("\\,", ",").replace("\\|", "|");
             String description = data[2].replace("\\,", ",").replace("\\|", "|");
 
-            // Валидация
             if (name.isEmpty() || country.isEmpty() || description.isEmpty()) {
                 return "ERROR: Все поля должны быть заполнены";
             }
 
             Destination destination = new Destination(0, name, country, description);
             destinationService.addDestination(destination);
+
             return "DESTINATION_ADDED";
         } catch (Exception e) {
             return "ERROR: " + e.getMessage();
@@ -775,10 +721,8 @@ public class ClientHandler implements Runnable {
 
     private String handleUpdateDestination(String[] parts) {
         try {
-            // Объединяем все части после команды
             String input = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
 
-            // Разбиваем по запятым, учитывая экранирование
             String[] data = input.split("(?<!\\\\),", -1);
             if (data.length != 4) {
                 return "ERROR: Неверное количество параметров. Ожидается: id,название,страна,описание";
@@ -786,19 +730,19 @@ public class ClientHandler implements Runnable {
 
             int id = Integer.parseInt(data[0]);
 
-            // Убираем экранирование
             String name = data[1].replace("\\,", ",").replace("\\|", "|");
             String country = data[2].replace("\\,", ",").replace("\\|", "|");
             String description = data[3].replace("\\,", ",").replace("\\|", "|");
 
-            // Валидация
             if (id <= 0) return "ERROR: Неверный ID направления";
+
             if (name.isEmpty() || country.isEmpty() || description.isEmpty()) {
                 return "ERROR: Все поля должны быть заполнены";
             }
 
             Destination destination = new Destination(id, name, country, description);
             destinationService.updateDestination(destination);
+
             return "DESTINATION_UPDATED";
         } catch (Exception e) {
             return "ERROR: " + e.getMessage();
@@ -818,10 +762,8 @@ public class ClientHandler implements Runnable {
         return "ERROR: Invalid request";
     }
 
-    // server/ClientHandler.java
     private String handleSearchTours(String[] parts) {
         try {
-            // Парсим параметры (теперь все параметры независимы)
             String searchTerm = parts.length > 1 && !parts[1].equals("null") ? parts[1] : null;
             Double maxPrice = parts.length > 2 && !parts[2].equals("null") ? Double.parseDouble(parts[2]) : null;
             Double minPrice = parts.length > 3 && !parts[3].equals("null") ? Double.parseDouble(parts[3]) : null;
@@ -833,7 +775,6 @@ public class ClientHandler implements Runnable {
                     searchTerm, minPrice, maxPrice, startDate, endDate, sortBy
             );
 
-            // Формирование ответа остается без изменений
             StringBuilder response = new StringBuilder("TOURS ");
             for (Tour tour : tours) {
                 response.append(tour.getId()).append(",")
@@ -844,6 +785,7 @@ public class ClientHandler implements Runnable {
                         .append(tour.getEndDate()).append(",")
                         .append(tour.getDestinationId()).append("|");
             }
+
             return response.toString();
         } catch (Exception e) {
             return "ERROR: " + e.getMessage();
@@ -878,6 +820,7 @@ public class ClientHandler implements Runnable {
 
                 Review review = new Review(0, userId, tourId, rating, comment, reviewDate);
                 reviewService.addReview(review);
+
                 return "REVIEW_ADDED";
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid parameters";
@@ -892,6 +835,7 @@ public class ClientHandler implements Runnable {
                 int tourId = Integer.parseInt(parts[1]);
                 List<Review> reviews = reviewService.getReviewsByTourId(tourId);
                 StringBuilder response = new StringBuilder("REVIEWS ");
+
                 for (Review review : reviews) {
                     response.append(review.getId()).append(",")
                             .append(review.getUserId()).append(",")
@@ -899,6 +843,7 @@ public class ClientHandler implements Runnable {
                             .append(review.getComment().replace(",", "\\,").replace("|", "\\|")).append(",")
                             .append(review.getReviewDate()).append("|");
                 }
+
                 return response.toString();
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid tour ID";
@@ -913,6 +858,7 @@ public class ClientHandler implements Runnable {
                 int userId = Integer.parseInt(parts[1]);
                 int tourId = Integer.parseInt(parts[2]);
                 boolean hasReviewed = reviewService.hasUserReviewedTour(userId, tourId);
+
                 return "HAS_REVIEWED " + hasReviewed;
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid parameters";
@@ -926,11 +872,13 @@ public class ClientHandler implements Runnable {
             try {
                 int tourId = Integer.parseInt(parts[1]);
                 TourRating rating = reviewService.getTourRating(tourId);
+
                 if (rating != null) {
                     return String.format("TOUR_RATING %.2f %d",
                             rating.getAverageRating(),
                             rating.getReviewCount());
                 }
+
                 return "TOUR_RATING 0.00 0";
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid tour ID";
@@ -945,6 +893,7 @@ public class ClientHandler implements Runnable {
                 int userId = Integer.parseInt(parts[1]);
                 int tourId = Integer.parseInt(parts[2]);
                 boolean hasBooked = bookingService.hasUserBookedTour(userId, tourId);
+
                 return "HAS_BOOKED " + hasBooked;
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid parameters";
@@ -959,6 +908,7 @@ public class ClientHandler implements Runnable {
                 int userId = Integer.parseInt(parts[1]);
                 int tourId = Integer.parseInt(parts[2]);
                 String status = bookingService.getBookingStatus(userId, tourId);
+
                 return "BOOKING_STATUS " + (status != null ? status : "none");
             } catch (NumberFormatException e) {
                 return "ERROR: Invalid parameters";
@@ -973,7 +923,6 @@ public class ClientHandler implements Runnable {
             StringBuilder response = new StringBuilder("PAYMENTS_ADMIN ");
 
             for (Payment payment : payments) {
-                // Получаем информацию о бронировании и пользователе
                 Booking booking = bookingService.getBookingById(payment.getBookingId());
                 Tour tour = tourService.getTourById(booking.getTourId());
 
@@ -1011,7 +960,6 @@ public class ClientHandler implements Runnable {
             StringBuilder response = new StringBuilder("BOOKINGS_ADMIN ");
 
             for (Booking booking : bookings) {
-                // Получаем информацию о пользователе и туре
                 User user = userService.getUserById(booking.getUserId());
                 Tour tour = tourService.getTourById(booking.getTourId());
 

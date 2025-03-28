@@ -49,9 +49,6 @@ public class TourController {
     private TableColumn<TourModel, String> endDateColumn;
 
     @FXML
-    private TableColumn<TourModel, String> destinationColumn;
-
-    @FXML
     private Label welcomeLabel;
 
     @FXML
@@ -107,11 +104,6 @@ public class TourController {
 
     private Stage primaryStage;
 
-    /**
-     * Устанавливает primaryStage для контроллера.
-     *
-     * @param primaryStage Основное окно приложения.
-     */
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         loadTours();
@@ -129,7 +121,6 @@ public class TourController {
 
     private void setupUIForRole(String role) {
         if ("ADMIN".equals(role)) {
-            // Показываем только кнопки для администратора
             addReviewButton.setVisible(false);
             bookTourButton.setVisible(false);
             viewBookingsButton.setVisible(false);
@@ -139,7 +130,6 @@ public class TourController {
             manageToursButton.setVisible(true);
             manageDestinationsButton.setVisible(true);
         } else {
-            // Показываем только кнопки для пользователя
             addReviewButton.setVisible(true);
             bookTourButton.setVisible(true);
             viewBookingsButton.setVisible(true);
@@ -156,12 +146,10 @@ public class TourController {
 
     @FXML
     private void initialize() {
-        // Настройка колонок таблицы
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
 
-        // Настройка комбобокса сортировки
         sortComboBox.getItems().addAll(
                 "По умолчанию",
                 "По цене (возрастание)",
@@ -172,7 +160,6 @@ public class TourController {
         );
         sortComboBox.setValue("По умолчанию");
 
-        // Настройка слайдера цены
         priceSlider.setMin(0);
         priceSlider.setMax(10000);
         priceSlider.setValue(10000);
@@ -186,7 +173,6 @@ public class TourController {
             priceLabel.setText(String.format("%.0f", newVal));
         });
 
-        // Форматирование дат
         startDateColumn.setCellFactory(column -> new TableCell<TourModel, String>() {
             @Override
             protected void updateItem(String date, boolean empty) {
@@ -211,7 +197,6 @@ public class TourController {
             }
         });
 
-        // Обработчик выбора тура
         tourTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
@@ -227,13 +212,10 @@ public class TourController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             return date.format(formatter);
         } catch (Exception e) {
-            return dateString; // Возвращаем как есть, если не удалось распарсить
+            return dateString;
         }
     }
 
-    /**
-     * Загружает список туров с сервера.
-     */
     private void loadTours() {
         try (Socket socket = new Socket("localhost", 12345);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -246,7 +228,6 @@ public class TourController {
                 tourTable.getItems().clear();
                 String[] toursData = response.substring(6).split("\\|");
 
-                // Сначала загрузим все направления для маппинга
                 Map<Integer, String> destinations = loadDestinationsMap();
 
                 for (String tourData : toursData) {
@@ -299,9 +280,6 @@ public class TourController {
         return destinations;
     }
 
-    /**
-     * Обрабатывает нажатие кнопки "Забронировать".
-     */
     @FXML
     private void handleBookTour() {
         TourModel selectedTour = tourTable.getSelectionModel().getSelectedItem();
@@ -312,7 +290,6 @@ public class TourController {
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                // Проверяем статус бронирования
                 out.println("GET_BOOKING_STATUS " + currentUser.getId() + " " + selectedTour.getId());
                 String statusResponse = in.readLine();
 
@@ -328,7 +305,6 @@ public class TourController {
                     }
                 }
 
-                // Если брони нет или она отменена - создаем новую
                 String currentDate = LocalDate.now().toString();
                 out.println("BOOK_TOUR " + currentUser.getId() + " " + selectedTour.getId() + " " + currentDate);
                 String response = in.readLine();
@@ -347,18 +323,12 @@ public class TourController {
         }
     }
 
-    /**
-     * Обрабатывает нажатие кнопки "Обновить".
-     */
     @FXML
     private void handleRefresh() {
-        tourTable.getItems().clear(); // Очищаем таблицу
-        loadTours(); // Загружаем туры заново
+        tourTable.getItems().clear();
+        loadTours();
     }
 
-    /**
-     * Обрабатывает нажатие кнопки "Направления".
-     */
     @FXML
     private void handleViewDestinations() {
         try {
@@ -370,7 +340,6 @@ public class TourController {
 
             Scene scene = new Scene(root);
 
-            // Устанавливаем размер сцены
             primaryStage.setScene(scene);
             primaryStage.setWidth(1600);
             primaryStage.setHeight(900);
@@ -415,7 +384,6 @@ public class TourController {
 
             Scene scene = new Scene(root);
 
-            // Устанавливаем размер сцены
             primaryStage.setScene(scene);
             primaryStage.setWidth(1600);
             primaryStage.setHeight(900);
@@ -481,45 +449,15 @@ public class TourController {
         alert.showAndWait();
     }
 
-    // client/controllers/TourController.java
     @FXML
     private void handleSearch() {
         try (Socket socket = new Socket("localhost", 12345);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            // Получаем параметры поиска
-            String searchTerm = searchField.getText();
-            Double maxPrice = priceSlider.getValue() < priceSlider.getMax() ?
-                    priceSlider.getValue() : null;
-            String startDate = startDatePicker.getValue() != null ?
-                    startDatePicker.getValue().toString() : "null";
-            String endDate = endDatePicker.getValue() != null ?
-                    endDatePicker.getValue().toString() : "null";
-
-            // Определяем параметр сортировки
-            String sortBy;
-            switch (sortComboBox.getValue()) {
-                case "По цене (возрастание)": sortBy = "price_asc"; break;
-                case "По цене (убывание)": sortBy = "price_desc"; break;
-                case "По дате (возрастание)": sortBy = "date_asc"; break;
-                case "По дате (убывание)": sortBy = "date_desc"; break;
-                case "По популярности": sortBy = "popular"; break;
-                default: sortBy = "null";
-            }
-
-            // Формируем команду с учетом всех возможных комбинаций фильтров
-            String command = String.format("SEARCH_TOURS %s %s %s %s %s %s",
-                    searchTerm.isEmpty() ? "null" : searchTerm,
-                    maxPrice != null ? String.format("%.2f", maxPrice) : "null",
-                    "null", // minPrice (не используем в интерфейсе)
-                    startDate,
-                    endDate,
-                    sortBy);
-
+            String command = getString();
             out.println(command);
 
-            // Обработка ответа остается без изменений
             String response = in.readLine();
             if (response.startsWith("TOURS")) {
                 tourTable.getItems().clear();
@@ -550,6 +488,34 @@ public class TourController {
         }
     }
 
+    private String getString() {
+        String searchTerm = searchField.getText();
+        Double maxPrice = priceSlider.getValue() < priceSlider.getMax() ?
+                priceSlider.getValue() : null;
+        String startDate = startDatePicker.getValue() != null ?
+                startDatePicker.getValue().toString() : "null";
+        String endDate = endDatePicker.getValue() != null ?
+                endDatePicker.getValue().toString() : "null";
+
+        String sortBy;
+        switch (sortComboBox.getValue()) {
+            case "По цене (возрастание)": sortBy = "price_asc"; break;
+            case "По цене (убывание)": sortBy = "price_desc"; break;
+            case "По дате (возрастание)": sortBy = "date_asc"; break;
+            case "По дате (убывание)": sortBy = "date_desc"; break;
+            case "По популярности": sortBy = "popular"; break;
+            default: sortBy = "null";
+        }
+
+        return String.format("SEARCH_TOURS %s %s %s %s %s %s",
+                searchTerm.isEmpty() ? "null" : searchTerm,
+                maxPrice != null ? String.format("%.2f", maxPrice) : "null",
+                "null",
+                startDate,
+                endDate,
+                sortBy);
+    }
+
     @FXML
     private void handleResetFilters() {
         searchField.clear();
@@ -557,10 +523,9 @@ public class TourController {
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
         sortComboBox.setValue("По умолчанию");
-        handleRefresh(); // Загружаем все туры без фильтров
+        handleRefresh();
     }
 
-    // Добавим новые методы
     private void loadTourReviews(int tourId) {
         try (Socket socket = new Socket("localhost", 12345);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -589,7 +554,6 @@ public class TourController {
                 }
             }
 
-            // Загрузка рейтинга тура
             out.println("GET_TOUR_RATING " + tourId);
             response = in.readLine();
             if (response.startsWith("TOUR_RATING")) {
@@ -635,7 +599,6 @@ public class TourController {
                     boolean hasReviewed = Boolean.parseBoolean(response.split(" ")[1]);
                     addReviewButton.setVisible(!hasReviewed);
 
-                    // Проверяем, был ли тур забронирован пользователем
                     out.println("HAS_BOOKED " + currentUser.getId() + " " + tourId);
                     response = in.readLine();
                     boolean hasBooked = response.startsWith("HAS_BOOKED true");
@@ -657,10 +620,8 @@ public class TourController {
             dialog.setTitle("Добавить отзыв");
             dialog.setHeaderText("Оставьте отзыв о туре: " + selectedTour.getName());
 
-            // Установка кнопок
             dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-            // Создание содержимого
             GridPane grid = new GridPane();
             grid.setHgap(10);
             grid.setVgap(10);
@@ -681,7 +642,6 @@ public class TourController {
 
             dialog.getDialogPane().setContent(grid);
 
-            // Преобразование результата
             dialog.setResultConverter(dialogButton -> {
                 if (dialogButton == ButtonType.OK) {
                     return new Pair<>(ratingCombo.getValue(), commentField.getText());

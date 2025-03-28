@@ -6,7 +6,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
@@ -16,22 +20,30 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class UserManagementController {
-    @FXML private TableView<UserModel> usersTable;
-    @FXML private TableColumn<UserModel, Integer> idColumn;
-    @FXML private TableColumn<UserModel, String> usernameColumn;
-    @FXML private TableColumn<UserModel, String> roleColumn;
-    @FXML private TableColumn<UserModel, Double> balanceColumn;
+    @FXML
+    private TableView<UserModel> usersTable;
+    @FXML
+    private TableColumn<UserModel, Integer> idColumn;
+    @FXML
+    private TableColumn<UserModel, String> usernameColumn;
+    @FXML
+    private TableColumn<UserModel, String> roleColumn;
+    @FXML
+    private TableColumn<UserModel, Double> balanceColumn;
 
-    @FXML private TextField usernameField;
-    @FXML private ComboBox<String> roleComboBox;
-    @FXML private TextField balanceField;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private ComboBox<String> roleComboBox;
+    @FXML
+    private TextField balanceField;
 
     private Stage primaryStage;
-    private UserModel currentAdmin; // Текущий администратор
+    private UserModel currentAdmin;
 
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.currentAdmin = MainClient.getCurrentUser(); // Сохраняем текущего пользователя
+        this.currentAdmin = MainClient.getCurrentUser();
         initializeTable();
         loadUsers();
         setupRoleComboBox();
@@ -103,7 +115,6 @@ public class UserManagementController {
             String role = roleComboBox.getValue();
             double balance = Double.parseDouble(balanceField.getText());
 
-            // Валидация
             if (username.isEmpty()) {
                 showAlert("Ошибка", "Логин не может быть пустым");
                 return;
@@ -114,20 +125,16 @@ public class UserManagementController {
                 return;
             }
 
-            // Проверка на уникальность имени пользователя
             if (isUsernameExists(username)) {
                 showAlert("Ошибка", "Пользователь с таким именем уже существует");
                 return;
             }
 
-            // Пароль делаем таким же как логин
-            String password = username;
-
             try (Socket socket = new Socket("localhost", 12345);
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                out.println("ADD_USER " + username + " " + password + " " + role + " " + balance);
+                out.println("ADD_USER " + username + " " + username + " " + role + " " + balance);
                 String response = in.readLine();
 
                 if ("USER_ADDED".equals(response)) {
@@ -154,7 +161,6 @@ public class UserManagementController {
                 String newRole = roleComboBox.getValue();
                 double newBalance = Double.parseDouble(balanceField.getText());
 
-                // Валидация
                 if (newUsername.isEmpty()) {
                     showAlert("Ошибка", "Логин не может быть пустым");
                     return;
@@ -165,7 +171,6 @@ public class UserManagementController {
                     return;
                 }
 
-                // Проверяем, не пытаемся ли изменить на существующее имя (кроме себя)
                 if (!newUsername.equals(selectedUser.getUsername()) && isUsernameExists(newUsername)) {
                     showAlert("Ошибка", "Пользователь с таким именем уже существует");
                     return;
@@ -175,7 +180,6 @@ public class UserManagementController {
                      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                    // При обновлении пароль не меняем (используем старый)
                     out.println("UPDATE_USER " + selectedUser.getId() + " " + newUsername + " " +
                             selectedUser.getUsername() + " " + newRole + " " + newBalance);
                     String response = in.readLine();
@@ -202,7 +206,6 @@ public class UserManagementController {
     private void handleDeleteUser() {
         UserModel selectedUser = usersTable.getSelectionModel().getSelectedItem();
         if (selectedUser != null) {
-            // Проверяем, не пытается ли администратор удалить самого себя
             if (selectedUser.getId() == currentAdmin.getId()) {
                 showAlert("Ошибка", "Вы не можете удалить самого себя");
                 return;

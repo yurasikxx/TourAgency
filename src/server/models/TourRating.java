@@ -1,5 +1,8 @@
 package server.models;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class TourRating {
     private int tourId;
     private double averageRating;
@@ -9,11 +12,10 @@ public class TourRating {
 
     public TourRating(int tourId, double averageRating, int reviewCount) {
         this.tourId = tourId;
-        this.averageRating = averageRating;
-        this.reviewCount = reviewCount;
+        setAverageRating(averageRating);
+        setReviewCount(reviewCount);
     }
 
-    // Геттеры и сеттеры
     public int getTourId() {
         return tourId;
     }
@@ -23,11 +25,15 @@ public class TourRating {
     }
 
     public double getAverageRating() {
-        return averageRating;
+        return BigDecimal.valueOf(averageRating)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     public void setAverageRating(double averageRating) {
-        this.averageRating = averageRating;
+        this.averageRating = BigDecimal.valueOf(averageRating)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     public int getReviewCount() {
@@ -35,6 +41,18 @@ public class TourRating {
     }
 
     public void setReviewCount(int reviewCount) {
+        if (reviewCount < 0) {
+            throw new IllegalArgumentException("Review count cannot be negative");
+        }
         this.reviewCount = reviewCount;
+    }
+
+    @Override
+    public String toString() {
+        return "TourRating{" +
+                "tourId=" + tourId +
+                ", averageRating=" + getAverageRating() +
+                ", reviewCount=" + reviewCount +
+                '}';
     }
 }

@@ -1,8 +1,23 @@
 package server;
 
-import server.database.DAO.impl.*;
-import server.services.*;
-import server.services.impl.*;
+import server.database.DAO.impl.BookingDAOImpl;
+import server.database.DAO.impl.DestinationDAOImpl;
+import server.database.DAO.impl.PaymentDAOImpl;
+import server.database.DAO.impl.ReviewDAOImpl;
+import server.database.DAO.impl.TourDAOImpl;
+import server.database.DAO.impl.UserDAOImpl;
+import server.services.BookingService;
+import server.services.DestinationService;
+import server.services.PaymentService;
+import server.services.ReviewService;
+import server.services.TourService;
+import server.services.UserService;
+import server.services.impl.BookingServiceImpl;
+import server.services.impl.DestinationServiceImpl;
+import server.services.impl.PaymentServiceImpl;
+import server.services.impl.ReviewServiceImpl;
+import server.services.impl.TourServiceImpl;
+import server.services.impl.UserServiceImpl;
 import server.utils.ConfigLoader;
 
 import java.io.IOException;
@@ -16,15 +31,14 @@ public class MainServer {
     private ExecutorService threadPool;
     private boolean isRunning;
 
-    private UserService userService;
-    private TourService tourService;
-    private BookingService bookingService;
-    private PaymentService paymentService;
-    private DestinationService destinationService;
-    private ReviewService reviewService;
+    private final UserService userService;
+    private final TourService tourService;
+    private final BookingService bookingService;
+    private final PaymentService paymentService;
+    private final DestinationService destinationService;
+    private final ReviewService reviewService;
 
     public MainServer() {
-        // Инициализация сервисов
         this.userService = new UserServiceImpl(new UserDAOImpl());
         this.tourService = new TourServiceImpl(new TourDAOImpl());
         this.bookingService = new BookingServiceImpl(new BookingDAOImpl());
@@ -44,11 +58,11 @@ public class MainServer {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Новое подключение: " + clientSocket.getInetAddress());
 
-                // Создаем ClientHandler с передачей сервисов
                 ClientHandler clientHandler = new ClientHandler(
                         clientSocket, userService, tourService, bookingService,
                         paymentService, destinationService, reviewService
                 );
+
                 threadPool.execute(clientHandler);
             }
         } catch (IOException e) {
@@ -64,9 +78,11 @@ public class MainServer {
             if (serverSocket != null) {
                 serverSocket.close();
             }
+
             if (threadPool != null) {
                 threadPool.shutdown();
             }
+
             System.out.println("Сервер остановлен.");
         } catch (IOException e) {
             System.err.println("Ошибка при остановке сервера: " + e.getMessage());

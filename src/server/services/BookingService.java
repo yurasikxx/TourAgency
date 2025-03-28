@@ -7,14 +7,20 @@ import java.util.Map;
 
 public interface BookingService {
     Booking getBookingById(int id);
+
     List<Booking> getBookingsByUserId(int userId);
+
     List<Booking> getAllBookings();
+
     void addBooking(Booking booking);
+
     void updateBooking(Booking booking);
-    void deleteBooking(int id);
+
     Map<Integer, Long> getTourPopularity();
+
     boolean hasUserBookedTour(int userId, int tourId);
-    boolean canUserBookTour(int userId, int tourId);
+
     String getBookingStatus(int userId, int tourId);
+
     boolean hasBookingsForTour(int tourId);
 }

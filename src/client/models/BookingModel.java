@@ -9,7 +9,8 @@ public class BookingModel {
     private double price;
     private double amount;
 
-    public BookingModel() {}
+    public BookingModel() {
+    }
 
     public BookingModel(int id, String tourName, String bookingDate, double price, String status) {
         this.id = id;
@@ -18,6 +19,7 @@ public class BookingModel {
         this.price = price;
         this.status = status;
     }
+
     public BookingModel(int id, String userName, String tourName,
                         String bookingDate, String status, double amount) {
         this.id = id;
@@ -44,7 +46,6 @@ public class BookingModel {
         this.amount = amount;
     }
 
-    // Геттеры
     public int getId() {
         return id;
     }

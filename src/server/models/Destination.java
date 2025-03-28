@@ -1,15 +1,11 @@
 package server.models;
 
-/**
- * Класс, представляющий сущность "Направление".
- */
 public class Destination {
-    private int id;          // Уникальный идентификатор направления
-    private String name;     // Название направления
-    private String country;  // Страна
-    private String description; // Описание направления
+    private int id;
+    private String name;
+    private String country;
+    private String description;
 
-    // Конструкторы
     public Destination() {}
 
     public Destination(int id, String name, String country, String description) {
@@ -19,7 +15,6 @@ public class Destination {
         this.description = description;
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }

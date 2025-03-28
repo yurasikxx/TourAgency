@@ -9,7 +9,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TourDAOImpl implements TourDAO {
@@ -60,39 +59,6 @@ public class TourDAOImpl implements TourDAO {
             e.printStackTrace();
         }
         return tours;
-    }
-
-    @Override
-    public List<Tour> getToursByDestinationId(int destinationId) {
-        List<Tour> tours = new ArrayList<>();
-        String query = "SELECT * FROM Tours WHERE destination_id = ?"; // SQL-запрос
-
-        try (Connection connection = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            // Устанавливаем параметр destinationId в запрос
-            statement.setInt(1, destinationId);
-
-            // Выполняем запрос
-            ResultSet resultSet = statement.executeQuery();
-
-            // Обрабатываем результат
-            while (resultSet.next()) {
-                Tour tour = new Tour(
-                        resultSet.getInt("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString("description"),
-                        resultSet.getDouble("price"),
-                        resultSet.getString("start_date"),
-                        resultSet.getString("end_date"),
-                        resultSet.getInt("destination_id")
-                );
-                tours.add(tour); // Добавляем тур в список
-            }
-        } catch (SQLException e) {
-            e.printStackTrace(); // Обработка ошибок
-        }
-
-        return tours; // Возвращаем список туров
     }
 
     @Override

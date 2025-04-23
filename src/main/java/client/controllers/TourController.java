@@ -169,9 +169,7 @@ public class TourController {
         priceSlider.setMinorTickCount(4);
         priceSlider.setBlockIncrement(500);
 
-        priceSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            priceLabel.setText(String.format("%.0f", newVal));
-        });
+        priceSlider.valueProperty().addListener((obs, oldVal, newVal) -> priceLabel.setText(String.format("%.0f", newVal)));
 
         startDateColumn.setCellFactory(column -> new TableCell<TourModel, String>() {
             @Override
@@ -539,17 +537,22 @@ public class TourController {
             if (response.startsWith("REVIEWS")) {
                 String[] reviewsData = response.substring(7).split("\\|");
                 for (String reviewData : reviewsData) {
-                    String[] fields = reviewData.split(",(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
-                    if (fields.length >= 6) {
-                        ReviewModel review = new ReviewModel(
-                                Integer.parseInt(fields[0]),
-                                Integer.parseInt(fields[1]),
-                                fields[2],
-                                Integer.parseInt(fields[3]),
-                                fields[4],
-                                fields[5]
-                        );
-                        addReviewToUI(review);
+                    try {
+                        String[] fields = reviewData.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+                        if (fields.length >= 6) {
+                            ReviewModel review = new ReviewModel(
+                                    Integer.parseInt(fields[0].trim()),
+                                    Integer.parseInt(fields[1].trim()),
+                                    fields[2].replace("\"", "").replace("\\,", ",").replace("\\|", "|"),
+                                    Integer.parseInt(fields[3].trim()),
+                                    fields[4].replace("\"", "").replace("\\,", ",").replace("\\|", "|"),
+                                    fields[5].trim()
+                            );
+                            addReviewToUI(review);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Ошибка парсинга отзыва: " + reviewData);
+                        e.printStackTrace();
                     }
                 }
             }
@@ -659,11 +662,17 @@ public class TourController {
                     UserModel currentUser = MainClient.getCurrentUser();
                     String currentDate = java.time.LocalDate.now().toString();
 
-                    String command = String.format("ADD_REVIEW %d %d %d %s %s",
+                    String escapedComment = ratingAndComment.getValue()
+                            .replace("\\", "\\\\")
+                            .replace(",", "\\,")
+                            .replace("|", "\\|")
+                            .replace("\"", "\\\"");
+
+                    String command = String.format("ADD_REVIEW %d %d %d \"%s\" %s",
                             currentUser.getId(),
                             selectedTour.getId(),
                             ratingAndComment.getKey(),
-                            ratingAndComment.getValue().replace(" ", "~"),
+                            escapedComment,
                             currentDate);
 
                     out.println(command);
@@ -672,9 +681,12 @@ public class TourController {
                     if ("REVIEW_ADDED".equals(response)) {
                         loadTourReviews(selectedTour.getId());
                         checkIfUserCanReview(selectedTour.getId());
+                    } else {
+                        showAlert("Ошибка", "Не удалось добавить отзыв: " + response);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                    showAlert("Ошибка", "Ошибка подключения к серверу");
                 }
             });
         }

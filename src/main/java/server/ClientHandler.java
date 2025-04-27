@@ -19,21 +19,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 public class ClientHandler implements Runnable {
-    private Socket clientSocket;
+    private final Socket clientSocket;
     private BufferedReader in;
     private PrintWriter out;
 
-    private UserService userService;
-    private TourService tourService;
-    private BookingService bookingService;
-    private PaymentService paymentService;
-    private DestinationService destinationService;
-    private ReviewService reviewService;
+    private final UserService userService;
+    private final TourService tourService;
+    private final BookingService bookingService;
+    private final PaymentService paymentService;
+    private final DestinationService destinationService;
+    private final ReviewService reviewService;
 
     public ClientHandler(Socket socket, UserService authService, TourService tourService,
                          BookingService bookingService, PaymentService paymentService,
@@ -101,6 +100,7 @@ public class ClientHandler implements Runnable {
             case "MAKE_PAYMENT":
                 return handleMakePayment(parts);
             case "GET_DESTINATIONS":
+            case "GET_ALL_DESTINATIONS":
                 return handleGetAllDestinations();
             case "GET_TOURS_BY_DESTINATION":
                 return handleGetToursByDestination(parts);
@@ -122,8 +122,6 @@ public class ClientHandler implements Runnable {
                 return handleUpdateTour(parts);
             case "DELETE_TOUR":
                 return handleDeleteTour(parts);
-            case "GET_ALL_DESTINATIONS":
-                return handleGetAllDestinations();
             case "ADD_DESTINATION":
                 return handleAddDestination(parts);
             case "UPDATE_DESTINATION":
@@ -172,15 +170,19 @@ public class ClientHandler implements Runnable {
     }
 
     private String handleRegister(String[] parts) {
-        if (parts.length == 3) {
+        if (parts.length == 9) {
             String username = parts[1];
             String password = parts[2];
+            String fullName = parts[3] + " " + parts[4] + " " + parts[5];
+            int age = Integer.parseInt(parts[6]);
+            String email = parts[7];
+            String phone = parts[8];
 
             if (userService.getUserByUsername(username) != null) {
                 return "REGISTER_FAILURE: Пользователь с таким логином уже существует.";
             }
 
-            User newUser = new User(username, password, "USER", 1000);
+            User newUser = new User(username, password, "USER", 1000, fullName, age, email, phone);
             userService.register(newUser);
             return "REGISTER_SUCCESS";
         }
@@ -212,12 +214,14 @@ public class ClientHandler implements Runnable {
                 String currentStatus = bookingService.getBookingStatus(userId, tourId);
 
                 if (currentStatus != null) {
-                    if (currentStatus.equals("pending")) {
-                        return "BOOKING_FAILURE: У вас уже есть бронь на этот тур (статус: в ожидании)";
-                    } else if (currentStatus.equals("confirmed")) {
-                        return "BOOKING_FAILURE: Этот тур уже оплачен и не может быть забронирован повторно";
-                    } else if (currentStatus.equals("cancelled")) {
-                        System.out.println("Можно создать новую бронь, если предыдущая была отменена");
+                    switch (currentStatus) {
+                        case "pending":
+                            return "BOOKING_FAILURE: У вас уже есть бронь на этот тур (статус: в ожидании)";
+                        case "confirmed":
+                            return "BOOKING_FAILURE: Этот тур уже оплачен и не может быть забронирован повторно";
+                        case "cancelled":
+                            System.out.println("Можно создать новую бронь, если предыдущая была отменена");
+                            break;
                     }
                 }
 
@@ -242,7 +246,7 @@ public class ClientHandler implements Runnable {
                     Tour tour = tourService.getTourById(booking.getTourId());
 
                     if (tour != null) {
-                        String status = "";
+                        String status;
                         if (booking.getStatus().equals("confirmed")) {
                             status = "Подтверждено";
                         } else if (booking.getStatus().equals("cancelled")) {
@@ -257,8 +261,7 @@ public class ClientHandler implements Runnable {
                                 .append(tour.getPrice()).append(",")
                                 .append(status).append("|");
                     } else {
-                        response.append(booking.getId()).append(",")
-                                .append("Тур " + booking.getTourId()).append(",")
+                        response.append(booking.getId()).append(",").append("Тур ").append(booking.getTourId()).append(",")
                                 .append(booking.getBookingDate()).append(",")
                                 .append(0.0).append(",")
                                 .append("В ожидании").append("|");
@@ -449,21 +452,29 @@ public class ClientHandler implements Runnable {
             response.append(user.getId()).append(",")
                     .append(user.getUsername()).append(",")
                     .append(user.getRole()).append(",")
-                    .append(user.getBalance()).append("|");
+                    .append(user.getBalance()).append(",")
+                    .append(user.getFullName()).append(",")
+                    .append(user.getAge()).append(",")
+                    .append(user.getEmail()).append(",")
+                    .append(user.getPhone()).append("|");
         }
 
         return response.toString();
     }
 
     private String handleAddUser(String[] parts) {
-        if (parts.length == 5) {
+        if (parts.length == 11) {
             try {
                 String username = parts[1];
                 String password = parts[2];
                 String role = parts[3];
                 double balance = Double.parseDouble(parts[4]);
+                String fullName = parts[5] + " " + parts[6] + " " + parts[7];
+                int age = Integer.parseInt(parts[8]);
+                String email = parts[9];
+                String phone = parts[10];
 
-                User user = new User(username, password, role, balance);
+                User user = new User(username, password, role, balance, fullName, age, email, phone);
                 userService.register(user);
 
                 return "USER_ADDED";
@@ -475,20 +486,24 @@ public class ClientHandler implements Runnable {
     }
 
     private String handleUpdateUser(String[] parts) {
-        if (parts.length == 6) {
+        if (parts.length == 12) {
             try {
                 int id = Integer.parseInt(parts[1]);
                 String username = parts[2];
                 String password = parts[3];
                 String role = parts[4];
                 double balance = Double.parseDouble(parts[5]);
+                String fullName = parts[6] + " " + parts[7] + " " + parts[8];
+                int age = Integer.parseInt(parts[9]);
+                String email = parts[10];
+                String phone = parts[11];
 
                 User existingUser = userService.getUserByUsername(username);
                 if (existingUser != null && existingUser.getId() != id) {
                     return "ERROR: Пользователь с таким именем уже существует";
                 }
 
-                User user = new User(id, username, password, role, balance);
+                User user = new User(id, username, password, role, balance, fullName, age, email, phone);
                 userService.updateUser(user);
 
                 return "USER_UPDATED";
@@ -601,54 +616,6 @@ public class ClientHandler implements Runnable {
             }
         } catch (Exception e) {
             return "ERROR: " + e.getMessage();
-        }
-    }
-
-    private String validateTourData(String name, String description, double price,
-                                    String startDate, String endDate, int destinationId) {
-        if (name == null || name.trim().isEmpty()) {
-            return "Название тура не может быть пустым";
-        }
-
-        if (description == null || description.trim().isEmpty()) {
-            return "Описание тура не может быть пустым";
-        }
-
-        if (price <= 0) {
-            return "Стоимость тура должна быть положительным числом";
-        }
-
-        if (!isValidDate(startDate)) {
-            return "Неверный формат даты начала (используйте YYYY-MM-DD)";
-        }
-
-        if (!isValidDate(endDate)) {
-            return "Неверный формат даты окончания (используйте YYYY-MM-DD)";
-        }
-
-        if (!destinationService.exists(destinationId)) {
-            return "Указанное направление не существует";
-        }
-
-        try {
-            LocalDate start = LocalDate.parse(startDate);
-            LocalDate end = LocalDate.parse(endDate);
-
-            if (end.isBefore(start)) {
-                return "Дата окончания должна быть после даты начала";
-            }
-        } catch (Exception e) {
-            return "Неверный формат даты";
-        }
-        return null;
-    }
-
-    private boolean isValidDate(String date) {
-        try {
-            LocalDate.parse(date);
-            return true;
-        } catch (Exception e) {
-            return false;
         }
     }
 

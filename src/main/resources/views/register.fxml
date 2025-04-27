@@ -10,31 +10,36 @@
           stylesheets="@../styles.css"
           styleClass="root">
 
-    <!-- Заголовок -->
     <Text text="Регистрация" GridPane.columnSpan="2" GridPane.rowIndex="0" GridPane.columnIndex="0"
           styleClass="title"/>
 
-    <!-- Поле для логина -->
     <Label text="Логин:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-    <TextField fx:id="usernameField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    <TextField fx:id="usernameField" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="300"/>
 
-    <!-- Поле для пароля -->
     <Label text="Пароль:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-    <PasswordField fx:id="passwordField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    <PasswordField fx:id="passwordField" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="300"/>
 
-    <!-- Поле для подтверждения пароля -->
-    <Label text="Подтвердите пароль:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-    <PasswordField fx:id="confirmPasswordField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+    <Label text="Подтвердите пароль:" GridPane.rowIndex="3" GridPane.columnIndex="0" prefWidth="300"/>
+    <PasswordField fx:id="confirmPasswordField" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="300"/>
 
-    <!-- Кнопка регистрации -->
-    <Button text="Зарегистрироваться" onAction="#handleRegister" GridPane.rowIndex="4" GridPane.columnIndex="1"
+    <Label text="ФИО:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+    <TextField fx:id="fullNameField" GridPane.rowIndex="4" GridPane.columnIndex="1" prefWidth="300"/>
+
+    <Label text="Возраст:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+    <TextField fx:id="ageField" GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="300"/>
+
+    <Label text="Email:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+    <TextField fx:id="emailField" GridPane.rowIndex="6" GridPane.columnIndex="1" prefWidth="300"/>
+
+    <Label text="Телефон:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+    <TextField fx:id="phoneField" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="300"/>
+
+    <Button text="Зарегистрироваться" onAction="#handleRegister" GridPane.rowIndex="8" GridPane.columnIndex="1"
             styleClass="button"/>
 
-    <!-- Кнопка для возврата к авторизации -->
-    <Button text="Назад" onAction="#handleBackToLogin" GridPane.rowIndex="5" GridPane.columnIndex="1"
+    <Button text="Назад" onAction="#handleBackToLogin" GridPane.rowIndex="9" GridPane.columnIndex="1"
             styleClass="button"/>
 
-    <!-- Сообщение об ошибке -->
-    <Label fx:id="errorLabel" textFill="RED" GridPane.columnSpan="2" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+    <Label fx:id="errorLabel" textFill="RED" GridPane.columnSpan="2" GridPane.rowIndex="10" GridPane.columnIndex="0"/>
 
 </GridPane>

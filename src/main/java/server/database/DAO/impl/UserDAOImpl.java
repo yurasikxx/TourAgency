@@ -20,16 +20,19 @@ public class UserDAOImpl implements UserDAO {
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, id);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return new User(
-                            resultSet.getInt("id"),
-                            resultSet.getString("username"),
-                            resultSet.getString("password"),
-                            resultSet.getString("role"),
-                            resultSet.getDouble("balance")
-                    );
-                }
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new User(
+                        resultSet.getInt("id"),
+                        resultSet.getString("username"),
+                        resultSet.getString("password"),
+                        resultSet.getString("role"),
+                        resultSet.getDouble("balance"),
+                        resultSet.getString("full_name"),
+                        resultSet.getInt("age"),
+                        resultSet.getString("email"),
+                        resultSet.getString("phone")
+                );
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -51,7 +54,11 @@ public class UserDAOImpl implements UserDAO {
                         resultSet.getString("username"),
                         resultSet.getString("password"),
                         resultSet.getString("role"),
-                        resultSet.getDouble("balance")
+                        resultSet.getDouble("balance"),
+                        resultSet.getString("full_name"),
+                        resultSet.getInt("age"),
+                        resultSet.getString("email"),
+                        resultSet.getString("phone")
                 );
             }
         } catch (SQLException e) {
@@ -75,7 +82,11 @@ public class UserDAOImpl implements UserDAO {
                         resultSet.getString("username"),
                         resultSet.getString("password"),
                         resultSet.getString("role"),
-                        resultSet.getDouble("balance")
+                        resultSet.getDouble("balance"),
+                        resultSet.getString("full_name"),
+                        resultSet.getInt("age"),
+                        resultSet.getString("email"),
+                        resultSet.getString("phone")
                 ));
             }
         } catch (SQLException e) {
@@ -86,13 +97,17 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void addUser(User user) {
-        String query = "INSERT INTO Users (username, password, role, balance) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO Users (username, password, role, balance, full_name, age, email, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getRole());
             statement.setDouble(4, user.getBalance());
+            statement.setString(5, user.getFullName());
+            statement.setInt(6, user.getAge());
+            statement.setString(7, user.getEmail());
+            statement.setString(8, user.getPhone());
             statement.executeUpdate();
             System.out.println("Пользователь успешно добавлен в базу данных: " + user.getUsername());
         } catch (SQLException e) {
@@ -103,14 +118,18 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void updateUser(User user) {
-        String query = "UPDATE Users SET username = ?, password = ?, role = ?, balance = ? WHERE id = ?";
+        String query = "UPDATE Users SET username = ?, password = ?, role = ?, balance = ?, full_name = ?, age = ?, email = ?, phone = ? WHERE id = ?";
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getRole());
             statement.setDouble(4, user.getBalance());
-            statement.setInt(5, user.getId());
+            statement.setString(5, user.getFullName());
+            statement.setInt(6, user.getAge());
+            statement.setString(7, user.getEmail());
+            statement.setString(8, user.getPhone());
+            statement.setInt(9, user.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

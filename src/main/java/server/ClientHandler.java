@@ -152,6 +152,8 @@ public class ClientHandler implements Runnable {
                 return handleGetAllBookingsAdmin();
             case "HAS_TOURS_FOR_DESTINATION":
                 return handleHasToursForDestination(parts);
+            case "UPDATE_PROFILE":
+                return handleUpdateProfile(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -163,7 +165,14 @@ public class ClientHandler implements Runnable {
             String password = parts[2];
             User user = userService.authenticate(username, password);
             if (user != null) {
-                return "LOGIN_SUCCESS " + user.getRole() + " " + user.getId();
+                return String.format("LOGIN_SUCCESS %s %d %.2f %s %d %s %s",
+                        user.getRole(),
+                        user.getId(),
+                        user.getBalance(),
+                        user.getFullName(),
+                        user.getAge(),
+                        user.getEmail(),
+                        user.getPhone());
             }
         }
         return "LOGIN_FAILURE";
@@ -955,5 +964,43 @@ public class ClientHandler implements Runnable {
             }
         }
         return "ERROR: Invalid request";
+    }
+
+    private String handleUpdateProfile(String[] parts) {
+        if (parts.length == 9) {
+            try {
+                int userId = Integer.parseInt(parts[1]);
+                String fullName = parts[2].replace("~", " ");
+                int age = Integer.parseInt(parts[3]);
+                String email = parts[4];
+                String phone = parts[5];
+                String oldPassword = parts[6];
+                String newPassword = parts[7];
+
+                User user = userService.getUserById(userId);
+                if (user == null) {
+                    return "ERROR: Пользователь не найден";
+                }
+
+                if (!newPassword.isEmpty() && !user.getPassword().equals(oldPassword)) {
+                    return "ERROR: Неверный старый пароль";
+                }
+
+                user.setFullName(fullName);
+                user.setAge(age);
+                user.setEmail(email);
+                user.setPhone(phone);
+
+                if (!newPassword.isEmpty()) {
+                    user.setPassword(newPassword);
+                }
+
+                userService.updateUser(user);
+                return "PROFILE_UPDATED";
+            } catch (NumberFormatException e) {
+                return "ERROR: Неверный формат данных";
+            }
+        }
+        return "ERROR: Неверный запрос";
     }
 }

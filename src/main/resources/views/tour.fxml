@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
 <BorderPane fx:controller="client.controllers.TourController"
             xmlns:fx="http://javafx.com/fxml/1"
             prefWidth="1600" prefHeight="900"
@@ -87,7 +87,7 @@
                         <PropertyValueFactory property="endDate"/>
                     </cellValueFactory>
                 </TableColumn>
-                <TableColumn fx:id="destinationColumn" text="Направление" prefWidth="150">
+                <TableColumn text="Направление" prefWidth="150">
                     <cellValueFactory>
                         <PropertyValueFactory property="destination"/>
                     </cellValueFactory>
@@ -117,12 +117,18 @@
             <!-- Блок с кнопками -->
             <HBox spacing="10.0" alignment="CENTER_RIGHT">
                 <Button fx:id="bookTourButton" text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
-                <Button fx:id="viewBookingsButton" text="Мои бронирования" onAction="#handleViewBookings" styleClass="button"/>
-                <Button fx:id="viewDestinationsButton" text="Направления" onAction="#handleViewDestinations" styleClass="button"/>
+                <Button fx:id="viewBookingsButton" text="Мои бронирования" onAction="#handleViewBookings"
+                        styleClass="button"/>
+                <Button fx:id="viewDestinationsButton" text="Направления" onAction="#handleViewDestinations"
+                        styleClass="button"/>
+                <Button fx:id="profileButton" text="Личный кабинет" onAction="#handleProfile" styleClass="button"/>
 
-                <Button fx:id="manageUsersButton" text="Управление пользователями" onAction="#handleManageUsers" styleClass="button" visible="false"/>
-                <Button fx:id="manageToursButton" text="Управление турами" onAction="#handleManageTours" styleClass="button" visible="false"/>
-                <Button fx:id="manageDestinationsButton" text="Управление направлениями" onAction="#handleManageDestinations" styleClass="button" visible="false"/>
+                <Button fx:id="manageUsersButton" text="Управление пользователями" onAction="#handleManageUsers"
+                        styleClass="button" visible="false"/>
+                <Button fx:id="manageToursButton" text="Управление турами" onAction="#handleManageTours"
+                        styleClass="button" visible="false"/>
+                <Button fx:id="manageDestinationsButton" text="Управление направлениями"
+                        onAction="#handleManageDestinations" styleClass="button" visible="false"/>
 
                 <Button fx:id="refreshButton" text="Обновить" onAction="#handleRefresh" styleClass="button"/>
                 <Button fx:id="logoutButton" text="Выйти" onAction="#handleLogout" styleClass="button"/>

@@ -57,13 +57,10 @@ public class LoginController {
             if (response.startsWith("LOGIN_SUCCESS")) {
                 String[] responseParts = response.split(" ");
 
-                if (responseParts.length >= 3) {
-                    String role = responseParts[1];
-                    int userId = Integer.parseInt(responseParts[2]);
+                if (responseParts.length >= 10) {
+                    UserModel user = getUserModel(responseParts, username);
 
-                    UserModel user = new UserModel(userId, username, role);
                     MainClient.setCurrentUser(user);
-
                     loadMainView();
                 } else {
                     errorLabel.setText("Ошибка: сервер вернул некорректный ответ.");
@@ -75,7 +72,7 @@ public class LoginController {
             errorLabel.setText("Ошибка подключения к серверу!");
             e.printStackTrace();
         } catch (NumberFormatException e) {
-            errorLabel.setText("Ошибка: некорректный ID пользователя.");
+            errorLabel.setText("Ошибка: некорректные данные пользователя.");
             e.printStackTrace();
         }
     }
@@ -127,5 +124,26 @@ public class LoginController {
         if (event.getCode() == KeyCode.ENTER) {
             handleLogin();
         }
+    }
+
+    private static UserModel getUserModel(String[] responseParts, String username) {
+        String role = responseParts[1];
+        int userId = Integer.parseInt(responseParts[2]);
+        double balance = Double.parseDouble(responseParts[3]);
+        String fullName = responseParts[4] + " " + responseParts[5] + " " + responseParts[6];
+        int age = Integer.parseInt(responseParts[7]);
+        String email = responseParts[8];
+        String phone = responseParts[9];
+
+        return new UserModel(
+                userId,
+                username,
+                role,
+                balance,
+                fullName,
+                age,
+                email,
+                phone
+        );
     }
 }

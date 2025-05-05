@@ -162,3 +162,74 @@
 #priceColumn {
     -fx-alignment: CENTER-RIGHT;
 }
+
+.profile-root {
+    -fx-background-color: #f8f9fa;
+    -fx-padding: 20px;
+}
+
+.profile-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-fill: #2c3e50;
+}
+
+.profile-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+}
+
+.profile-value {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+}
+
+.profile-field {
+    -fx-font-size: 14px;
+    -fx-pref-width: 250px;
+    -fx-padding: 5px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color: #ced4da;
+}
+
+.profile-field:focused {
+    -fx-border-color: #4CAF50;
+}
+
+.profile-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 20px;
+    -fx-background-radius: 5px;
+}
+
+.profile-button:hover {
+    -fx-background-color: #45a049;
+}
+
+.profile-button-cancel {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 20px;
+    -fx-background-radius: 5px;
+}
+
+.profile-button-cancel:hover {
+    -fx-background-color: #5a6268;
+}
+
+.profile-error {
+    -fx-text-fill: #dc3545;
+    -fx-font-size: 13px;
+    -fx-padding: 5px;
+}
+
+.profile-success {
+    -fx-text-fill: #28a745;
+    -fx-font-size: 13px;
+    -fx-padding: 5px;
+}

@@ -102,6 +102,9 @@ public class TourController {
     @FXML
     private Label ratingLabel;
 
+    @FXML
+    private Button profileButton;
+
     private Stage primaryStage;
 
     public void setPrimaryStage(Stage primaryStage) {
@@ -125,6 +128,7 @@ public class TourController {
             bookTourButton.setVisible(false);
             viewBookingsButton.setVisible(false);
             viewDestinationsButton.setVisible(false);
+            profileButton.setVisible(false);
 
             manageUsersButton.setVisible(true);
             manageToursButton.setVisible(true);
@@ -134,6 +138,7 @@ public class TourController {
             bookTourButton.setVisible(true);
             viewBookingsButton.setVisible(true);
             viewDestinationsButton.setVisible(true);
+            profileButton.setVisible(true);
 
             manageUsersButton.setVisible(false);
             manageToursButton.setVisible(false);
@@ -497,12 +502,23 @@ public class TourController {
 
         String sortBy;
         switch (sortComboBox.getValue()) {
-            case "По цене (возрастание)": sortBy = "price_asc"; break;
-            case "По цене (убывание)": sortBy = "price_desc"; break;
-            case "По дате (возрастание)": sortBy = "date_asc"; break;
-            case "По дате (убывание)": sortBy = "date_desc"; break;
-            case "По популярности": sortBy = "popular"; break;
-            default: sortBy = "null";
+            case "По цене (возрастание)":
+                sortBy = "price_asc";
+                break;
+            case "По цене (убывание)":
+                sortBy = "price_desc";
+                break;
+            case "По дате (возрастание)":
+                sortBy = "date_asc";
+                break;
+            case "По дате (убывание)":
+                sortBy = "date_desc";
+                break;
+            case "По популярности":
+                sortBy = "popular";
+                break;
+            default:
+                sortBy = "null";
         }
 
         return String.format("SEARCH_TOURS %s %s %s %s %s %s",
@@ -689,6 +705,25 @@ public class TourController {
                     showAlert("Ошибка", "Ошибка подключения к серверу");
                 }
             });
+        }
+    }
+
+    @FXML
+    private void handleProfile() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/profile.fxml"));
+            Parent root = loader.load();
+
+            ProfileController profileController = loader.getController();
+            profileController.setPrimaryStage(primaryStage);
+
+            Scene scene = new Scene(root);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Личный кабинет");
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Ошибка", "Не удалось загрузить личный кабинет");
         }
     }
 }

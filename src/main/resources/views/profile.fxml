@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<VBox fx:controller="client.controllers.ProfileController"
+      xmlns:fx="http://javafx.com/fxml/1"
+      spacing="20" alignment="CENTER"
+      prefWidth="600" prefHeight="700"
+      stylesheets="@../styles.css"
+      styleClass="profile-root">
+
+    <Text text="Личный кабинет" styleClass="profile-title"/>
+
+    <GridPane hgap="15" vgap="15" alignment="CENTER">
+        <padding>
+            <Insets top="10" right="20" bottom="20" left="20"/>
+        </padding>
+
+        <Label text="Логин:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="usernameLabel" styleClass="profile-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Баланс:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Label fx:id="balanceLabel" styleClass="profile-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="ФИО:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="fullNameField" styleClass="profile-field" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Возраст:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextField fx:id="ageField" styleClass="profile-field" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+        <Label text="Email:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <TextField fx:id="emailField" styleClass="profile-field" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+        <Label text="Телефон:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+        <TextField fx:id="phoneField" styleClass="profile-field" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+        <Label text="Старый пароль:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+        <PasswordField fx:id="oldPasswordField" styleClass="profile-field" GridPane.columnIndex="1"
+                       GridPane.rowIndex="6"/>
+
+        <Label text="Новый пароль:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+        <PasswordField fx:id="newPasswordField" styleClass="profile-field" GridPane.columnIndex="1"
+                       GridPane.rowIndex="7"/>
+
+        <Label text="Подтвердите пароль:" styleClass="profile-label" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+        <PasswordField fx:id="confirmPasswordField" styleClass="profile-field" GridPane.columnIndex="1"
+                       GridPane.rowIndex="8"/>
+    </GridPane>
+
+    <Label fx:id="errorLabel" styleClass="profile-error"/>
+    <Label fx:id="successLabel" styleClass="profile-success"/>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Button text="Сохранить изменения" onAction="#handleSave" styleClass="profile-button"/>
+        <Button text="Назад" onAction="#handleBack" styleClass="profile-button-cancel"/>
+    </HBox>
+
+</VBox>

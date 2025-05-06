@@ -1,8 +1,8 @@
 package server.database.DAO.impl;
 
 import server.database.DAO.BookingDAO;
-import server.models.Booking;
 import server.database.DatabaseConnection;
+import server.models.Booking;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,7 +26,12 @@ public class BookingDAOImpl implements BookingDAO {
                         resultSet.getInt("user_id"),
                         resultSet.getInt("tour_id"),
                         resultSet.getString("booking_date"),
-                        resultSet.getString("status")
+                        resultSet.getString("status"),
+                        resultSet.getInt("adults"),
+                        resultSet.getInt("children"),
+                        resultSet.getString("meal_option"),
+                        resultSet.getString("additional_services"),
+                        resultSet.getDouble("total_price")
                 );
             }
         } catch (SQLException e) {
@@ -49,7 +54,12 @@ public class BookingDAOImpl implements BookingDAO {
                         resultSet.getInt("user_id"),
                         resultSet.getInt("tour_id"),
                         resultSet.getString("booking_date"),
-                        resultSet.getString("status")
+                        resultSet.getString("status"),
+                        resultSet.getInt("adults"),
+                        resultSet.getInt("children"),
+                        resultSet.getString("meal_option"),
+                        resultSet.getString("additional_services"),
+                        resultSet.getDouble("total_price")
                 ));
             }
         } catch (SQLException e) {
@@ -71,7 +81,12 @@ public class BookingDAOImpl implements BookingDAO {
                         resultSet.getInt("user_id"),
                         resultSet.getInt("tour_id"),
                         resultSet.getString("booking_date"),
-                        resultSet.getString("status")
+                        resultSet.getString("status"),
+                        resultSet.getInt("adults"),
+                        resultSet.getInt("children"),
+                        resultSet.getString("meal_option"),
+                        resultSet.getString("additional_services"),
+                        resultSet.getDouble("total_price")
                 ));
             }
             return bookings;
@@ -82,13 +97,18 @@ public class BookingDAOImpl implements BookingDAO {
 
     @Override
     public void addBooking(Booking booking) {
-        String query = "INSERT INTO Bookings (user_id, tour_id, booking_date, status) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO Bookings (user_id, tour_id, booking_date, status, adults, children, meal_option, additional_services, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, booking.getUserId());
             statement.setInt(2, booking.getTourId());
             statement.setString(3, booking.getBookingDate());
             statement.setString(4, booking.getStatus());
+            statement.setInt(5, booking.getAdults());
+            statement.setInt(6, booking.getChildren());
+            statement.setString(7, booking.getMealOption());
+            statement.setString(8, booking.getAdditionalServices());
+            statement.setDouble(9, booking.getTotalPrice());
             statement.executeUpdate();
             System.out.println("Бронирование успешно добавлено.");
         } catch (SQLException e) {
@@ -98,14 +118,19 @@ public class BookingDAOImpl implements BookingDAO {
 
     @Override
     public void updateBooking(Booking booking) {
-        String query = "UPDATE Bookings SET user_id = ?, tour_id = ?, booking_date = ?, status = ? WHERE id = ?";
+        String query = "UPDATE Bookings SET user_id = ?, tour_id = ?, booking_date = ?, status = ?, adults = ?, children = ?, meal_option = ?, additional_services = ?, total_price = ? WHERE id = ?";
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, booking.getUserId());
             statement.setInt(2, booking.getTourId());
             statement.setString(3, booking.getBookingDate());
             statement.setString(4, booking.getStatus());
-            statement.setInt(5, booking.getId());
+            statement.setInt(5, booking.getAdults());
+            statement.setInt(6, booking.getChildren());
+            statement.setString(7, booking.getMealOption());
+            statement.setString(8, booking.getAdditionalServices());
+            statement.setDouble(9, booking.getTotalPrice());
+            statement.setInt(10, booking.getId());
             statement.executeUpdate();
             System.out.println("Бронирование успешно обновлено.");
         } catch (SQLException e) {

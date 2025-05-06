@@ -214,11 +214,16 @@ public class ClientHandler implements Runnable {
     }
 
     private String handleBookTour(String[] parts) {
-        if (parts.length == 4) {
+        if (parts.length == 9) {
             try {
                 int userId = Integer.parseInt(parts[1]);
                 int tourId = Integer.parseInt(parts[2]);
                 String bookingDate = parts[3];
+                int adults = Integer.parseInt(parts[4]);
+                int children = Integer.parseInt(parts[5]);
+                String mealOption = parts[6];
+                String additionalServices = parts[7];
+                double totalPrice = Double.parseDouble(parts[8]);
 
                 String currentStatus = bookingService.getBookingStatus(userId, tourId);
 
@@ -234,11 +239,12 @@ public class ClientHandler implements Runnable {
                     }
                 }
 
-                Booking booking = new Booking(0, userId, tourId, bookingDate, "pending");
+                Booking booking = new Booking(0, userId, tourId, bookingDate, "pending",
+                        adults, children, mealOption, additionalServices, totalPrice);
                 bookingService.addBooking(booking);
                 return "BOOKING_SUCCESS";
             } catch (NumberFormatException e) {
-                return "ERROR: Invalid user ID or tour ID";
+                return "ERROR: Invalid parameters";
             }
         }
         return "ERROR: Invalid booking request";
@@ -268,12 +274,23 @@ public class ClientHandler implements Runnable {
                                 .append(tour.getName()).append(",")
                                 .append(booking.getBookingDate()).append(",")
                                 .append(tour.getPrice()).append(",")
-                                .append(status).append("|");
+                                .append(status).append(",")
+                                .append(booking.getAdults()).append(",")
+                                .append(booking.getChildren()).append(",")
+                                .append(booking.getMealOption()).append(",")
+                                .append(booking.getAdditionalServices()).append(",")
+                                .append(booking.getTotalPrice()).append("|");
                     } else {
-                        response.append(booking.getId()).append(",").append("Тур ").append(booking.getTourId()).append(",")
+                        response.append(booking.getId()).append(",")
+                                .append("Тур ").append(booking.getTourId()).append(",")
                                 .append(booking.getBookingDate()).append(",")
                                 .append(0.0).append(",")
-                                .append("В ожидании").append("|");
+                                .append("В ожидании").append("|")
+                                .append(booking.getAdults()).append(",")
+                                .append(booking.getChildren()).append(",")
+                                .append(booking.getMealOption()).append(",")
+                                .append(booking.getAdditionalServices()).append(",")
+                                .append(booking.getTotalPrice()).append("|");
                     }
                 }
 
@@ -345,12 +362,7 @@ public class ClientHandler implements Runnable {
                     return "ERROR: Пользователь не найден.";
                 }
 
-                Tour tour = tourService.getTourById(booking.getTourId());
-                if (tour == null) {
-                    return "ERROR: Тур не найден.";
-                }
-
-                double penalty = tour.getPrice() * 0.05;
+                double penalty = booking.getTotalPrice() * 0.05;
 
                 if (user.getBalance() < penalty) {
                     return "ERROR: Недостаточно средств для оплаты штрафа.";
@@ -374,7 +386,7 @@ public class ClientHandler implements Runnable {
         if (parts.length == 5) {
             try {
                 int bookingId = Integer.parseInt(parts[1]);
-                double amount = Double.parseDouble(parts[2]);
+                double totalPrice = Double.parseDouble(parts[2]);
                 String paymentDate = parts[3];
                 int userId = Integer.parseInt(parts[4]);
 
@@ -392,17 +404,17 @@ public class ClientHandler implements Runnable {
                     return "ERROR: Пользователь не найден.";
                 }
 
-                if (user.getBalance() < amount) {
+                if (user.getBalance() < totalPrice) {
                     return "ERROR: Недостаточно средств на балансе.";
                 }
 
-                double newBalance = user.getBalance() - amount;
+                double newBalance = user.getBalance() - totalPrice;
                 userService.updateBalance(userId, newBalance);
 
                 booking.setStatus("confirmed");
                 bookingService.updateBooking(booking);
 
-                Payment payment = new Payment(0, bookingId, amount, paymentDate, "paid");
+                Payment payment = new Payment(0, bookingId, totalPrice, paymentDate, "paid");
                 paymentService.addPayment(payment);
 
                 return "PAYMENT_SUCCESS";

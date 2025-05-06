@@ -38,6 +38,21 @@ public class BookingController {
     private TableColumn<BookingModel, String> statusColumn;
 
     @FXML
+    private TableColumn<BookingModel, String> adultsColumn;
+
+    @FXML
+    private TableColumn<BookingModel, String> childrenColumn;
+
+    @FXML
+    private TableColumn<BookingModel, String> mealOptionColumn;
+
+    @FXML
+    private TableColumn<BookingModel, String> additionalServicesColumn;
+
+    @FXML
+    private TableColumn<BookingModel, String> totalPriceColumn;
+
+    @FXML
     private Label balanceLabel;
 
     private Stage primaryStage;
@@ -58,6 +73,11 @@ public class BookingController {
         bookingDateColumn.setCellValueFactory(new PropertyValueFactory<>("bookingDate"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+        adultsColumn.setCellValueFactory(new PropertyValueFactory<>("adults"));
+        childrenColumn.setCellValueFactory(new PropertyValueFactory<>("children"));
+        mealOptionColumn.setCellValueFactory(new PropertyValueFactory<>("mealOption"));
+        additionalServicesColumn.setCellValueFactory(new PropertyValueFactory<>("additionalServices"));
+        totalPriceColumn.setCellValueFactory(new PropertyValueFactory<>("totalPrice"));
     }
 
     private void loadBookings() {
@@ -70,6 +90,8 @@ public class BookingController {
                 System.out.println("Пользователь не авторизован!");
                 return;
             }
+
+            balanceLabel.setText(String.format("%.2f", getUserBalance()));
 
             out.println("GET_BOOKINGS " + currentUser.getId());
 
@@ -84,25 +106,12 @@ public class BookingController {
                     }
 
                     String[] fields = bookingData.split(",");
-                    if (fields.length == 5) {
-                        int id = Integer.parseInt(fields[0]);
-                        String tourName = fields[1];
-                        String bookingDate = fields[2];
-                        double price = Double.parseDouble(fields[3]);
-                        String status = fields[4];
-
-                        BookingModel booking = new BookingModel(id, tourName, bookingDate, price, status);
+                    if (fields.length == 10) {
+                        BookingModel booking = getBookingModel(fields);
                         bookingTable.getItems().add(booking);
-                    } else {
-                        System.err.println("Ошибка: некорректные данные бронирования: " + bookingData);
                     }
                 }
             }
-
-            double balance = getUserBalance();
-            System.out.println("Баланс пользователя: " + balance);
-            balanceLabel.setText(String.format("%.2f", balance));
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -231,7 +240,7 @@ public class BookingController {
                     return;
                 }
 
-                out.println("MAKE_PAYMENT " + selectedBooking.getId() + " " + selectedBooking.getPrice() + " " + currentDate + " " + currentUser.getId());
+                out.println("MAKE_PAYMENT " + selectedBooking.getId() + " " + selectedBooking.getTotalPrice() + " " + currentDate + " " + currentUser.getId());
 
                 String response = in.readLine();
                 if (response.equals("PAYMENT_SUCCESS")) {
@@ -241,6 +250,12 @@ public class BookingController {
                     balanceLabel.setText(String.format("%.2f", balance));
 
                     handleRefresh();
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Успешно");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Оплата прошла успешно!");
+                    alert.showAndWait();
                 } else {
                     System.out.println("Ошибка при оплате: " + response);
 
@@ -289,6 +304,21 @@ public class BookingController {
             e.printStackTrace();
         }
         return 0.0;
+    }
+
+    private static BookingModel getBookingModel(String[] fields) {
+        int id = Integer.parseInt(fields[0]);
+        String tourName = fields[1];
+        String bookingDate = fields[2];
+        double price = Double.parseDouble(fields[3]);
+        String status = fields[4];
+        int adults = Integer.parseInt(fields[5]);
+        int children = Integer.parseInt(fields[6]);
+        String mealOption = fields[7];
+        String additionalServices = fields[8];
+        double totalPrice = Double.parseDouble(fields[9]);
+
+        return new BookingModel(id, tourName, bookingDate, status, price, adults, children, mealOption, additionalServices, totalPrice);
     }
 
     private void showAlert(String title, String message) {

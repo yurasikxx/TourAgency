@@ -20,7 +20,7 @@
 
     <TableView fx:id="bookingTable" prefWidth="600">
         <columns>
-            <TableColumn fx:id="tourNameColumn" text="Название тура" prefWidth="200">
+            <TableColumn fx:id="tourNameColumn" text="Название тура" prefWidth="250">
                 <cellValueFactory><PropertyValueFactory property="tourName"/></cellValueFactory>
             </TableColumn>
             <TableColumn fx:id="bookingDateColumn" text="Дата бронирования" prefWidth="150">
@@ -31,6 +31,21 @@
             </TableColumn>
             <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100">
                 <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn fx:id="adultsColumn" text="Взрослые" prefWidth="100">
+                <cellValueFactory><PropertyValueFactory property="adults"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn fx:id="childrenColumn" text="Дети" prefWidth="100">
+                <cellValueFactory><PropertyValueFactory property="children"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn fx:id="mealOptionColumn" text="Питание" prefWidth="100">
+                <cellValueFactory><PropertyValueFactory property="mealOption"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn fx:id="additionalServicesColumn" text="Доп.услуги" prefWidth="100">
+                <cellValueFactory><PropertyValueFactory property="additionalServices"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn fx:id="totalPriceColumn" text="Итоговая цена" prefWidth="150">
+                <cellValueFactory><PropertyValueFactory property="totalPrice"/></cellValueFactory>
             </TableColumn>
         </columns>
     </TableView>

@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TourController {
     @FXML
@@ -286,43 +287,176 @@ public class TourController {
     @FXML
     private void handleBookTour() {
         TourModel selectedTour = tourTable.getSelectionModel().getSelectedItem();
+        AtomicReference<Double> totalPrice = new AtomicReference<>((double) 0);
+
         if (selectedTour != null) {
-            UserModel currentUser = MainClient.getCurrentUser();
+            Dialog<BookingDetails> dialog = new Dialog<>();
+            dialog.setTitle("Бронирование тура");
+            dialog.setHeaderText("Бронирование тура: " + selectedTour.getName());
 
-            try (Socket socket = new Socket("localhost", 12345);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-                out.println("GET_BOOKING_STATUS " + currentUser.getId() + " " + selectedTour.getId());
-                String statusResponse = in.readLine();
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
 
-                if (statusResponse.startsWith("BOOKING_STATUS")) {
-                    String status = statusResponse.split(" ")[1];
+            Spinner<Integer> adultsSpinner = new Spinner<>(1, 10, 1);
+            Spinner<Integer> childrenSpinner = new Spinner<>(0, 10, 0);
 
-                    if (status.equals("pending")) {
-                        showAlert("Информация", "У вас уже есть бронь на этот тур (статус: в ожидании)");
-                        return;
-                    } else if (status.equals("confirmed")) {
-                        showAlert("Информация", "Этот тур уже оплачен и не может быть забронирован повторно");
-                        return;
+            ComboBox<String> mealCombo = new ComboBox<>();
+            mealCombo.getItems().addAll(
+                    "Без (0 руб.)",
+                    "Завтрак (+500 руб./чел.)",
+                    "Полупансион (+1000 руб./чел.)",
+                    "Полное (+1500 руб./чел.)"
+            );
+            mealCombo.setValue("Без (0 руб.)");
+
+            TextField servicesField = new TextField();
+            servicesField.setPromptText("Доп. услуги (через запятую)");
+
+            Label basePriceLabel = new Label(String.format("Базовая цена: %.2f руб.", selectedTour.getPrice()));
+            Label mealPriceLabel = new Label("Питание: 0 руб.");
+            Label additionalServicesLabel = new Label("Доп.услуги: 0 руб.");
+            Label totalPriceLabel = new Label("Итого: " + selectedTour.getPrice() + " руб.");
+            totalPriceLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
+
+            grid.add(new Label("Взрослые:"), 0, 0);
+            grid.add(adultsSpinner, 1, 0);
+            grid.add(new Label("Дети (до 13 лет, скидка 30%):"), 0, 1);
+            grid.add(childrenSpinner, 1, 1);
+            grid.add(new Label("Питание:"), 0, 2);
+            grid.add(mealCombo, 1, 2);
+            grid.add(new Label("Доп. услуги:"), 0, 3);
+            grid.add(servicesField, 1, 3);
+            grid.add(basePriceLabel, 0, 4, 2, 1);
+            grid.add(mealPriceLabel, 0, 5, 2, 1);
+            grid.add(additionalServicesLabel, 0, 6, 2, 1);
+            grid.add(totalPriceLabel, 0, 7, 2, 1);
+
+            Runnable updatePrice = () -> {
+                int adults = adultsSpinner.getValue();
+                int children = childrenSpinner.getValue();
+                String mealOption = mealCombo.getValue();
+
+                double basePrice = selectedTour.getPrice();
+                double baseTotal = basePrice * adults + (basePrice * 0.7) * children;
+
+                int mealPricePerPerson = 0;
+                if (mealOption != null && !mealOption.startsWith("Без")) {
+                    if (mealOption.contains("Завтрак")) mealPricePerPerson = 500;
+                    else if (mealOption.contains("Полупансион")) mealPricePerPerson = 1000;
+                    else if (mealOption.contains("Полное")) mealPricePerPerson = 1500;
+                }
+
+                double additionalServicesCost = 0;
+                if (!servicesField.getText().isEmpty()) {
+                    String[] services = servicesField.getText().split(",");
+                    additionalServicesCost = services.length * 500;
+                }
+
+                double totalMealPrice = mealPricePerPerson * (adults + children);
+                double totalAdditionalServicePrice = additionalServicesCost * (adults + children);
+                double total = baseTotal + totalMealPrice + totalAdditionalServicePrice;
+                totalPrice.set(total);
+
+                basePriceLabel.setText(String.format("Базовая цена: %.2f руб. (%d взр. × %.2f + %d дет. × %.2f)",
+                        baseTotal, adults, basePrice, children, basePrice * 0.7));
+                mealPriceLabel.setText(String.format("Питание: %.2f руб. (%s × %d чел.)",
+                        totalMealPrice, mealOption, adults + children));
+                additionalServicesLabel.setText(String.format("Доп.услуги: %.2f руб. (%d чел.)",
+                        totalAdditionalServicePrice, adults + children));
+                totalPriceLabel.setText(String.format("Итого: %.2f руб.", total));
+            };
+
+            adultsSpinner.valueProperty().addListener((obs, oldVal, newVal) -> updatePrice.run());
+            childrenSpinner.valueProperty().addListener((obs, oldVal, newVal) -> updatePrice.run());
+            mealCombo.valueProperty().addListener((obs, oldVal, newVal) -> updatePrice.run());
+            servicesField.textProperty().addListener((obs, oldVal, newVal) -> updatePrice.run());
+
+            updatePrice.run();
+
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == ButtonType.OK) {
+                    String mealOption = mealCombo.getValue().split("\\(")[0].trim();
+                    return new BookingDetails(
+                            adultsSpinner.getValue(),
+                            childrenSpinner.getValue(),
+                            mealOption,
+                            servicesField.getText()
+                    );
+                }
+                return null;
+            });
+
+            Optional<BookingDetails> result = dialog.showAndWait();
+
+            result.ifPresent(bookingDetails -> {
+                try (Socket socket = new Socket("localhost", 12345);
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+                    UserModel currentUser = MainClient.getCurrentUser();
+                    String currentDate = LocalDate.now().toString();
+
+                    String command = String.format("BOOK_TOUR %d %d %s %d %d %s %s %.2f",
+                            currentUser.getId(),
+                            selectedTour.getId(),
+                            currentDate,
+                            bookingDetails.getAdults(),
+                            bookingDetails.getChildren(),
+                            bookingDetails.getMealOption(),
+                            bookingDetails.getAdditionalServices(),
+                            Double.parseDouble(totalPrice.toString()));
+
+                    out.println(command);
+                    String response = in.readLine();
+
+                    if (response.equals("BOOKING_SUCCESS")) {
+                        showAlert("Успех", "Тур успешно забронирован");
+                    } else {
+                        showAlert("Ошибка", response.substring(response.indexOf(":") + 1));
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    showAlert("Ошибка", "Ошибка подключения к серверу");
                 }
-
-                String currentDate = LocalDate.now().toString();
-                out.println("BOOK_TOUR " + currentUser.getId() + " " + selectedTour.getId() + " " + currentDate);
-                String response = in.readLine();
-
-                if (response.equals("BOOKING_SUCCESS")) {
-                    showAlert("Успех", "Тур успешно забронирован");
-                } else {
-                    showAlert("Ошибка", response.substring(response.indexOf(":") + 1));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                showAlert("Ошибка", "Ошибка подключения к серверу");
-            }
+            });
         } else {
             showAlert("Предупреждение", "Выберите тур для бронирования");
+        }
+    }
+
+    private static class BookingDetails {
+        private final int adults;
+        private final int children;
+        private final String mealOption;
+        private final String additionalServices;
+
+        public BookingDetails(int adults, int children, String mealOption, String additionalServices) {
+            this.adults = adults;
+            this.children = children;
+            this.mealOption = mealOption;
+            this.additionalServices = additionalServices;
+        }
+
+        public int getAdults() {
+            return adults;
+        }
+
+        public int getChildren() {
+            return children;
+        }
+
+        public String getMealOption() {
+            return mealOption;
+        }
+
+        public String getAdditionalServices() {
+            return additionalServices;
         }
     }
 

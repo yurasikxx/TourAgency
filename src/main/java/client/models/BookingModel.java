@@ -1,5 +1,7 @@
 package client.models;
 
+import java.util.Objects;
+
 public class BookingModel {
     private int id;
     private String userName;
@@ -8,17 +10,11 @@ public class BookingModel {
     private String status;
     private double price;
     private double amount;
-
-    public BookingModel() {
-    }
-
-    public BookingModel(int id, String tourName, String bookingDate, double price, String status) {
-        this.id = id;
-        this.tourName = tourName;
-        this.bookingDate = bookingDate;
-        this.price = price;
-        this.status = status;
-    }
+    private int adults;
+    private int children;
+    private String mealOption;
+    private String additionalServices;
+    private double totalPrice;
 
     public BookingModel(int id, String userName, String tourName,
                         String bookingDate, String status, double amount) {
@@ -30,12 +26,65 @@ public class BookingModel {
         this.amount = amount;
     }
 
+    public BookingModel(int id, String tourName, String bookingDate, String status, double price, int adults, int children, String mealOption, String additionalServices, double totalPrice) {
+        this.id = id;
+        this.tourName = tourName;
+        this.bookingDate = bookingDate;
+        this.status = status;
+        this.price = price;
+        this.adults = adults;
+        this.children = children;
+        this.mealOption = mealOption;
+        this.additionalServices = additionalServices;
+        this.totalPrice = totalPrice;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getUserName() {
         return userName;
     }
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getTourName() {
+        return tourName;
+    }
+
+    public void setTourName(String tourName) {
+        this.tourName = tourName;
+    }
+
+    public String getBookingDate() {
+        return bookingDate;
+    }
+
+    public void setBookingDate(String bookingDate) {
+        this.bookingDate = bookingDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public double getAmount() {
@@ -46,55 +95,73 @@ public class BookingModel {
         this.amount = amount;
     }
 
-    public int getId() {
-        return id;
+    public int getAdults() {
+        return adults;
     }
 
-    public String getTourName() {
-        return tourName;
+    public void setAdults(int adults) {
+        this.adults = adults;
     }
 
-    public String getBookingDate() {
-        return bookingDate;
+    public int getChildren() {
+        return children;
     }
 
-    public double getPrice() {
-        return price;
+    public void setChildren(int children) {
+        this.children = children;
     }
 
-    public String getStatus() {
-        return status;
+    public String getMealOption() {
+        return mealOption;
     }
 
-    // Сеттеры (если нужны)
-    public void setId(int id) {
-        this.id = id;
+    public void setMealOption(String mealOption) {
+        this.mealOption = mealOption;
     }
 
-    public void setTourName(String tourName) {
-        this.tourName = tourName;
+    public String getAdditionalServices() {
+        return additionalServices;
     }
 
-    public void setBookingDate(String bookingDate) {
-        this.bookingDate = bookingDate;
+    public void setAdditionalServices(String additionalServices) {
+        this.additionalServices = additionalServices;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public double getTotalPrice() {
+        return totalPrice;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        BookingModel that = (BookingModel) o;
+        return id == that.id && Double.compare(price, that.price) == 0 && Double.compare(amount, that.amount) == 0 && adults == that.adults && children == that.children && Double.compare(totalPrice, that.totalPrice) == 0 && Objects.equals(userName, that.userName) && Objects.equals(tourName, that.tourName) && Objects.equals(bookingDate, that.bookingDate) && Objects.equals(status, that.status) && Objects.equals(mealOption, that.mealOption) && Objects.equals(additionalServices, that.additionalServices);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userName, tourName, bookingDate, status, price, amount, adults, children, mealOption, additionalServices, totalPrice);
     }
 
     @Override
     public String toString() {
         return "BookingModel{" +
                 "id=" + id +
+                ", userName='" + userName + '\'' +
                 ", tourName='" + tourName + '\'' +
                 ", bookingDate='" + bookingDate + '\'' +
-                ", price=" + price +
                 ", status='" + status + '\'' +
+                ", price=" + price +
+                ", amount=" + amount +
+                ", adults=" + adults +
+                ", children=" + children +
+                ", mealOption='" + mealOption + '\'' +
+                ", additionalServices='" + additionalServices + '\'' +
+                ", totalPrice=" + totalPrice +
                 '}';
     }
 }

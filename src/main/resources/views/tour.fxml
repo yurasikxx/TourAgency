@@ -11,7 +11,6 @@
             stylesheets="@../styles.css"
             styleClass="root">
 
-    <!-- Верхняя панель -->
     <top>
         <HBox spacing="10" alignment="CENTER_LEFT">
             <VBox spacing="10" alignment="CENTER">
@@ -58,7 +57,6 @@
         </HBox>
     </top>
 
-    <!-- Центральная панель -->
     <center>
         <TableView fx:id="tourTable">
             <columns>
@@ -96,10 +94,8 @@
         </TableView>
     </center>
 
-    <!-- Нижняя панель -->
     <bottom>
         <VBox spacing="10.0">
-            <!-- Блок с отзывами -->
             <VBox>
                 <HBox spacing="10.0" alignment="CENTER">
                     <Button fx:id="addReviewButton" text="Оставить отзыв" onAction="#handleAddReview" visible="false"/>
@@ -114,7 +110,6 @@
                 </ScrollPane>
             </VBox>
 
-            <!-- Блок с кнопками -->
             <HBox spacing="10.0" alignment="CENTER_RIGHT">
                 <Button fx:id="bookTourButton" text="Забронировать" onAction="#handleBookTour" styleClass="button"/>
                 <Button fx:id="viewBookingsButton" text="Мои бронирования" onAction="#handleViewBookings"

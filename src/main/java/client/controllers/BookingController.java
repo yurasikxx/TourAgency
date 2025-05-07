@@ -13,8 +13,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import server.utils.DocumentGenerator;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -277,6 +280,38 @@ public class BookingController {
         } else {
             System.out.println("Бронирование не выбрано!");
             showAlert("Предупреждение", "Выберите бронирование для оплаты");
+        }
+    }
+
+    @FXML
+    private void handleGenerateContract() {
+        BookingModel selectedBooking = bookingTable.getSelectionModel().getSelectedItem();
+        if (selectedBooking != null) {
+            if (!selectedBooking.getStatus().equals("Подтверждено")) {
+                showAlert("Ошибка", "Договор можно сгенерировать только для подтверждённых бронирований");
+                return;
+            }
+
+            UserModel currentUser = MainClient.getCurrentUser();
+            if (currentUser == null) {
+                showAlert("Ошибка", "Пользователь не авторизован");
+                return;
+            }
+
+            try {
+                String filePath = DocumentGenerator.generateContract(selectedBooking, currentUser);
+                showAlert("Успех", "Договор успешно сгенерирован и сохранён по пути: " + filePath);
+
+                // Открываем документ в системе
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(new File(filePath));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert("Ошибка", "Не удалось сгенерировать договор: " + e.getMessage());
+            }
+        } else {
+            showAlert("Предупреждение", "Выберите бронирование для генерации договора");
         }
     }
 

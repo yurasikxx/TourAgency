@@ -26,6 +26,11 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
+    public Tour getTourByName(String name) {
+        return tourDAO.getTourByName(name);
+    }
+
+    @Override
     public List<Tour> getAllTours() {
         return tourDAO.getAllTours();
     }

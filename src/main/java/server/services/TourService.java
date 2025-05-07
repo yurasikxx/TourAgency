@@ -7,6 +7,8 @@ import java.util.List;
 public interface TourService {
     Tour getTourById(int id);
 
+    Tour getTourByName(String name);
+
     List<Tour> getAllTours();
 
     List<Tour> getToursByDestinationId(int id);

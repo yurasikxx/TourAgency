@@ -38,6 +38,30 @@ public class TourDAOImpl implements TourDAO {
     }
 
     @Override
+    public Tour getTourByName(String name) {
+        String query = "SELECT * FROM Tours WHERE name = ?";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, name);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new Tour(
+                        resultSet.getInt("id"),
+                        resultSet.getString("name"),
+                        resultSet.getString("description"),
+                        resultSet.getDouble("price"),
+                        resultSet.getString("start_date"),
+                        resultSet.getString("end_date"),
+                        resultSet.getInt("destination_id")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public List<Tour> getAllTours() {
         List<Tour> tours = new ArrayList<>();
         String query = "SELECT * FROM Tours";

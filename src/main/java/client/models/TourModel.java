@@ -1,5 +1,8 @@
 package client.models;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 public class TourModel {
     private int id;
     private String name;
@@ -88,6 +91,17 @@ public class TourModel {
 
     public void setDestination(String destination) {
         this.destination = destination;
+    }
+
+    public boolean isHotTour() {
+        try {
+            LocalDate startDate = LocalDate.parse(this.startDate);
+            LocalDate now = LocalDate.now();
+            long daysBetween = ChronoUnit.DAYS.between(now, startDate);
+            return daysBetween < 10 && daysBetween >= 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

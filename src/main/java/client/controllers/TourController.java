@@ -208,6 +208,25 @@ public class TourController {
                         checkIfUserCanReview(newSelection.getId());
                     }
                 });
+
+        tourTable.setRowFactory(tv -> new TableRow<TourModel>() {
+            @Override
+            protected void updateItem(TourModel tour, boolean empty) {
+                super.updateItem(tour, empty);
+
+                if (tour == null || empty) {
+                    setStyle("");
+                } else {
+                    if (isSelected()) {
+                        setStyle("");
+                    } else if (tour.isHotTour()) {
+                        setStyle("-fx-background-color: #edf757;");
+                    } else {
+                        setStyle("");
+                    }
+                }
+            }
+        });
     }
 
     private String formatDate(String dateString) {

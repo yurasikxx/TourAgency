@@ -83,8 +83,12 @@
 }
 
 .table-row-cell:selected {
-    -fx-background-color: #4CAF50;
-    -fx-text-fill: white;
+    -fx-background-color: #4CAF50 !important;
+    -fx-text-fill: black !important;
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: black !important;
 }
 
 .list-view {

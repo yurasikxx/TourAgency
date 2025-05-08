@@ -63,7 +63,7 @@ public class BookingDAOImplTest {
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
 
-        Booking booking = new Booking(0, 1, 1, "2025-01-01", "pending");
+        Booking booking = new Booking(0, 1, 1, "2025-01-01", "pending", 1, 1, "Без", "Массаж", 1000);
 
         bookingDAO.addBooking(booking);
 
@@ -99,7 +99,7 @@ public class BookingDAOImplTest {
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
 
-        Booking booking = new Booking(1, 1, 1, "2025-01-01", "confirmed");
+        Booking booking = new Booking(1, 1, 1, "2025-01-01", "confirmed", 1, 1, "Без", "Массаж", 1000);
 
         bookingDAO.updateBooking(booking);
 

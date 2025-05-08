@@ -49,6 +49,10 @@ public class UserDAOImplTest {
         when(mockResultSet.getString("password")).thenReturn("testpass");
         when(mockResultSet.getString("role")).thenReturn("user");
         when(mockResultSet.getDouble("balance")).thenReturn(1000.0);
+        when(mockResultSet.getString("full_name")).thenReturn("Иванов Иван Иванович");
+        when(mockResultSet.getInt("age")).thenReturn(20);
+        when(mockResultSet.getString("email")).thenReturn("ivanov@example.com");
+        when(mockResultSet.getString("phone")).thenReturn("+375(29)123-45-67");
 
         User result = userDAO.getUserById(1);
 
@@ -65,7 +69,7 @@ public class UserDAOImplTest {
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
 
-        User user = new User(0, "testuser", "testpass", "user", 1000.0);
+        User user = new User(0, "testuser", "testpass", "user", 1000.0, "Иванов Иван Иванович", 20, "ivanov@example.com", "+375(29)123-45-67");
 
         userDAO.addUser(user);
 
@@ -73,6 +77,11 @@ public class UserDAOImplTest {
         verify(mockPreparedStatement).setString(2, user.getPassword());
         verify(mockPreparedStatement).setString(3, user.getRole());
         verify(mockPreparedStatement).setDouble(4, user.getBalance());
+        verify(mockPreparedStatement).setString(5, user.getFullName());
+        verify(mockPreparedStatement).setInt(6, user.getAge());
+        verify(mockPreparedStatement).setString(7, user.getEmail());
+        verify(mockPreparedStatement).setString(8, user.getPhone());
+
         verify(mockPreparedStatement).executeUpdate();
     }
 
@@ -81,7 +90,7 @@ public class UserDAOImplTest {
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
 
-        User user = new User(1, "testuser", "newpass", "user", 1500.0);
+        User user = new User(0, "testuser", "testpass", "user", 1000.0, "Иванов Иван Иванович", 20, "ivanov@example.com", "+375(29)123-45-67");
 
         userDAO.updateUser(user);
 
@@ -89,7 +98,11 @@ public class UserDAOImplTest {
         verify(mockPreparedStatement).setString(2, user.getPassword());
         verify(mockPreparedStatement).setString(3, user.getRole());
         verify(mockPreparedStatement).setDouble(4, user.getBalance());
-        verify(mockPreparedStatement).setInt(5, user.getId());
+        verify(mockPreparedStatement).setString(5, user.getFullName());
+        verify(mockPreparedStatement).setInt(6, user.getAge());
+        verify(mockPreparedStatement).setString(7, user.getEmail());
+        verify(mockPreparedStatement).setString(8, user.getPhone());
+        verify(mockPreparedStatement).setInt(9, user.getId());
         verify(mockPreparedStatement).executeUpdate();
     }
 
@@ -103,6 +116,10 @@ public class UserDAOImplTest {
         when(mockResultSet.getString("password")).thenReturn("testpass");
         when(mockResultSet.getString("role")).thenReturn("user");
         when(mockResultSet.getDouble("balance")).thenReturn(1000.0);
+        when(mockResultSet.getString("full_name")).thenReturn("Иванов Иван Иванович");
+        when(mockResultSet.getInt("age")).thenReturn(20);
+        when(mockResultSet.getString("email")).thenReturn("ivanov@example.com");
+        when(mockResultSet.getString("phone")).thenReturn("+375(29)123-45-67");
 
         User result = userDAO.getUserByUsername("testuser");
 

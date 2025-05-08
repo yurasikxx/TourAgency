@@ -27,7 +27,7 @@ public class BookingServiceImplTest {
 
     @Test
     public void testGetBookingById() {
-        Booking expected = new Booking(1, 1, 1, "2025-01-01", "pending");
+        Booking expected = new Booking(1, 1, 1, "2025-01-01", "pending", 1, 1, "Без", "Массаж", 1000);
         when(bookingDAO.getBookingById(1)).thenReturn(expected);
 
         Booking actual = bookingService.getBookingById(1);
@@ -38,8 +38,8 @@ public class BookingServiceImplTest {
     @Test
     public void testGetBookingsByUserId() {
         List<Booking> expected = Arrays.asList(
-                new Booking(1, 1, 1, "2025-01-01", "pending"),
-                new Booking(2, 1, 2, "2025-01-02", "confirmed")
+                new Booking(1, 1, 1, "2025-01-01", "pending", 1, 1, "Без", "Массаж", 1000),
+                new Booking(2, 1, 2, "2025-01-02", "confirmed", 1, 1, "Без", "Массаж", 1000)
         );
         when(bookingDAO.getBookingsByUserId(1)).thenReturn(expected);
 

@@ -8,8 +8,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -23,6 +25,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Optional;
 
 public class BookingController {
     @FXML
@@ -56,6 +61,12 @@ public class BookingController {
     private TableColumn<BookingModel, String> totalPriceColumn;
 
     @FXML
+    private TableColumn<BookingModel, String> paidAmountColumn;
+
+    @FXML
+    private TableColumn<BookingModel, String> paymentStatusColumn;
+
+    @FXML
     private Label balanceLabel;
 
     private Stage primaryStage;
@@ -81,6 +92,8 @@ public class BookingController {
         mealOptionColumn.setCellValueFactory(new PropertyValueFactory<>("mealOption"));
         additionalServicesColumn.setCellValueFactory(new PropertyValueFactory<>("additionalServices"));
         totalPriceColumn.setCellValueFactory(new PropertyValueFactory<>("totalPrice"));
+        paidAmountColumn.setCellValueFactory(new PropertyValueFactory<>("paidAmount"));
+        paymentStatusColumn.setCellValueFactory(new PropertyValueFactory<>("paymentStatus"));
     }
 
     private void loadBookings() {
@@ -89,28 +102,40 @@ public class BookingController {
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
             UserModel currentUser = MainClient.getCurrentUser();
-            if (currentUser == null) {
-                System.out.println("Пользователь не авторизован!");
-                return;
-            }
+            if (currentUser == null) return;
 
             balanceLabel.setText(String.format("%.2f", getUserBalance()));
-
             out.println("GET_BOOKINGS " + currentUser.getId());
 
             String response = in.readLine();
-            System.out.println("Ответ сервера: " + response);
-
             if (response.startsWith("BOOKINGS")) {
                 String[] bookingsData = response.substring(9).split("\\|");
                 for (String bookingData : bookingsData) {
-                    if (bookingData.isEmpty()) {
-                        continue;
-                    }
+                    if (bookingData.isEmpty()) continue;
 
                     String[] fields = bookingData.split(",");
-                    if (fields.length == 10) {
+                    if (fields.length == 13) {
                         BookingModel booking = getBookingModel(fields);
+
+                        if (shouldHighlightBooking(booking)) {
+                            booking.setPaymentStatus("Требуется оплата!");
+                            bookingTable.setRowFactory(tv -> new TableRow<BookingModel>() {
+                                @Override
+                                protected void updateItem(BookingModel item, boolean empty) {
+                                    super.updateItem(item, empty);
+                                    if (item == null || empty) {
+                                        setStyle("");
+                                    } else {
+                                        if (shouldHighlightBooking(item)) {
+                                            setStyle("-fx-background-color: #ffcccc; -fx-text-fill: #cc0000; -fx-font-weight: bold;");
+                                        } else {
+                                            setStyle("");
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
                         bookingTable.getItems().add(booking);
                     }
                 }
@@ -341,6 +366,50 @@ public class BookingController {
         return 0.0;
     }
 
+    @FXML
+    private void handlePartialPayment() {
+        BookingModel selectedBooking = bookingTable.getSelectionModel().getSelectedItem();
+        if (selectedBooking != null) {
+            if (!selectedBooking.getStatus().equals("В ожидании")) {
+                showAlert("Ошибка", "Частичная оплата доступна только для туров в статусе 'В ожидании'");
+                return;
+            }
+
+            ChoiceDialog<Double> dialog = new ChoiceDialog<>(10.0, Arrays.asList(10.0, 30.0, 60.0, 100.0));
+            dialog.setTitle("Частичная оплата");
+            dialog.setHeaderText("Выберите процент оплаты");
+            dialog.setContentText("Процент:");
+
+            Optional<Double> result = dialog.showAndWait();
+            result.ifPresent(percent -> {
+                double amountToPay = selectedBooking.getTotalPrice() * (percent / 100.0);
+
+                try (Socket socket = new Socket("localhost", 12345);
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+                    String currentDate = LocalDate.now().toString();
+                    UserModel currentUser = MainClient.getCurrentUser();
+
+                    out.println("MAKE_PARTIAL_PAYMENT " + selectedBooking.getId() + " " +
+                            amountToPay + " " + currentDate + " " + currentUser.getId());
+
+                    String response = in.readLine();
+                    if (response.equals("PARTIAL_PAYMENT_SUCCESS")) {
+                        showAlert("Успешно", String.format("Оплачено %.2f%% от суммы бронирования", percent));
+                        handleRefresh();
+                    } else {
+                        showAlert("Ошибка", "Не удалось выполнить оплату: " + response);
+                    }
+                } catch (IOException e) {
+                    showAlert("Ошибка", "Ошибка подключения к серверу");
+                }
+            });
+        } else {
+            showAlert("Предупреждение", "Выберите бронирование для оплаты");
+        }
+    }
+
     private static BookingModel getBookingModel(String[] fields) {
         int id = Integer.parseInt(fields[0]);
         String tourName = fields[1];
@@ -352,8 +421,25 @@ public class BookingController {
         String mealOption = fields[7];
         String additionalServices = fields[8];
         double totalPrice = Double.parseDouble(fields[9]);
+        double paidAmount = Double.parseDouble(fields[10]);
+        String paymentStatus = fields[11];
+        String tourStartDate = fields[12];
 
-        return new BookingModel(id, tourName, bookingDate, status, price, adults, children, mealOption, additionalServices, totalPrice);
+        return new BookingModel(id, tourName, bookingDate, status, price, adults, children, mealOption, additionalServices, totalPrice, paidAmount, paymentStatus, tourStartDate);
+    }
+
+    private boolean shouldHighlightBooking(BookingModel booking) {
+        if (!booking.getStatus().equals("В ожидании")) return false;
+
+        try {
+            LocalDate startDate = LocalDate.parse(booking.getTourStartDate());
+            LocalDate now = LocalDate.now();
+            long daysUntilTour = ChronoUnit.DAYS.between(now, startDate);
+
+            return daysUntilTour <= 14 && booking.getPaidAmount() < booking.getTotalPrice();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void showAlert(String title, String message) {

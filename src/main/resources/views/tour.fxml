@@ -60,17 +60,17 @@
     <center>
         <TableView fx:id="tourTable">
             <columns>
-                <TableColumn fx:id="nameColumn" text="Название" prefWidth="150">
+                <TableColumn fx:id="nameColumn" text="Название" prefWidth="200">
                     <cellValueFactory>
                         <PropertyValueFactory property="name"/>
                     </cellValueFactory>
                 </TableColumn>
-                <TableColumn fx:id="descriptionColumn" text="Описание" prefWidth="300">
+                <TableColumn fx:id="descriptionColumn" text="Описание" prefWidth="350">
                     <cellValueFactory>
                         <PropertyValueFactory property="description"/>
                     </cellValueFactory>
                 </TableColumn>
-                <TableColumn fx:id="priceColumn" text="Цена" prefWidth="100">
+                <TableColumn fx:id="priceColumn" text="Цена">
                     <cellValueFactory>
                         <PropertyValueFactory property="price"/>
                     </cellValueFactory>
@@ -85,7 +85,7 @@
                         <PropertyValueFactory property="endDate"/>
                     </cellValueFactory>
                 </TableColumn>
-                <TableColumn text="Направление" prefWidth="150">
+                <TableColumn fx:id="destinationColumn" text="Направление" prefWidth="150">
                     <cellValueFactory>
                         <PropertyValueFactory property="destination"/>
                     </cellValueFactory>

@@ -12,4 +12,6 @@ public interface PaymentService {
 
     void addPayment(Payment payment);
 
+    double getTotalPaidAmount(int bookingId);
+
 }

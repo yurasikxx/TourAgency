@@ -16,4 +16,6 @@ public interface PaymentDAO {
     void updatePayment(Payment payment);
 
     void deletePayment(int id);
+
+    double getTotalPaidAmount(int bookingId);
 }

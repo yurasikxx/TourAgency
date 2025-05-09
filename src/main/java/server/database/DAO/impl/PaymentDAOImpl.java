@@ -122,4 +122,20 @@ public class PaymentDAOImpl implements PaymentDAO {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public double getTotalPaidAmount(int bookingId) {
+        String query = "SELECT SUM(amount) FROM Payments WHERE booking_id = ? AND status IN ('paid', 'partial')";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, bookingId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
 }

@@ -8,13 +8,13 @@
     <center>
         <TableView fx:id="paymentsTable">
             <columns>
-                <TableColumn text="ID" fx:id="idColumn" prefWidth="50"/>
-                <TableColumn text="ID бронирования" fx:id="bookingIdColumn" prefWidth="100"/>
-                <TableColumn text="ID пользователя" fx:id="userIdColumn" prefWidth="100"/>
-                <TableColumn text="Сумма" fx:id="amountColumn" prefWidth="100"/>
-                <TableColumn text="Дата платежа" fx:id="paymentDateColumn" prefWidth="120"/>
-                <TableColumn text="Статус" fx:id="statusColumn" prefWidth="100"/>
-                <TableColumn text="Тур" fx:id="tourColumn" prefWidth="150"/>
+                <TableColumn text="ID" fx:id="idColumn" prefWidth="50" style="-fx-alignment: CENTER;"/>
+                <TableColumn text="ID бронирования" fx:id="bookingIdColumn" prefWidth="150" style="-fx-alignment: CENTER;"/>
+                <TableColumn text="ID пользователя" fx:id="userIdColumn" prefWidth="150" style="-fx-alignment: CENTER;"/>
+                <TableColumn text="Сумма" fx:id="amountColumn" prefWidth="100" style="-fx-alignment: CENTER;"/>
+                <TableColumn text="Дата платежа" fx:id="paymentDateColumn" prefWidth="120" style="-fx-alignment: CENTER;"/>
+                <TableColumn text="Статус" fx:id="statusColumn" prefWidth="100" style="-fx-alignment: CENTER;"/>
+                <TableColumn text="Тур" fx:id="tourColumn" prefWidth="200" style="-fx-alignment: CENTER;"/>
             </columns>
         </TableView>
     </center>

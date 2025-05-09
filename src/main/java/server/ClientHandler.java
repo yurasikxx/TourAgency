@@ -154,6 +154,8 @@ public class ClientHandler implements Runnable {
                 return handleHasToursForDestination(parts);
             case "UPDATE_PROFILE":
                 return handleUpdateProfile(parts);
+            case "MAKE_PARTIAL_PAYMENT":
+                return handleMakePartialPayment(parts);
             default:
                 return "ERROR: Unknown command";
         }
@@ -259,16 +261,15 @@ public class ClientHandler implements Runnable {
 
                 for (Booking booking : bookings) {
                     Tour tour = tourService.getTourById(booking.getTourId());
+                    double paidAmount = paymentService.getTotalPaidAmount(booking.getId());
+                    String paymentStatus = paidAmount == 0 ? "Не оплачено" :
+                            paidAmount >= booking.getTotalPrice() ? "Полностью оплачено" :
+                                    String.format("Частично оплачено (%.0f%%)",
+                                            (paidAmount / booking.getTotalPrice()) * 100);
 
                     if (tour != null) {
-                        String status;
-                        if (booking.getStatus().equals("confirmed")) {
-                            status = "Подтверждено";
-                        } else if (booking.getStatus().equals("cancelled")) {
-                            status = "Отменено";
-                        } else {
-                            status = "В ожидании";
-                        }
+                        String status = booking.getStatus().equals("confirmed") ? "Подтверждено" :
+                                booking.getStatus().equals("cancelled") ? "Отменено" : "В ожидании";
 
                         response.append(booking.getId()).append(",")
                                 .append(tour.getName()).append(",")
@@ -279,18 +280,10 @@ public class ClientHandler implements Runnable {
                                 .append(booking.getChildren()).append(",")
                                 .append(booking.getMealOption()).append(",")
                                 .append(booking.getAdditionalServices()).append(",")
-                                .append(booking.getTotalPrice()).append("|");
-                    } else {
-                        response.append(booking.getId()).append(",")
-                                .append("Тур ").append(booking.getTourId()).append(",")
-                                .append(booking.getBookingDate()).append(",")
-                                .append(0.0).append(",")
-                                .append("В ожидании").append("|")
-                                .append(booking.getAdults()).append(",")
-                                .append(booking.getChildren()).append(",")
-                                .append(booking.getMealOption()).append(",")
-                                .append(booking.getAdditionalServices()).append(",")
-                                .append(booking.getTotalPrice()).append("|");
+                                .append(booking.getTotalPrice()).append(",")
+                                .append(paidAmount).append(",")
+                                .append(paymentStatus).append(",")
+                                .append(tour.getStartDate()).append("|");
                     }
                 }
 
@@ -1014,5 +1007,53 @@ public class ClientHandler implements Runnable {
             }
         }
         return "ERROR: Неверный запрос";
+    }
+
+    private String handleMakePartialPayment(String[] parts) {
+        if (parts.length == 5) {
+            try {
+                int bookingId = Integer.parseInt(parts[1]);
+                double amount = Double.parseDouble(parts[2]);
+                String paymentDate = parts[3];
+                int userId = Integer.parseInt(parts[4]);
+
+                Booking booking = bookingService.getBookingById(bookingId);
+                if (booking == null) {
+                    return "ERROR: Бронирование не найдено.";
+                }
+
+                if (booking.getUserId() != userId) {
+                    return "ERROR: Бронирование не принадлежит текущему пользователю.";
+                }
+
+                User user = userService.getUserById(userId);
+                if (user == null) {
+                    return "ERROR: Пользователь не найден.";
+                }
+
+                if (user.getBalance() < amount) {
+                    return "ERROR: Недостаточно средств на балансе.";
+                }
+
+                double newBalance = user.getBalance() - amount;
+                userService.updateBalance(userId, newBalance);
+
+                // Добавляем частичный платеж
+                Payment payment = new Payment(0, bookingId, amount, paymentDate, "partial");
+                paymentService.addPayment(payment);
+
+                // Обновляем статус, если оплачено полностью
+                double totalPaid = paymentService.getTotalPaidAmount(bookingId);
+                if (totalPaid >= booking.getTotalPrice()) {
+                    booking.setStatus("confirmed");
+                    bookingService.updateBooking(booking);
+                }
+
+                return "PARTIAL_PAYMENT_SUCCESS";
+            } catch (NumberFormatException e) {
+                return "ERROR: Некорректные данные.";
+            }
+        }
+        return "ERROR: Неверный запрос.";
     }
 }

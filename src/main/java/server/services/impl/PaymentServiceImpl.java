@@ -28,4 +28,8 @@ public class PaymentServiceImpl implements PaymentService {
         paymentDAO.addPayment(payment);
     }
 
+    @Override
+    public double getTotalPaidAmount(int bookingId) {
+        return paymentDAO.getTotalPaidAmount(bookingId);
+    }
 }

@@ -15,6 +15,9 @@ public class BookingModel {
     private String mealOption;
     private String additionalServices;
     private double totalPrice;
+    private double paidAmount;
+    private String paymentStatus;
+    private String tourStartDate;
 
     public BookingModel(int id, String userName, String tourName,
                         String bookingDate, String status, double amount) {
@@ -26,7 +29,7 @@ public class BookingModel {
         this.amount = amount;
     }
 
-    public BookingModel(int id, String tourName, String bookingDate, String status, double price, int adults, int children, String mealOption, String additionalServices, double totalPrice) {
+    public BookingModel(int id, String tourName, String bookingDate, String status, double price, int adults, int children, String mealOption, String additionalServices, double totalPrice, double paidAmount, String paymentStatus, String tourStartDate) {
         this.id = id;
         this.tourName = tourName;
         this.bookingDate = bookingDate;
@@ -37,6 +40,9 @@ public class BookingModel {
         this.mealOption = mealOption;
         this.additionalServices = additionalServices;
         this.totalPrice = totalPrice;
+        this.paidAmount = paidAmount;
+        this.paymentStatus = paymentStatus;
+        this.tourStartDate = tourStartDate;
     }
 
     public int getId() {
@@ -135,16 +141,40 @@ public class BookingModel {
         this.totalPrice = totalPrice;
     }
 
+    public double getPaidAmount() {
+        return paidAmount;
+    }
+
+    public void setPaidAmount(double paidAmount) {
+        this.paidAmount = paidAmount;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getTourStartDate() {
+        return tourStartDate;
+    }
+
+    public void setTourStartDate(String tourStartDate) {
+        this.tourStartDate = tourStartDate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         BookingModel that = (BookingModel) o;
-        return id == that.id && Double.compare(price, that.price) == 0 && Double.compare(amount, that.amount) == 0 && adults == that.adults && children == that.children && Double.compare(totalPrice, that.totalPrice) == 0 && Objects.equals(userName, that.userName) && Objects.equals(tourName, that.tourName) && Objects.equals(bookingDate, that.bookingDate) && Objects.equals(status, that.status) && Objects.equals(mealOption, that.mealOption) && Objects.equals(additionalServices, that.additionalServices);
+        return id == that.id && Double.compare(price, that.price) == 0 && Double.compare(amount, that.amount) == 0 && adults == that.adults && children == that.children && Double.compare(totalPrice, that.totalPrice) == 0 && Double.compare(paidAmount, that.paidAmount) == 0 && Objects.equals(userName, that.userName) && Objects.equals(tourName, that.tourName) && Objects.equals(bookingDate, that.bookingDate) && Objects.equals(status, that.status) && Objects.equals(mealOption, that.mealOption) && Objects.equals(additionalServices, that.additionalServices) && Objects.equals(paymentStatus, that.paymentStatus) && Objects.equals(tourStartDate, that.tourStartDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userName, tourName, bookingDate, status, price, amount, adults, children, mealOption, additionalServices, totalPrice);
+        return Objects.hash(id, userName, tourName, bookingDate, status, price, amount, adults, children, mealOption, additionalServices, totalPrice, paidAmount, paymentStatus, tourStartDate);
     }
 
     @Override
@@ -162,6 +192,9 @@ public class BookingModel {
                 ", mealOption='" + mealOption + '\'' +
                 ", additionalServices='" + additionalServices + '\'' +
                 ", totalPrice=" + totalPrice +
+                ", paidAmount=" + paidAmount +
+                ", paymentStatus='" + paymentStatus + '\'' +
+                ", tourStartDate='" + tourStartDate + '\'' +
                 '}';
     }
 }

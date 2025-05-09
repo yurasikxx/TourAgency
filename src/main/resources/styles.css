@@ -237,3 +237,13 @@
     -fx-font-size: 13px;
     -fx-padding: 5px;
 }
+
+.table-row-cell:highlight {
+    -fx-background-color: #ffcccc;
+    -fx-text-fill: #cc0000;
+    -fx-font-weight: bold;
+}
+
+#priceColumn, #destinationColumn {
+    -fx-alignment: CENTER;
+}
